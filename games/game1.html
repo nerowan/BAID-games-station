@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Chris职业生涯模拟器</title>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
+            font-family: 'Microsoft YaHei', sans-serif;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        #game-container {
+            width: 800px;
+            margin: 20px auto;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 36px;
+        }
+        #story {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        #choices {
+            display: flex;
+            flex-direction: column;
+        }
+        .choice-button {
+            background: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px;
+            margin: 5px 0;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .choice-button:hover {
+            background: #45a049;
+        }
+        #stats, #skills, #inventory, #relationships, #achievements {
+            margin-top: 20px;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 5px;
+            overflow: auto;
+        }
+        #stats span {
+            margin-right: 15px;
+            display: inline-block;
+            width: 30%;
+            box-sizing: border-box;
+        }
+        #event-log {
+            margin-top: 20px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        #inventory h2, #skills h2, #relationships h2, #achievements h2 {
+            margin-top: 0;
+        }
+        #progress-bar {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        #progress {
+            width: 0%;
+            height: 20px;
+            background-color: #4CAF50;
+        }
+        #shop, #news, #gossip {
+            margin-top: 20px;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        #shop h2, #news h2, #gossip h2 {
+            margin-top: 0;
+        }
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .shop-item button {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        #close-shop, #close-news, #close-gossip {
+            margin-top: 10px;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        .hidden {
+            display: none;
+        }
+        #news-content, #gossip-content {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        #buttons-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        #buttons-container button {
+            flex: 1;
+            margin: 0 5px;
+        }
+        #team-selection {
+            margin-top: 20px;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        #team-selection h2 {
+            margin-top: 0;
+        }
+        #team-list button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            font-size: 16px;
+        }
+        #close-team-selection {
+            margin-top: 10px;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Chris职业生涯模拟器</h1>
+        <div id="progress-bar">
+            <div id="progress"></div>
+        </div>
+        <div id="story"></div>
+        <div id="choices"></div>
+        <div id="buttons-container">
+            <button id="open-shop">进入商店</button>
+            <button id="open-news">查看国际新闻</button>
+            <button id="open-gossip">查看绯闻</button>
+        </div>
+        <div id="shop">
+            <h2>商店</h2>
+            <div class="shop-item">
+                <span>高级球鞋（提升速度） - 1000财富</span>
+                <button onclick="buyItem('高级球鞋', 1000, '速度', 10)">购买</button>
+            </div>
+            <div class="shop-item">
+                <span>力量训练器（提升力量） - 1500财富</span>
+                <button onclick="buyItem('力量训练器', 1500, '力量', 15)">购买</button>
+            </div>
+            <div class="shop-item">
+                <span>战术手册（提升战术） - 1200财富</span>
+                <button onclick="buyItem('战术手册', 1200, '战术', 12)">购买</button>
+            </div>
+            <div class="shop-item">
+                <span>能量饮料（恢复体力） - 500财富</span>
+                <button onclick="buyItem('能量饮料', 500, 'energy', 20)">购买</button>
+            </div>
+            <div class="shop-item">
+                <span>金正恩自传（提升智力） - 2000财富</span>
+                <button onclick="buyItem('金正恩自传', 2000, '智力', 15)">购买</button>
+            </div>
+            <div class="shop-item">
+                <span>特朗普演讲集（提升领导力） - 2500财富</span>
+                <button onclick="buyItem('特朗普演讲集', 2500, '领导力', 20)">购买</button>
+            </div>
+            <div class="shop-item">
+                <span>万昊轩签名卡（提升踢球技能） - 3000财富</span>
+                <button onclick="buyItem('万昊轩签名卡', 3000, '踢球', 25)">购买</button>
+            </div>
+            <button id="close-shop" onclick="closeShop()">关闭商店</button>
+        </div>
+        <div id="news">
+            <h2>国际新闻</h2>
+            <div id="news-content">
+                <!-- 新闻内容 -->
+            </div>
+            <button id="close-news" onclick="closeNews()">关闭新闻</button>
+        </div>
+        <div id="gossip">
+            <h2>绯闻</h2>
+            <div id="gossip-content">
+                <!-- 绯闻内容 -->
+            </div>
+            <button id="close-gossip" onclick="closeGossip()">关闭绯闻</button>
+        </div>
+        <div id="team-selection">
+            <h2>选择球队</h2>
+            <div id="team-list">
+                <!-- 球队列表 -->
+            </div>
+            <button id="close-team-selection" onclick="closeTeamSelection()">关闭</button>
+        </div>
+        <div id="stats">
+            <h2>基本属性</h2>
+            <span>年龄: <span id="age">10</span></span>
+            <span>体力: <span id="energy">100</span></span>
+            <span>财富: <span id="wealth">1000</span></span>
+            <span>人气: <span id="popularity">50</span></span>
+            <span>心情: <span id="mood">70</span></span>
+            <span>进球数: <span id="goals">0</span></span>
+            <span>助攻数: <span id="assists">0</span></span>
+            <span>出场数: <span id="appearances">0</span></span>
+            <span>身价: <span id="marketValue">1000</span></span>
+        </div>
+        <div id="skills">
+            <h2>技能</h2>
+            <ul id="skill-list">
+                <!-- 技能列表 -->
+            </ul>
+        </div>
+        <div id="inventory">
+            <h2>物品</h2>
+            <ul id="item-list">
+                <!-- 物品列表 -->
+            </ul>
+        </div>
+        <div id="relationships">
+            <h2>人际关系</h2>
+            <ul id="relationship-list">
+                <!-- 人际关系列表 -->
+            </ul>
+        </div>
+        <div id="achievements">
+            <h2>成就</h2>
+            <ul id="achievement-list">
+                <!-- 成就列表 -->
+            </ul>
+        </div>
+        <div id="event-log"></div>
+    </div>
+
+    <script>
+        const storyElement = document.getElementById('story');
+        const choicesElement = document.getElementById('choices');
+        const ageElement = document.getElementById('age');
+        const energyElement = document.getElementById('energy');
+        const wealthElement = document.getElementById('wealth');
+        const popularityElement = document.getElementById('popularity');
+        const moodElement = document.getElementById('mood');
+        const goalsElement = document.getElementById('goals');
+        const assistsElement = document.getElementById('assists');
+        const appearancesElement = document.getElementById('appearances');
+        const marketValueElement = document.getElementById('marketValue');
+        const eventLogElement = document.getElementById('event-log');
+        const skillListElement = document.getElementById('skill-list');
+        const itemListElement = document.getElementById('item-list');
+        const relationshipListElement = document.getElementById('relationship-list');
+        const achievementListElement = document.getElementById('achievement-list');
+        const progressBarElement = document.getElementById('progress');
+        const shopElement = document.getElementById('shop');
+        const openShopButton = document.getElementById('open-shop');
+        const newsElement = document.getElementById('news');
+        const openNewsButton = document.getElementById('open-news');
+        const newsContentElement = document.getElementById('news-content');
+        const gossipElement = document.getElementById('gossip');
+        const openGossipButton = document.getElementById('open-gossip');
+        const gossipContentElement = document.getElementById('gossip-content');
+        const teamSelectionElement = document.getElementById('team-selection');
+        const teamListElement = document.getElementById('team-list');
+
+        let age = 10;
+        let energy = 100;
+        let wealth = 1000;
+        let popularity = 50;
+        let mood = 70;
+        let goals = 0;
+        let assists = 0;
+        let appearances = 0;
+        let marketValue = 1000;
+        let currentTeam = '无';
+
+        let skills = {
+            '踢球': 50,
+            '速度': 50,
+            '力量': 50,
+            '耐力': 50,
+            '领导力': 50,
+            '战术': 50,
+            '智力': 50
+        };
+
+        let inventory = [];
+        let relationships = {};
+        let achievements = [];
+
+        let totalScenes = 30; // 场景数量为30
+        let currentSceneIndex = 0;
+
+        let scenes = [
+            // 场景1
+            {
+                story: 'Chris在家附近的球场踢球，结识了一个新的朋友小明。',
+                choices: [
+                    {
+                        text: '与小明成为好友，一起训练。',
+                        effect: () => {
+                            addRelationship('小明', 70);
+                            improveSkill('踢球', 5);
+                            mood += 10;
+                            age += 1;
+                            appearances += 1;
+                            addEvent('你和小明成为了好朋友，一起训练进步。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '保持距离，专注自我训练。',
+                        effect: () => {
+                            improveSkill('力量', 5);
+                            mood -= 5;
+                            age += 1;
+                            addEvent('你选择了独自训练，力量有所提升。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '邀请小明加入校队，共同进步。',
+                        effect: () => {
+                            let success = Math.random() < 0.6;
+                            age += 1;
+                            if (success) {
+                                addRelationship('小明', 80);
+                                improveSkill('领导力', 5);
+                                mood += 15;
+                                addEvent('小明加入了校队，你们一起进步。');
+                                nextScene();
+                            } else {
+                                addRelationship('小明', -20);
+                                mood -= 10;
+                                addEvent('小明拒绝了你的邀请，关系受损。');
+                                nextScene();
+                            }
+                        }
+                    }
+                ]
+            },
+            // 场景2
+            {
+                story: '你得到了一个在城市青训营训练的机会。',
+                choices: [
+                    {
+                        text: '接受机会，去青训营提升自己。',
+                        effect: () => {
+                            improveSkill('战术', 10);
+                            improveSkill('速度', 10);
+                            wealth -= 2000;
+                            mood += 10;
+                            age += 2;
+                            appearances += 5;
+                            addAchievement('青训营学员');
+                            addEvent('你在青训营提升了技能，结识了更多朋友。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '留在本地，继续现有的训练。',
+                        effect: () => {
+                            improveSkill('耐力', 5);
+                            wealth += 500;
+                            mood += 5;
+                            age += 2;
+                            addEvent('你选择留在本地，稳步提升。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景3
+            {
+                story: '你在一次比赛中表现出色，被一家俱乐部相中。',
+                choices: [
+                    {
+                        text: '签约俱乐部，开始职业生涯。',
+                        effect: () => {
+                            improveSkill('踢球', 15);
+                            wealth += 5000;
+                            popularity += 20;
+                            energy -= 10;
+                            age += 2;
+                            appearances += 10;
+                            addItem('职业合同');
+                            addAchievement('职业球员');
+                            currentTeam = '本地俱乐部';
+                            addEvent('你签约了俱乐部，正式成为职业球员。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝签约，等待更好的机会。',
+                        effect: () => {
+                            popularity -= 10;
+                            mood -= 10;
+                            age += 1;
+                            addEvent('你拒绝了签约，继续等待机会。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '与俱乐部协商，更好的待遇。',
+                        effect: () => {
+                            let success = Math.random() < 0.5;
+                            age += 1;
+                            if (success) {
+                                wealth += 8000;
+                                popularity += 15;
+                                mood += 10;
+                                currentTeam = '本地俱乐部';
+                                addEvent('你成功获得了更好的合同。');
+                                nextScene();
+                            } else {
+                                popularity -= 15;
+                                mood -= 15;
+                                addEvent('谈判失败，错失机会。');
+                                nextScene();
+                            }
+                        }
+                    }
+                ]
+            },
+            // 场景4
+            {
+                story: '你在训练中受伤，需要休养一段时间。',
+                choices: [
+                    {
+                        text: '积极治疗，尽快恢复。',
+                        effect: () => {
+                            energy += 20;
+                            mood += 5;
+                            age += 1;
+                            addEvent('你积极治疗，身体恢复良好。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '尝试新的康复疗法。',
+                        effect: () => {
+                            let success = Math.random() < 0.7;
+                            wealth -= 1000;
+                            age += 1;
+                            if (success) {
+                                energy += 30;
+                                mood += 15;
+                                addEvent('疗法有效，你迅速恢复了。');
+                            } else {
+                                energy -= 10;
+                                mood -= 10;
+                                addEvent('疗法无效，浪费了时间和金钱。');
+                            }
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '利用休养时间，学习新知识。',
+                        effect: () => {
+                            improveSkill('智力', 10);
+                            mood += 5;
+                            age += 1;
+                            addEvent('你利用时间学习，智力提升了。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景5
+            {
+                story: '你的球队进入了杯赛决赛，需要你的出色表现。',
+                choices: [
+                    {
+                        text: '全力以赴，争取胜利。',
+                        effect: () => {
+                            let success = attemptSkill('踢球', 80);
+                            energy -= 20;
+                            age += 1;
+                            appearances += 1;
+                            if (success) {
+                                popularity += 30;
+                                mood += 20;
+                                goals += 2;
+                                assists += 1;
+                                addAchievement('杯赛冠军');
+                                addEvent('你带领球队夺得了冠军，成为英雄。');
+                                nextScene();
+                            } else {
+                                popularity -= 10;
+                                mood -= 15;
+                                addEvent('你们未能夺冠，心情低落。');
+                                nextScene();
+                            }
+                        }
+                    },
+                    {
+                        text: '保持平常心，稳定发挥。',
+                        effect: () => {
+                            popularity += 10;
+                            mood += 10;
+                            energy -= 10;
+                            age += 1;
+                            appearances += 1;
+                            addEvent('你稳定发挥，球队表现尚可。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '尝试新战术，出奇制胜。',
+                        effect: () => {
+                            let success = attemptSkill('战术', 70);
+                            energy -= 15;
+                            age += 1;
+                            appearances += 1;
+                            if (success) {
+                                popularity += 25;
+                                mood += 15;
+                                assists += 2;
+                                addAchievement('战术大师');
+                                addEvent('新战术奏效，你们取得了胜利。');
+                                nextScene();
+                            } else {
+                                popularity -= 5;
+                                mood -= 10;
+                                addEvent('新战术失败，比赛失利。');
+                                nextScene();
+                            }
+                        }
+                    }
+                ]
+            },
+            // 场景6
+            {
+                story: '你收到了一份海外俱乐部的邀请，可以去欧洲踢球。',
+                choices: [
+                    {
+                        text: '接受邀请，前往欧洲发展。',
+                        effect: () => {
+                            improveSkill('战术', 15);
+                            improveSkill('速度', 10);
+                            wealth += 10000;
+                            popularity += 30;
+                            mood += 20;
+                            age += 2;
+                            appearances += 20;
+                            currentTeam = '欧洲俱乐部';
+                            addAchievement('海外球员');
+                            addEvent('你在欧洲取得了成功，职业生涯更上一层楼。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '留在国内，继续为本土球队效力。',
+                        effect: () => {
+                            improveSkill('领导力', 10);
+                            popularity += 20;
+                            mood += 15;
+                            age += 2;
+                            appearances += 15;
+                            addEvent('你选择留在国内，成为球队的核心。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '要求更高的待遇，再做决定。',
+                        effect: () => {
+                            let success = Math.random() < 0.5;
+                            age += 1;
+                            if (success) {
+                                wealth += 15000;
+                                popularity += 25;
+                                mood += 15;
+                                currentTeam = '欧洲俱乐部';
+                                addEvent('你获得了更高的待遇，前往欧洲。');
+                                nextScene();
+                            } else {
+                                popularity -= 15;
+                                mood -= 15;
+                                addEvent('谈判失败，错过机会。');
+                                nextScene();
+                            }
+                        }
+                    }
+                ]
+            },
+            // 场景7
+            {
+                story: '你在欧洲的表现吸引了赞助商的关注。',
+                choices: [
+                    {
+                        text: '签约赞助商，获取更多收入。',
+                        effect: () => {
+                            wealth += 20000;
+                            popularity += 40;
+                            mood += 20;
+                            age += 1;
+                            addItem('赞助合同');
+                            addEvent('你签约了赞助商，财富大幅提升。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝赞助，保持独立性。',
+                        effect: () => {
+                            mood += 10;
+                            age += 1;
+                            addEvent('你拒绝了赞助，保持了独立性。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '与经纪人商讨更好的合作方案。',
+                        effect: () => {
+                            let success = Math.random() < 0.6;
+                            age += 1;
+                            if (success) {
+                                wealth += 25000;
+                                popularity += 50;
+                                mood += 25;
+                                addEvent('你获得了更好的合作方案。');
+                                nextScene();
+                            } else {
+                                popularity -= 10;
+                                mood -= 10;
+                                addEvent('谈判未果，错失机会。');
+                                nextScene();
+                            }
+                        }
+                    }
+                ]
+            },
+            // 场景8
+            {
+                story: '你被选为国家队成员，参加国际赛事。',
+                choices: [
+                    {
+                        text: '全力以赴，为国争光。',
+                        effect: () => {
+                            improveSkill('踢球', 10);
+                            improveSkill('耐力', 10);
+                            popularity += 50;
+                            mood += 30;
+                            age += 1;
+                            appearances += 5;
+                            goals += 3;
+                            assists += 2;
+                            addAchievement('国家队成员');
+                            addEvent('你在国际赛事中表现出色，为国争光。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '保持平常心，积累经验。',
+                        effect: () => {
+                            improveSkill('战术', 5);
+                            popularity += 20;
+                            mood += 15;
+                            age += 1;
+                            appearances += 5;
+                            addEvent('你积累了宝贵的经验，提升了实力。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '因伤退出，专注俱乐部比赛。',
+                        effect: () => {
+                            energy += 20;
+                            mood -= 5;
+                            age += 1;
+                            addEvent('你因伤退出，专注俱乐部比赛。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景9
+            {
+                story: '你考虑投资创业，为未来做打算。',
+                choices: [
+                    {
+                        text: '投资足球相关产业。',
+                        effect: () => {
+                            let success = Math.random() < 0.7;
+                            wealth -= 10000;
+                            age += 1;
+                            if (success) {
+                                wealth += 20000;
+                                mood += 20;
+                                addAchievement('成功投资者');
+                                addEvent('投资成功，财富增加。');
+                                nextScene();
+                            } else {
+                                wealth -= 5000;
+                                mood -= 10;
+                                addEvent('投资失败，损失了一些财富。');
+                                nextScene();
+                            }
+                        }
+                    },
+                    {
+                        text: '专注本职工作，不参与投资。',
+                        effect: () => {
+                            mood += 5;
+                            age += 1;
+                            addEvent('你专注于足球事业，保持了稳定的状态。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '投资高风险高回报的项目。',
+                        effect: () => {
+                            let success = Math.random() < 0.3;
+                            wealth -= 20000;
+                            age += 1;
+                            if (success) {
+                                wealth += 50000;
+                                mood += 30;
+                                addAchievement('风险投资家');
+                                addEvent('高风险投资成功，财富大幅增加。');
+                                nextScene();
+                            } else {
+                                wealth -= 10000;
+                                mood -= 20;
+                                addEvent('投资失败，损失严重。');
+                                nextScene();
+                            }
+                        }
+                    }
+                ]
+            },
+            // 场景10
+            {
+                story: '你受邀参加一档热门综艺节目。',
+                choices: [
+                    {
+                        text: '接受邀请，提升曝光度。',
+                        effect: () => {
+                            popularity += 30;
+                            wealth += 5000;
+                            mood += 15;
+                            age += 1;
+                            addAchievement('综艺明星');
+                            addEvent('你参加了综艺节目，收获了大量粉丝。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝邀请，专注足球事业。',
+                        effect: () => {
+                            mood += 5;
+                            age += 1;
+                            addEvent('你拒绝了邀请，专注于足球事业。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景11
+            {
+                story: '你的职业生涯进入了巅峰时期。',
+                choices: [
+                    {
+                        text: '继续努力，挑战更高荣誉。',
+                        effect: () => {
+                            improveSkill('领导力', 15);
+                            popularity += 40;
+                            energy -= 15;
+                            mood += 20;
+                            age += 2;
+                            appearances += 30;
+                            goals += 10;
+                            assists += 8;
+                            addEvent('你继续努力，取得了更多荣誉。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '考虑退役，开始新的生活。',
+                        effect: () => {
+                            wealth += 10000;
+                            mood += 30;
+                            age += 2;
+                            addEvent('你选择退役，开始享受生活。');
+                            endGame(true);
+                        }
+                    },
+                    {
+                        text: '转型为教练，培养新人。',
+                        effect: () => {
+                            improveSkill('战术', 20);
+                            popularity += 30;
+                            mood += 25;
+                            age += 2;
+                            addAchievement('优秀教练');
+                            addEvent('你成为了教练，继续为足球事业贡献力量。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景12
+            {
+                story: '你收到了来自其他俱乐部的转会邀请。',
+                choices: [
+                    {
+                        text: '接受转会，挑战新环境。',
+                        effect: () => {
+                            wealth += 15000;
+                            popularity += 20;
+                            mood += 10;
+                            age += 1;
+                            currentTeam = '新俱乐部';
+                            addEvent('你接受了转会邀请，开始新的征程。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝转会，忠于现有球队。',
+                        effect: () => {
+                            popularity += 15;
+                            mood += 15;
+                            age += 1;
+                            addEvent('你拒绝了转会邀请，赢得了球迷的尊重。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '与球队谈判，加薪续约。',
+                        effect: () => {
+                            let success = Math.random() < 0.6;
+                            age += 1;
+                            if (success) {
+                                wealth += 20000;
+                                mood += 20;
+                                addEvent('谈判成功，你获得了加薪续约。');
+                                nextScene();
+                            } else {
+                                popularity -= 10;
+                                mood -= 10;
+                                addEvent('谈判失败，关系紧张。');
+                                nextScene();
+                            }
+                        }
+                    }
+                ]
+            },
+            // 场景13
+            {
+                story: '你被邀请参加一场慈善赛，为公益事业贡献力量。',
+                choices: [
+                    {
+                        text: '积极参与，展现爱心。',
+                        effect: () => {
+                            popularity += 25;
+                            mood += 20;
+                            age += 1;
+                            addAchievement('慈善大使');
+                            addEvent('你参加了慈善赛，受到广泛赞誉。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝参与，专注训练。',
+                        effect: () => {
+                            mood -= 5;
+                            age += 1;
+                            addEvent('你拒绝了慈善赛邀请，专注于训练。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景14
+            {
+                story: '媒体对你的私人生活进行大量报道，影响了你的形象。',
+                choices: [
+                    {
+                        text: '召开新闻发布会，澄清事实。',
+                        effect: () => {
+                            let success = Math.random() < 0.7;
+                            age += 1;
+                            if (success) {
+                                popularity += 20;
+                                mood += 15;
+                                addEvent('你成功澄清了事实，形象得到恢复。');
+                                nextScene();
+                            } else {
+                                popularity -= 15;
+                                mood -= 15;
+                                addEvent('澄清未果，形象受损。');
+                                nextScene();
+                            }
+                        }
+                    },
+                    {
+                        text: '无视媒体，继续生活。',
+                        effect: () => {
+                            popularity -= 10;
+                            mood -= 5;
+                            age += 1;
+                            addEvent('你选择无视媒体，专注于自己的生活。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '利用媒体，提高曝光度。',
+                        effect: () => {
+                            popularity += 30;
+                            mood += 10;
+                            age += 1;
+                            addEvent('你利用媒体，提高了自己的知名度。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景15
+            {
+                story: '你收到了国际足联的邀请，参与足球规则的制定和修改。',
+                choices: [
+                    {
+                        text: '接受邀请，为足球事业贡献智慧。',
+                        effect: () => {
+                            improveSkill('智力', 15);
+                            popularity += 20;
+                            mood += 15;
+                            age += 1;
+                            addAchievement('规则制定者');
+                            addEvent('你参与了足球规则的制定，影响深远。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝邀请，专注于比赛。',
+                        effect: () => {
+                            mood += 5;
+                            age += 1;
+                            addEvent('你拒绝了邀请，继续专注于比赛。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景16
+            {
+                story: '你被任命为球队的队长，需要领导全队。',
+                choices: [
+                    {
+                        text: '接受任命，担负起责任。',
+                        effect: () => {
+                            improveSkill('领导力', 20);
+                            popularity += 25;
+                            mood += 20;
+                            age += 1;
+                            addAchievement('球队队长');
+                            addEvent('你成为了球队队长，带领球队前进。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝任命，保持现状。',
+                        effect: () => {
+                            mood -= 5;
+                            age += 1;
+                            addEvent('你拒绝了队长的任命，保持了现状。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景17
+            {
+                story: '你的球队有机会签下世界级球星，你作为队长需要参与谈判。',
+                choices: [
+                    {
+                        text: '积极参与，促成签约。',
+                        effect: () => {
+                            improveSkill('智力', 10);
+                            popularity += 20;
+                            mood += 15;
+                            age += 1;
+                            addEvent('你成功促成了球星的签约，球队实力大增。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '保持中立，不参与谈判。',
+                        effect: () => {
+                            mood += 5;
+                            age += 1;
+                            addEvent('你选择不参与谈判，专注于训练。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '反对签约，认为不合适。',
+                        effect: () => {
+                            popularity -= 10;
+                            mood -= 10;
+                            age += 1;
+                            addEvent('你反对签约，导致内部出现分歧。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景18
+            {
+                story: '你收到了豪门俱乐部的高薪邀请，可能需要背叛现有球队。',
+                choices: [
+                    {
+                        text: '接受邀请，前往豪门。',
+                        effect: () => {
+                            wealth += 30000;
+                            popularity += 30;
+                            mood += 10;
+                            age += 1;
+                            currentTeam = '豪门俱乐部';
+                            addEvent('你接受了豪门的邀请，开始新的挑战。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝邀请，忠于现有球队。',
+                        effect: () => {
+                            popularity += 25;
+                            mood += 20;
+                            age += 1;
+                            addEvent('你拒绝了邀请，赢得了球迷的尊重。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '与现有球队谈判，希望提高待遇。',
+                        effect: () => {
+                            let success = Math.random() < 0.5;
+                            age += 1;
+                            if (success) {
+                                wealth += 20000;
+                                mood += 15;
+                                addEvent('谈判成功，你获得了更好的待遇。');
+                                nextScene();
+                            } else {
+                                popularity -= 15;
+                                mood -= 15;
+                                addEvent('谈判失败，关系恶化。');
+                                nextScene();
+                            }
+                        }
+                    }
+                ]
+            },
+            // 场景19
+            {
+                story: '你考虑推出自传，记录自己的职业生涯。',
+                choices: [
+                    {
+                        text: '撰写自传，分享经历。',
+                        effect: () => {
+                            wealth += 10000;
+                            popularity += 20;
+                            mood += 15;
+                            age += 1;
+                            addAchievement('作家球员');
+                            addEvent('你出版了自传，受到了广泛关注。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝出书，保持低调。',
+                        effect: () => {
+                            mood += 5;
+                            age += 1;
+                            addEvent('你选择不出书，继续专注于足球。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景20
+            {
+                story: '你的球队陷入财政危机，需要你的帮助。',
+                choices: [
+                    {
+                        text: '提供资金支持，渡过难关。',
+                        effect: () => {
+                            wealth -= 20000;
+                            popularity += 25;
+                            mood += 20;
+                            age += 1;
+                            addAchievement('球队救星');
+                            addEvent('你帮助球队渡过了难关，受到尊敬。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '无能为力，专注比赛。',
+                        effect: () => {
+                            mood -= 5;
+                            age += 1;
+                            addEvent('你无能为力，只能专注于比赛。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '考虑转会，离开球队。',
+                        effect: () => {
+                            popularity -= 20;
+                            mood -= 10;
+                            age += 1;
+                            addEvent('你考虑转会，球队和球迷感到失望。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景21
+            {
+                story: '你收到了来自娱乐圈的邀请，参与电影或电视剧的拍摄。',
+                choices: [
+                    {
+                        text: '接受邀请，尝试演艺事业。',
+                        effect: () => {
+                            wealth += 15000;
+                            popularity += 25;
+                            mood += 20;
+                            age += 1;
+                            addAchievement('跨界明星');
+                            addEvent('你参与了影视作品的拍摄，收获了新的粉丝。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝邀请，专注足球事业。',
+                        effect: () => {
+                            mood += 5;
+                            age += 1;
+                            addEvent('你拒绝了邀请，继续专注于足球。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景22
+            {
+                story: '你在国际比赛中与裁判发生了争执，可能面临禁赛处罚。',
+                choices: [
+                    {
+                        text: '公开道歉，争取原谅。',
+                        effect: () => {
+                            popularity += 10;
+                            mood += 5;
+                            age += 1;
+                            addEvent('你公开道歉，避免了严重的处罚。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '坚持立场，接受处罚。',
+                        effect: () => {
+                            popularity -= 15;
+                            mood -= 10;
+                            age += 1;
+                            addEvent('你坚持立场，被禁赛数场。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '寻求法律援助，挑战裁决。',
+                        effect: () => {
+                            let success = Math.random() < 0.4;
+                            wealth -= 5000;
+                            age += 1;
+                            if (success) {
+                                popularity += 20;
+                                mood += 10;
+                                addEvent('你成功挑战了裁决，形象提升。');
+                                nextScene();
+                            } else {
+                                popularity -= 20;
+                                mood -= 15;
+                                addEvent('挑战失败，形象受损。');
+                                nextScene();
+                            }
+                        }
+                    }
+                ]
+            },
+            // 场景23
+            {
+                story: '你考虑成立足球学校，培养下一代球员。',
+                choices: [
+                    {
+                        text: '成立足球学校，为未来投资。',
+                        effect: () => {
+                            wealth -= 30000;
+                            mood += 25;
+                            age += 1;
+                            addAchievement('足球教育家');
+                            addEvent('你成立了足球学校，为足球事业培养新人。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '放弃计划，专注个人事业。',
+                        effect: () => {
+                            mood -= 5;
+                            age += 1;
+                            addEvent('你放弃了成立足球学校的计划。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景24
+            {
+                story: '你被提名为国际足联最佳球员的候选人。',
+                choices: [
+                    {
+                        text: '积极拉票，争取胜利。',
+                        effect: () => {
+                            popularity += 30;
+                            mood += 20;
+                            age += 1;
+                            let success = Math.random() < 0.5;
+                            if (success) {
+                                addAchievement('国际足联最佳球员');
+                                addEvent('你成功当选为国际足联最佳球员！');
+                            } else {
+                                addEvent('你未能当选，但仍然备受瞩目。');
+                            }
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '保持低调，顺其自然。',
+                        effect: () => {
+                            mood += 10;
+                            age += 1;
+                            addEvent('你保持低调，专注于比赛。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景25
+            {
+                story: '你的职业生涯进入了晚期，需要考虑未来的道路。',
+                choices: [
+                    {
+                        text: '继续踢球，挑战自我极限。',
+                        effect: () => {
+                            improveSkill('耐力', 10);
+                            popularity += 20;
+                            energy -= 20;
+                            mood += 15;
+                            age += 2;
+                            appearances += 20;
+                            goals += 5;
+                            assists += 4;
+                            addEvent('你继续征战赛场，成为不老传奇。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '退役，开始新的生活。',
+                        effect: () => {
+                            wealth += 50000;
+                            mood += 30;
+                            age += 2;
+                            addEvent('你选择退役，开始享受生活。');
+                            endGame(true);
+                        }
+                    },
+                    {
+                        text: '转型为足球解说员，继续从事足球相关工作。',
+                        effect: () => {
+                            wealth += 10000;
+                            popularity += 25;
+                            mood += 20;
+                            age += 2;
+                            addAchievement('足球解说员');
+                            addEvent('你成为了足球解说员，继续为足球事业贡献。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景26
+            {
+                story: '你被邀请参加一场传奇球星的告别赛。',
+                choices: [
+                    {
+                        text: '接受邀请，致敬传奇。',
+                        effect: () => {
+                            popularity += 20;
+                            mood += 15;
+                            age += 1;
+                            appearances += 1;
+                            addEvent('你参加了告别赛，致敬了传奇球星。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝邀请，专注个人事务。',
+                        effect: () => {
+                            mood -= 5;
+                            age += 1;
+                            addEvent('你拒绝了邀请，继续专注于自己的事务。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景27
+            {
+                story: '你被提名为联合国儿童基金会的亲善大使。',
+                choices: [
+                    {
+                        text: '接受提名，贡献社会。',
+                        effect: () => {
+                            popularity += 25;
+                            mood += 20;
+                            age += 1;
+                            addAchievement('亲善大使');
+                            addEvent('你成为了亲善大使，积极参与公益事业。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝提名，保持低调。',
+                        effect: () => {
+                            mood += 5;
+                            age += 1;
+                            addEvent('你拒绝了提名，选择保持低调。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景28
+            {
+                story: '你的孩子展现出了出色的足球天赋。',
+                choices: [
+                    {
+                        text: '支持孩子，培养他成为球员。',
+                        effect: () => {
+                            mood += 25;
+                            age += 1;
+                            addEvent('你全力支持孩子的足球梦想。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '希望孩子选择其他职业。',
+                        effect: () => {
+                            mood -= 10;
+                            age += 1;
+                            addEvent('你希望孩子选择其他职业，避免足球的辛苦。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景29
+            {
+                story: '你被邀请担任俱乐部的技术总监。',
+                choices: [
+                    {
+                        text: '接受邀请，管理球队。',
+                        effect: () => {
+                            wealth += 20000;
+                            popularity += 20;
+                            mood += 15;
+                            age += 1;
+                            addAchievement('技术总监');
+                            addEvent('你成为了技术总监，开始新的挑战。');
+                            nextScene();
+                        }
+                    },
+                    {
+                        text: '拒绝邀请，享受退休生活。',
+                        effect: () => {
+                            mood += 10;
+                            age += 1;
+                            addEvent('你拒绝了邀请，选择享受退休生活。');
+                            nextScene();
+                        }
+                    }
+                ]
+            },
+            // 场景30
+            {
+                story: '你的传奇职业生涯即将画上句号。',
+                choices: [
+                    {
+                        text: '举办告别赛，正式退役。',
+                        effect: () => {
+                            popularity += 50;
+                            mood += 30;
+                            age += 1;
+                            addAchievement('传奇退役');
+                            addEvent('你举办了盛大的告别赛，正式退役。');
+                            endGame(true, '恭喜！你以传奇球星的身份圆满结束了职业生涯！');
+                        }
+                    },
+                    {
+                        text: '低调退役，不举办任何活动。',
+                        effect: () => {
+                            mood += 10;
+                            age += 1;
+                            addEvent('你选择低调退役，开始新的生活。');
+                            endGame(true, '你低调地结束了职业生涯，开启了人生的新篇章。');
+                        }
+                    }
+                ]
+            }
+        ];
+
+        // 修改nextScene函数，在每个场景之间有一定概率触发随机事件
+        function nextScene() {
+            currentSceneIndex++;
+            if (currentSceneIndex < scenes.length) {
+                // 在进入下一个场景之前，有30%的概率触发随机事件
+                if (Math.random() < 0.3) {
+                    randomEvent();
+                }
+                showScene();
+            } else {
+                endGame();
+            }
+        }
+
+        // 随机事件池
+        function randomEvent() {
+            let events = [
+                {
+                    description: '你被选为年度最佳球员。',
+                    effect: () => {
+                        popularity += 50;
+                        mood += 30;
+                        addAchievement('年度最佳球员');
+                        addEvent('你获得了年度最佳球员的荣誉，备受瞩目。');
+                        updateMarketValue();
+                    }
+                },
+                // 添加更多的随机事件
+                {
+                    description: '你在比赛中受伤，需休养一段时间。',
+                    effect: () => {
+                        energy -= 30;
+                        mood -= 20;
+                        addEvent('你在比赛中受伤，需要休息一段时间。');
+                    }
+                },
+                {
+                    description: '你的商业投资获得了巨额回报。',
+                    effect: () => {
+                        wealth += 50000;
+                        mood += 25;
+                        addEvent('你的投资项目获得了巨大的成功，财富大幅增加。');
+                    }
+                },
+                {
+                    description: '你被媒体拍到和神秘人士会面，引发猜测。',
+                    effect: () => {
+                        popularity += 15;
+                        mood -= 10;
+                        addEvent('媒体的报道增加了你的曝光度，但也带来了压力。');
+                    }
+                },
+                {
+                    description: '你参加了公益活动，形象大幅提升。',
+                    effect: () => {
+                        popularity += 30;
+                        mood += 20;
+                        addAchievement('公益先锋');
+                        addEvent('你积极参与公益活动，赢得了广泛赞誉。');
+                    }
+                }
+            ];
+
+            let event = events[Math.floor(Math.random() * events.length)];
+            addEvent(event.description);
+            event.effect();
+            updateStats();
+        }
+
+        function updateProgressBar() {
+            let progress = ((currentSceneIndex + 1) / totalScenes) * 100;
+            progressBarElement.style.width = progress + '%';
+        }
+
+        function updateStats() {
+            ageElement.textContent = age;
+            energyElement.textContent = energy;
+            wealthElement.textContent = wealth;
+            popularityElement.textContent = popularity;
+            moodElement.textContent = mood;
+            goalsElement.textContent = goals;
+            assistsElement.textContent = assists;
+            appearancesElement.textContent = appearances;
+            marketValueElement.textContent = marketValue;
+            updateSkills();
+            updateInventory();
+            updateRelationships();
+            updateAchievements();
+            updateProgressBar();
+        }
+
+        function updateSkills() {
+            skillListElement.innerHTML = '';
+            for (let skill in skills) {
+                let li = document.createElement('li');
+                li.textContent = `${skill}: ${skills[skill]}`;
+                skillListElement.appendChild(li);
+            }
+        }
+
+        function updateInventory() {
+            itemListElement.innerHTML = '';
+            inventory.forEach(item => {
+                let li = document.createElement('li');
+                li.textContent = item;
+                itemListElement.appendChild(li);
+            });
+        }
+
+        function updateRelationships() {
+            relationshipListElement.innerHTML = '';
+            for (let person in relationships) {
+                let li = document.createElement('li');
+                li.textContent = `${person}: ${relationships[person]}`;
+                relationshipListElement.appendChild(li);
+            }
+        }
+
+        function updateAchievements() {
+            achievementListElement.innerHTML = '';
+            achievements.forEach(achievement => {
+                let li = document.createElement('li');
+                li.textContent = achievement;
+                achievementListElement.appendChild(li);
+            });
+        }
+
+        function showScene() {
+            if (energy <= 0) {
+                endGame(false, '你的体力耗尽，无法继续。');
+                return;
+            }
+            if (mood <= 0) {
+                endGame(false, '你的心情低落，选择了退出。');
+                return;
+            }
+
+            let scene = scenes[currentSceneIndex];
+            storyElement.textContent = scene.story;
+            choicesElement.innerHTML = '';
+            scene.choices.forEach(choice => {
+                let button = document.createElement('button');
+                button.textContent = choice.text;
+                button.className = 'choice-button';
+                button.onclick = () => {
+                    choice.effect();
+                    updateStats();
+                };
+                choicesElement.appendChild(button);
+            });
+        }
+
+        function repeatScene() {
+            showScene();
+        }
+
+        function endGame(success, message) {
+            choicesElement.innerHTML = '';
+            openShopButton.style.display = 'none';
+            openNewsButton.style.display = 'none';
+            openGossipButton.style.display = 'none';
+            if (success) {
+                storyElement.textContent = message || '恭喜！Chris的职业生涯取得了巨大成功！';
+            } else {
+                storyElement.textContent = message || '游戏结束，Chris的职业生涯到此结束。';
+            }
+        }
+
+        function addEvent(text) {
+            let p = document.createElement('p');
+            p.textContent = text;
+            eventLogElement.appendChild(p);
+            eventLogElement.scrollTop = eventLogElement.scrollHeight;
+        }
+
+        function improveSkill(skillName, amount) {
+            if (skills[skillName] !== undefined) {
+                skills[skillName] += amount;
+            } else {
+                skills[skillName] = amount;
+            }
+            updateMarketValue();
+        }
+
+        function attemptSkill(skillName, difficulty) {
+            let skillValue = skills[skillName] || 0;
+            let chance = skillValue / (skillValue + difficulty);
+            return Math.random() < chance;
+        }
+
+        function addItem(itemName) {
+            inventory.push(itemName);
+        }
+
+        function addRelationship(person, value) {
+            relationships[person] = value;
+        }
+
+        function updateRelationship(person, amount) {
+            if (relationships[person] !== undefined) {
+                relationships[person] += amount;
+            } else {
+                relationships[person] = amount;
+            }
+        }
+
+        function addAchievement(achievement) {
+            if (!achievements.includes(achievement)) {
+                achievements.push(achievement);
+            }
+        }
+
+        function updateMarketValue() {
+            marketValue = skills['踢球'] * 100 + popularity * 50 + achievements.length * 1000;
+        }
+
+        // 商店功能
+        openShopButton.onclick = () => {
+            shopElement.style.display = 'block';
+        };
+
+        function closeShop() {
+            shopElement.style.display = 'none';
+        }
+
+        function buyItem(itemName, price, attribute, amount) {
+            if (wealth >= price) {
+                wealth -= price;
+                if (attribute === 'energy') {
+                    energy += amount;
+                } else {
+                    improveSkill(attribute, amount);
+                }
+                addItem(itemName);
+                addEvent(`你购买了${itemName}，${attribute}提升了${amount}点。`);
+                updateStats();
+            } else {
+                addEvent('你的财富不足，无法购买该物品。');
+            }
+        }
+
+        // 国际新闻功能
+        openNewsButton.onclick = () => {
+            newsElement.style.display = 'block';
+            displayNews();
+        };
+
+        function closeNews() {
+            newsElement.style.display = 'none';
+        }
+
+        function displayNews() {
+            let news = [
+                '某豪门俱乐部宣布解雇主教练，引发热议。',
+                '国际足联公布最新排名，你的国家队位列前十。',
+                '新一届金球奖候选名单出炉，你的名字在列。',
+                '转会市场活跃，多个大牌球员有望转会。',
+                '足坛传奇球员宣布退役，结束辉煌职业生涯。'
+            ];
+            newsContentElement.innerHTML = '';
+            let randomNews = news[Math.floor(Math.random() * news.length)];
+            let p = document.createElement('p');
+            p.textContent = randomNews;
+            newsContentElement.appendChild(p);
+        }
+
+        // 绯闻功能
+        openGossipButton.onclick = () => {
+            gossipElement.style.display = 'block';
+            displayGossip();
+        };
+
+        function closeGossip() {
+            gossipElement.style.display = 'none';
+        }
+
+        function displayGossip() {
+            let gossips = [
+                '媒体猜测你可能转会到其他俱乐部。',
+                '传言你与教练关系紧张，可能影响出场机会。',
+                '有人看到你深夜加练，展现出强烈的求胜欲。',
+                '关于你的商业合作传闻不断，可能推出个人品牌。',
+                '你被邀请参加一档访谈节目，引发关注。'
+            ];
+            gossipContentElement.innerHTML = '';
+            let randomGossip = gossips[Math.floor(Math.random() * gossips.length)];
+            let p = document.createElement('p');
+            p.textContent = randomGossip;
+            gossipContentElement.appendChild(p);
+        }
+
+        // 球队选择功能
+        function openTeamSelection(teams, callback) {
+            teamSelectionElement.style.display = 'block';
+            teamListElement.innerHTML = '';
+            teams.forEach(team => {
+                let button = document.createElement('button');
+                button.textContent = team.name;
+                button.onclick = () => {
+                    currentTeam = team.name;
+                    wealth += team.offer;
+                    popularity += team.popularityBoost;
+                    addEvent(`你选择了加入${team.name}，获得了${team.offer}财富。`);
+                    teamSelectionElement.style.display = 'none';
+                    callback();
+                    updateStats();
+                };
+                teamListElement.appendChild(button);
+            });
+        }
+
+        function closeTeamSelection() {
+            teamSelectionElement.style.display = 'none';
+        }
+
+        // 初始化游戏
+        updateStats();
+        showScene();
+    </script>
+</body>
+</html>

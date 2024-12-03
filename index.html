@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北中游戏站</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 轻量级 CSS -->
+    <link rel="stylesheet" href="assets/css/styles.min.css">
+    <!-- Favicon -->
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="#">游戏中心</a>
+            <div class="navbar-right">
+                <input type="search" id="searchInput" placeholder="搜索游戏..." aria-label="搜索">
+                <button id="searchButton" aria-label="搜索"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search" 
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" 
+                d="M505 442.7L405.3 343c28.4-34.9 45.7-79.4 
+                45.7-128C451 96.5 354.5 0 225.5 0S0 
+                96.5 0 215.5 96.5 431 215.5 
+                431c48.6 0 93.1-17.3 128-45.7l99.7 
+                99.7c4.5 4.5 10.6 7 17 7s12.5-2.5 
+                17-7c9.4-9.4 9.4-24.6 0-34zM215.5 
+                368c-80.2 0-152.5-54.8-152.5-152.5S135.3 
+                63 215.5 63 368 117.8 368 198s-72.3 
+                152.5-152.5 152.5z"></path></svg></button>
+                <button id="themeToggle" aria-label="切换主题">
+                    <svg id="themeIcon" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="moon" 
+                    class="svg-inline--fa fa-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                        <path fill="currentColor" d="M279.135 512c-15.665 
+                        0-31.052-2.351-46.094-6.683-39.611-11.447-73.395-38.789-93.349-73.041 
+                        -19.952-34.252-25.679-73.531-16.408-111.335 
+                        4.65-20.486 12.868-40.047 24.368-57.256 
+                        11.505-17.205 26.14-32.309 42.349-44.299 
+                        16.21-11.989 33.81-21.342 52.32-27.48 
+                        18.51-6.14 37.765-9.72 56.733-9.72 
+                        50.441 0 98.56 19.843 137.368 55.486 
+                        38.808 35.643 61.486 84.984 61.486 138.467 
+                        0 50.441-19.843 98.56-55.486 
+                        137.368-35.643 38.808-84.984 61.486-138.467 
+                        61.486z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="container">
+        <h1 class="main-title">欢迎来到北中游戏站</h1>
+
+        <!-- 分类过滤 -->
+        <div class="filters">
+            <button class="filter-btn active" data-category="all">全部</button>
+            <button class="filter-btn" data-category="action">剧情</button>
+            <button class="filter-btn" data-category="puzzle">经营策略</button>
+            <button class="filter-btn" data-category="strategy">娱乐</button>
+            <!-- 添加更多类别按钮 -->
+        </div>
+
+        <!-- 游戏展示区 -->
+        <div class="games-grid" id="gamesContainer">
+            <!-- 游戏卡片将通过 JavaScript 动态加载 -->
+        </div>
+
+        <!-- 无匹配游戏提示 -->
+        <div id="noResults" class="no-results" style="display: none;">
+            <p>没有找到匹配的游戏。</p>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        &copy; 2024 北中游戏站. 保留所有权利。
+    </footer>
+
+    <!-- 优化后的 JavaScript 加载 -->
+    <script src="assets/js/scripts.min.js" defer></script>
+</body>
+</html>

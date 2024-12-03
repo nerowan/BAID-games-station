@@ -1,0 +1,1915 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>北京中学运营模拟器</title>
+    <!-- 引入Bootstrap CSS用于界面美化 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Chart.js用于图表显示 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 自定义样式 */
+        body {
+            background-color: #f4f6f9;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+        }
+        .navbar {
+            background-color: #2c3e50;
+            color: white;
+        }
+        .navbar .navbar-brand {
+            font-weight: bold;
+        }
+        .navbar .nav-link {
+            color: white !important;
+        }
+        .navbar .nav-link:hover, .navbar .nav-link.active {
+            background-color: #34495e;
+            border-radius: 4px;
+        }
+        .container-fluid {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            padding: 0;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #34495e;
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar .status, .sidebar .actions {
+            margin-bottom: 20px;
+        }
+        .sidebar h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #2c3e50;
+            padding-bottom: 5px;
+        }
+        .sidebar p {
+            margin: 8px 0;
+        }
+        .sidebar .progress-container {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 25px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .sidebar .progress-bar {
+            height: 20px;
+            background-color: #4caf50;
+            width: 0%;
+        }
+        .sidebar .actions button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #2980b9;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .sidebar .actions button:hover {
+            background-color: #3498db;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            background-color: #ecf0f1;
+            animation: fadeIn 0.5s;
+        }
+        .section {
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            animation: slideIn 0.5s;
+        }
+        .section h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .btn-custom {
+            padding: 10px 15px;
+            margin: 5px 0;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn-custom:hover {
+            background-color: #3498db;
+        }
+        /* 模态框样式 */
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border-radius: 8px;
+            position: relative;
+        }
+        .modal-header {
+            border-bottom: none;
+        }
+        .modal-header .btn-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #aaa;
+        }
+        .modal-header .btn-close:hover {
+            color: black;
+        }
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        /* 弹窗样式 */
+        .event-popup {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2000;
+            background-color: white;
+            border: 2px solid #2c3e50;
+            border-radius: 8px;
+            padding: 20px;
+            width: 400px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .event-popup h4 {
+            margin-top: 0;
+        }
+        .event-popup button {
+            margin-top: 10px;
+        }
+        /* 优化课程设置界面 */
+        .course-option, .added-course {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        .course-option h5, .added-course h5 {
+            margin-top: 0;
+        }
+        .course-option button, .added-course button {
+            margin-top: 10px;
+        }
+        /* 优化科研项目界面 */
+        .research-option {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        /* 优化社团界面 */
+        .club-option, .created-club {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        /* 优化比赛界面 */
+        .competition-option {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        /* 进度条样式 */
+        .progress {
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #28a745;
+            transition: width 0.6s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航栏 -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white" href="#">北京中学运营模拟器</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon" style="background-color:white;"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto menu">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="switchMenu('dashboard')">仪表盘</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="switchMenu('students')">学生管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="switchMenu('teachers')">教师管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="switchMenu('courses')">课程设置</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="switchMenu('research')">科研项目</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="switchMenu('competitions')">校际比赛</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="switchMenu('clubs')">学生社团</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="switchMenu('alumni')">校友系统</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="switchMenu('facilities')">设施管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="switchMenu('economy')">经济管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="switchMenu('eventLog')">事件日志</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="saveGame()">保存游戏</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="loadGame()">加载游戏</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="resetGame()">重置游戏</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主体布局 -->
+    <div class="container-fluid">
+        <!-- 侧边栏 -->
+        <div class="sidebar" id="sidebar">
+            <div>
+                <div class="status">
+                    <h3>学校状态</h3>
+                    <p>资金: ¥<span id="funds">1,000,000</span></p>
+                    <p>声望: <span id="reputation">50</span></p>
+                    <p>学生人数: <span id="student-count">0</span></p>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    <p>游戏目标：将北京中学发展为世界一流学校！</p>
+                    <p>失败条件：资金耗尽或声望降至0。</p>
+                </div>
+                <div class="actions">
+                    <button class="btn" onclick="addFunds(50000)">增加资金 (¥50,000)</button>
+                    <button class="btn" onclick="upgradeFacility()">升级教学楼 (¥200,000)</button>
+                    <button class="btn" onclick="nextTurn()">下一时间</button>
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-secondary w-100" onclick="toggleSidebar()">收起/展开侧边栏</button>
+            </div>
+        </div>
+        <!-- 主内容区 -->
+        <div class="content" id="content">
+            <!-- 各个菜单内容 -->
+            <!-- 仪表盘 -->
+            <div class="section" id="dashboard-section">
+                <h2>仪表盘</h2>
+                <p>欢迎来到北京中学运营模拟器！管理你的学校，提升声望，成为世界第一。</p>
+                <div class="charts">
+                    <canvas id="financial-chart" width="400" height="200"></canvas>
+                    <canvas id="student-chart" width="400" height="200"></canvas>
+                </div>
+                <p>游戏进度: <span id="game-progress">0%</span></p>
+            </div>
+            <!-- 学生管理 -->
+            <div class="section" id="students-section" style="display:none;">
+                <h2>学生管理</h2>
+                <button class="btn btn-primary mb-3" onclick="refreshStudentApplicants()">刷新学生申请池</button>
+                <h4>学生申请池</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>年龄</th>
+                            <th>年级</th>
+                            <th>成绩</th>
+                            <th>特长</th>
+                            <th>满意度</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-applicant-table-body">
+                        <!-- 学生申请数据将动态填充 -->
+                    </tbody>
+                </table>
+                <h4>已录取学生</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>年龄</th>
+                            <th>年级</th>
+                            <th>成绩</th>
+                            <th>特长</th>
+                            <th>满意度</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-table-body">
+                        <!-- 学生数据将动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- 教师管理 -->
+            <div class="section" id="teachers-section" style="display:none;">
+                <h2>教师管理</h2>
+                <button class="btn btn-primary mb-3" onclick="refreshTeacherApplicants()">刷新教师应聘池</button>
+                <h4>教师应聘池</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>年龄</th>
+                            <th>专业</th>
+                            <th>职称</th>
+                            <th>薪资</th>
+                            <th>经验</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacher-applicant-table-body">
+                        <!-- 教师申请数据将动态填充 -->
+                    </tbody>
+                </table>
+                <h4>已聘用教师</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>年龄</th>
+                            <th>专业</th>
+                            <th>职称</th>
+                            <th>薪资</th>
+                            <th>经验</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacher-table-body">
+                        <!-- 教师数据将动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- 课程设置 -->
+            <div class="section" id="courses-section" style="display:none;">
+                <h2>课程设置</h2>
+                <p>从以下课程中选择，设置你学校的课程体系。</p>
+                <div id="course-options" class="row">
+                    <!-- 课程选项将动态填充 -->
+                </div>
+                <h4>已添加课程</h4>
+                <div id="added-courses" class="row">
+                    <!-- 已添加的课程将动态填充 -->
+                </div>
+            </div>
+            <!-- 科研项目 -->
+            <div class="section" id="research-section" style="display:none;">
+                <h2>科研项目</h2>
+                <p>选择科研项目，提升学校的科研水平和声望。</p>
+                <div id="research-options" class="row">
+                    <!-- 科研项目选项将动态填充 -->
+                </div>
+            </div>
+            <!-- 校际比赛 -->
+            <div class="section" id="competitions-section" style="display:none;">
+                <h2>校际比赛</h2>
+                <p>参加不同的比赛，提升学校声望和资金。</p>
+                <div id="competition-options" class="row">
+                    <!-- 比赛选项将动态填充 -->
+                </div>
+            </div>
+            <!-- 学生社团 -->
+            <div class="section" id="clubs-section" style="display:none;">
+                <h2>学生社团</h2>
+                <p>管理学生社团，提升学生满意度和学校声望。</p>
+                <div id="club-options" class="row">
+                    <!-- 社团选项将动态填充 -->
+                </div>
+                <h4>已创建社团</h4>
+                <div id="created-clubs" class="row">
+                    <!-- 已创建的社团将动态填充 -->
+                </div>
+            </div>
+            <!-- 校友系统 -->
+            <div class="section" id="alumni-section" style="display:none;">
+                <h2>校友系统</h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>毕业年份</th>
+                            <th>捐赠金额</th>
+                            <th>合作项目</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alumni-table-body">
+                        <!-- 校友数据将动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- 设施管理 -->
+            <div class="section" id="facilities-section" style="display:none;">
+                <h2>设施管理</h2>
+                <p>教学楼等级: <span id="facility-level">1</span></p>
+                <p>实验室数量: <span id="laboratory-count">2</span></p>
+                <p>图书馆数量: <span id="library-count">1</span></p>
+                <p>体育馆数量: <span id="gym-count">1</span></p>
+                <p>食堂数量: <span id="cafeteria-count">1</span></p>
+                <button class="btn btn-primary mb-2" onclick="buildLaboratory()">建造实验室 (¥100,000)</button>
+                <button class="btn btn-primary mb-2" onclick="buildLibrary()">建造图书馆 (¥150,000)</button>
+                <button class="btn btn-primary mb-2" onclick="buildGym()">建造体育馆 (¥120,000)</button>
+                <button class="btn btn-primary mb-2" onclick="buildCafeteria()">建造食堂 (¥80,000)</button>
+                <button class="btn btn-primary mb-2" onclick="buildArtCenter()">建造艺术中心 (¥200,000)</button>
+                <h4>设施升级</h4>
+                <button class="btn btn-secondary mb-2" onclick="upgradeLaboratory()">升级实验室 (¥50,000)</button>
+                <button class="btn btn-secondary mb-2" onclick="upgradeLibrary()">升级图书馆 (¥75,000)</button>
+                <button class="btn btn-secondary mb-2" onclick="upgradeGym()">升级体育馆 (¥60,000)</button>
+                <button class="btn btn-secondary mb-2" onclick="upgradeCafeteria()">升级食堂 (¥40,000)</button>
+                <button class="btn btn-secondary mb-2" onclick="upgradeArtCenter()">升级艺术中心 (¥100,000)</button>
+            </div>
+            <!-- 经济管理 -->
+            <div class="section" id="economy-section" style="display:none;">
+                <h2>经济管理</h2>
+                <p>收入来源:</p>
+                <ul>
+                    <li>学费收入: ¥<span id="tuition-income">500,000</span>/月</li>
+                    <li>政府补助: ¥<span id="government-grant">200,000</span>/月</li>
+                    <li>捐赠收入: ¥<span id="donation-income">100,000</span>/月</li>
+                </ul>
+                <p>支出项:</p>
+                <ul>
+                    <li>教师工资: ¥<span id="teacher-salary">300,000</span>/月</li>
+                    <li>维护费用: ¥<span id="maintenance-cost">100,000</span>/月</li>
+                    <li>研究资金: ¥<span id="research-fund">50,000</span>/月</li>
+                </ul>
+                <button class="btn btn-primary mb-2" onclick="openAdjustEconomyModal()">调整经济策略</button>
+                <button class="btn btn-primary mb-2" onclick="openPolicyModal()">制定政策</button>
+            </div>
+            <!-- 事件日志 -->
+            <div class="section" id="eventLog-section" style="display:none;">
+                <h2>事件日志</h2>
+                <div id="event-log-entries">
+                    <!-- 日志条目将动态添加 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框区域 -->
+    <!-- 调整经济策略模态框 -->
+    <div class="modal fade" id="adjust-economy-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>调整经济策略</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeAdjustEconomyModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adjust-economy-form">
+                        <div class="mb-3">
+                            <label class="form-label">学费收入:</label>
+                            <input type="number" id="tuition-income-input" class="form-control" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">政府补助:</label>
+                            <input type="number" id="government-grant-input" class="form-control" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">捐赠收入:</label>
+                            <input type="number" id="donation-income-input" class="form-control" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">教师工资:</label>
+                            <input type="number" id="teacher-salary-input" class="form-control" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">维护费用:</label>
+                            <input type="number" id="maintenance-cost-input" class="form-control" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">研究资金:</label>
+                            <input type="number" id="research-fund-input" class="form-control" min="0" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 政策制定模态框 -->
+    <div class="modal fade" id="policy-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>制定政策</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closePolicyModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="policy-form">
+                        <div class="mb-3">
+                            <label class="form-label">选择政策:</label>
+                            <select id="policy-select" class="form-control">
+                                <option value="increaseTuition">提高学费</option>
+                                <option value="decreaseTuition">降低学费</option>
+                                <option value="increaseSalaries">提高教师工资</option>
+                                <option value="decreaseSalaries">降低教师工资</option>
+                                <option value="increaseResearchFund">增加研究资金</option>
+                                <option value="decreaseResearchFund">减少研究资金</option>
+                                <option value="improveFacilities">改善设施</option>
+                                <option value="enhanceMarketing">加强宣传</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">实施政策</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 事件弹窗 -->
+    <div class="event-popup" id="event-popup">
+        <h4>事件通知</h4>
+        <p id="event-popup-message"></p>
+        <button class="btn btn-primary" onclick="closeEventPopup()">确定</button>
+    </div>
+
+    <!-- 引入Bootstrap JS和依赖 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 游戏逻辑脚本 -->
+    <script>
+        // 游戏数据
+        let gameData = {
+            funds: 1000000,
+            reputation: 50,
+            studentCount: 0,
+            facilityLevel: 1,
+            laboratoryCount: 2,
+            libraryCount: 1,
+            gymCount: 1,
+            cafeteriaCount: 1,
+            artCenterCount: 0,
+            teachers: [],
+            teacherApplicants: [],
+            courses: [],
+            courseOptions: [],
+            researchProjects: [],
+            researchOptions: [],
+            competitions: [],
+            competitionOptions: [],
+            clubs: [],
+            clubOptions: [],
+            alumni: [],
+            students: [],
+            studentApplicants: [],
+            progress: 0,
+            economy: {
+                tuitionIncome: 500000,      // 月收入
+                governmentGrant: 200000,
+                donationIncome: 100000,
+                teacherSalary: 300000,      // 月支出
+                maintenanceCost: 100000,
+                researchFund: 50000
+            },
+            facilities: {
+                gymCount: 1,
+                cafeteriaCount: 1,
+                artCenterCount: 0
+            },
+            gameMonth: 1,
+            eventLog: [],
+            tasks: [],
+            weather: "晴朗"
+        };
+
+        // 初始化游戏
+        function initGame() {
+            loadInitialData();
+            loadCourseOptions();
+            loadResearchOptions();
+            loadCompetitionOptions();
+            loadClubOptions();
+            updateUI();
+            createCharts();
+            startStoryLine();
+        }
+
+        // 加载初始数据或从存档加载
+        function loadInitialData() {
+            const savedGame = localStorage.getItem('beijingMiddleSchoolGame');
+            if (savedGame) {
+                if (confirm("检测到已有存档，是否加载？")) {
+                    gameData = JSON.parse(savedGame);
+                }
+            }
+        }
+
+        // 更新UI
+        function updateUI() {
+            document.getElementById('funds').innerText = gameData.funds.toLocaleString();
+            document.getElementById('reputation').innerText = gameData.reputation;
+            document.getElementById('student-count').innerText = gameData.students.length;
+            document.getElementById('facility-level').innerText = gameData.facilityLevel;
+            document.getElementById('laboratory-count').innerText = gameData.laboratoryCount;
+            document.getElementById('library-count').innerText = gameData.libraryCount;
+            document.getElementById('gym-count').innerText = gameData.gymCount;
+            document.getElementById('cafeteria-count').innerText = gameData.cafeteriaCount;
+            document.getElementById('game-progress').innerText = gameData.progress.toFixed(2) + '%';
+            updateProgressBar();
+            populateStudentTable();
+            populateTeacherTable();
+            populateCourseOptions();
+            populateResearchOptions();
+            populateCompetitionOptions();
+            populateClubOptions();
+            populateAlumniTable();
+            updateEconomyUI();
+            updateCharts();
+            populateEventLog();
+        }
+
+        // 更新进度条
+        function updateProgressBar() {
+            document.getElementById('progress-bar').style.width = gameData.progress + '%';
+            if (gameData.progress >= 100) {
+                alert("恭喜！北京中学已成为世界第一！");
+                gameData.progress = 100;
+                updateUI();
+            }
+        }
+
+        // 开始故事情节
+        function startStoryLine() {
+            // 添加主线任务
+            gameData.tasks.push({
+                name: "提升学校声望",
+                description: "将学校声望提升至100。",
+                completed: false
+            });
+            // 添加支线任务
+            gameData.tasks.push({
+                name: "扩招学生",
+                description: "将学生人数增加到50人。",
+                completed: false
+            });
+            logEvent("新的任务已发布！");
+        }
+
+        // 检查任务完成情况
+        function checkTasks() {
+            gameData.tasks.forEach(task => {
+                if (!task.completed) {
+                    if (task.name === "提升学校声望" && gameData.reputation >= 100) {
+                        task.completed = true;
+                        logEvent(`任务完成：${task.name}`);
+                        gameData.funds += 100000; // 奖励
+                        logEvent("获得奖励：资金 ¥100,000");
+                    }
+                    if (task.name === "扩招学生" && gameData.students.length >= 50) {
+                        task.completed = true;
+                        logEvent(`任务完成：${task.name}`);
+                        gameData.reputation += 20; // 奖励
+                        logEvent("获得奖励：声望增加 20");
+                    }
+                }
+            });
+        }
+
+        // 下一时间按钮点击事件
+        function nextTurn() {
+            monthlyUpdate();
+            randomEvents(); // 点击下一时间时触发随机事件
+            generateRandomStudents(); // 生成随机学生
+            generateRandomTeachers(); // 生成随机教师
+            updateWeather(); // 更新天气
+            checkTasks(); // 检查任务
+        }
+
+        // 月度更新
+        function monthlyUpdate() {
+            gameData.gameMonth += 1;
+            // 收入和支出
+            gameData.funds += gameData.economy.tuitionIncome;
+            gameData.funds += gameData.economy.governmentGrant;
+            gameData.funds += gameData.economy.donationIncome;
+            gameData.funds -= gameData.economy.teacherSalary;
+            gameData.funds -= gameData.economy.maintenanceCost;
+            gameData.funds -= gameData.economy.researchFund;
+            // 校友捐赠
+            gameData.funds += gameData.alumni.reduce((acc, alumni) => acc + alumni.donation, 0);
+            logEvent(`第 ${gameData.gameMonth} 个月过去了，学校的资金和声望发生了变化。`);
+            updateUI();
+            checkFinancialHealth();
+            updateGameProgress();
+            updateStudentGrowth();
+            updateResearchProgress();
+            updateClubActivities();
+        }
+
+        // 更新游戏进度
+        function updateGameProgress() {
+            gameData.progress += gameData.reputation * 0.02;
+            if (gameData.progress >= 100) {
+                gameData.progress = 100;
+                alert("恭喜！北京中学已成为世界第一！");
+            }
+            document.getElementById('game-progress').innerText = Math.min(gameData.progress, 100).toFixed(2) + '%';
+            document.getElementById('progress-bar').style.width = Math.min(gameData.progress, 100) + '%';
+        }
+
+        // 检查财务状况
+        function checkFinancialHealth() {
+            if (gameData.funds < 0) {
+                alert("资金不足！游戏结束。");
+                gameData.funds = 0;
+                updateUI();
+            }
+        }
+
+        // 更新学生成长
+        function updateStudentGrowth() {
+            gameData.students.forEach(student => {
+                student.score += Math.random() * 5;
+                if (student.score > 100) student.score = 100;
+                student.satisfaction += Math.random() * 2;
+                if (student.satisfaction > 100) student.satisfaction = 100;
+                student.age += 1 / 12; // 每个月增加1/12岁
+            });
+            // 毕业生处理
+            gameData.students = gameData.students.filter(student => {
+                if (student.age >= 18) {
+                    // 转为校友
+                    gameData.alumni.push({
+                        name: student.name,
+                        graduationYear: new Date().getFullYear(),
+                        donation: Math.floor(Math.random() * 100000),
+                        project: '待定'
+                    });
+                    logEvent(`学生 ${student.name} 毕业了，成为校友。`);
+                    return false;
+                }
+                return true;
+            });
+            updateUI();
+        }
+
+        // 更新科研项目进度
+        function updateResearchProgress() {
+            gameData.researchProjects.forEach(project => {
+                project.progress += Math.random() * 10;
+                if (project.progress >= 100) {
+                    project.progress = 100;
+                    logEvent(`科研项目 ${project.name} 已完成！`);
+                }
+            });
+            updateUI();
+        }
+
+        // 更新社团活动
+        function updateClubActivities() {
+            gameData.clubs.forEach(club => {
+                const activityChance = Math.random();
+                if (activityChance > 0.7) {
+                    const activity = {
+                        name: `${club.name} 活动`,
+                        effect: Math.floor(Math.random() * 5) + 5
+                    };
+                    club.activities.push(activity);
+                    gameData.reputation += activity.effect;
+                    logEvent(`社团 ${club.name} 举办了活动，声望增加 ${activity.effect}`);
+                }
+            });
+            updateUI();
+        }
+
+        // 更新天气
+        function updateWeather() {
+            const weathers = ["晴朗", "多云", "阴天", "小雨", "大雨", "雷雨", "雪"];
+            gameData.weather = weathers[Math.floor(Math.random() * weathers.length)];
+            logEvent(`本月天气：${gameData.weather}`);
+        }
+
+        // 随机事件
+        function randomEvents() {
+            const events = [
+                { description: "举办了一场科技竞赛，声望增加 20。", effect: () => { gameData.reputation += 20; } },
+                { description: "突发疫情，资金减少 ¥100,000。", effect: () => { gameData.funds -= 100000; } },
+                // 更多事件
+                { description: "自然灾害导致设施受损，维修费用 ¥150,000。", effect: () => { gameData.funds -= 150000; } },
+                { description: "政府出台新政策，教育补贴增加。", effect: () => { gameData.economy.governmentGrant += 50000; } },
+                { description: "国际交流活动成功举办，声望增加 30。", effect: () => { gameData.reputation += 30; } },
+                { description: "食堂卫生问题，声望减少 15。", effect: () => { gameData.reputation -= 15; } },
+                { description: "获得科研大奖，声望增加 50，资金增加 ¥200,000。", effect: () => { gameData.reputation += 50; gameData.funds += 200000; } },
+                { description: "校友捐赠大型项目，资金增加 ¥500,000。", effect: () => { gameData.funds += 500000; } },
+                { description: "学生在全国比赛中获奖，声望增加 25。", effect: () => { gameData.reputation += 25; } },
+                { description: "教师罢工，声望减少 20，资金减少 ¥50,000。", effect: () => { gameData.reputation -= 20; gameData.funds -= 50000; } },
+                { description: "科技部科研项目申请成功，资金增加 ¥300,000。", effect: () => { gameData.funds += 300000; } },
+                { description: "教育部检查，发现教学质量下降，声望减少 30。", effect: () => { gameData.reputation -= 30; } },
+                { description: "举办了艺术节，声望增加 20。", effect: () => { gameData.reputation += 20; } },
+                { description: "校园安全事故，声望减少 25。", effect: () => { gameData.reputation -= 25; } },
+                { description: "政府削减教育预算，政府补助减少 ¥50,000。", effect: () => { gameData.economy.governmentGrant -= 50000; } },
+                { description: "学生社团活动积极，声望增加 15。", effect: () => { gameData.reputation += 15; } },
+                { description: "教师获得国家级奖项，声望增加 40。", effect: () => { gameData.reputation += 40; } },
+                { description: "学校被评为市级优秀学校，声望增加 35。", effect: () => { gameData.reputation += 35; } },
+                { description: "学生满意度下降，声望减少 20。", effect: () => { gameData.reputation -= 20; } },
+                { description: "校友举办募捐活动，资金增加 ¥200,000。", effect: () => { gameData.funds += 200000; } },
+                { description: "发现财务漏洞，资金减少 ¥100,000。", effect: () => { gameData.funds -= 100000; } },
+                { description: "新生报到人数创新高，声望增加 25。", effect: () => { gameData.reputation += 25; } },
+                { description: "校园网络升级，学生满意度提高。", effect: () => { gameData.students.forEach(s => s.satisfaction += 5); } }
+            ];
+            const randomEvent = events[Math.floor(Math.random() * events.length)];
+            randomEvent.effect();
+            logEvent(randomEvent.description);
+            showEventPopup(randomEvent.description);
+            updateUI();
+        }
+
+        // 日志记录
+        function logEvent(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            gameData.eventLog.unshift(`[${timestamp}] ${message}`);
+            populateEventLog();
+        }
+
+        // 显示事件弹窗
+        function showEventPopup(message) {
+            const popup = document.getElementById('event-popup');
+            document.getElementById('event-popup-message').innerText = message;
+            popup.style.display = 'block';
+        }
+
+        // 关闭事件弹窗
+        function closeEventPopup() {
+            const popup = document.getElementById('event-popup');
+            popup.style.display = 'none';
+        }
+
+        // 填充事件日志
+        function populateEventLog() {
+            const logEntries = document.getElementById('event-log-entries');
+            logEntries.innerHTML = '';
+            gameData.eventLog.forEach(entry => {
+                const p = document.createElement('p');
+                p.textContent = entry;
+                logEntries.appendChild(p);
+            });
+        }
+
+        // 切换菜单
+        function switchMenu(menu) {
+            const sections = ['dashboard-section', 'students-section', 'teachers-section', 'courses-section', 'research-section', 'competitions-section', 'clubs-section', 'alumni-section', 'facilities-section', 'economy-section', 'eventLog-section'];
+            sections.forEach(sec => {
+                document.getElementById(sec).style.display = 'none';
+            });
+            document.getElementById(`${menu}-section`).style.display = 'block';
+            // 更新导航栏
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            document.querySelector(`.nav-link[onclick="switchMenu('${menu}')"]`).classList.add('active');
+        }
+
+        // 侧边栏收起/展开
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        // 增加资金
+        function addFunds(amount) {
+            gameData.funds += amount;
+            logEvent(`增加资金 ¥${amount.toLocaleString()}`);
+            updateUI();
+        }
+
+        // 升级教学楼
+        function upgradeFacility() {
+            const cost = 200000;
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.facilityLevel += 1;
+                gameData.reputation += 10;
+                logEvent(`升级教学楼到等级 ${gameData.facilityLevel}，声望增加 10`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        // 建造设施函数
+        function buildLaboratory() {
+            const cost = 100000;
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.laboratoryCount += 1;
+                gameData.reputation += 5;
+                logEvent(`建造了一个新的实验室，现在共有 ${gameData.laboratoryCount} 个实验室，声望增加 5`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        function buildLibrary() {
+            const cost = 150000;
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.libraryCount += 1;
+                gameData.reputation += 7;
+                logEvent(`建造了一个新的图书馆，现在共有 ${gameData.libraryCount} 个图书馆，声望增加 7`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        function buildGym() {
+            const cost = 120000;
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.gymCount += 1;
+                gameData.reputation += 6;
+                logEvent(`建造了一个新的体育馆，现在共有 ${gameData.gymCount} 个体育馆，声望增加 6`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        function buildCafeteria() {
+            const cost = 80000;
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.cafeteriaCount += 1;
+                gameData.reputation += 4;
+                logEvent(`建造了一个新的食堂，现在共有 ${gameData.cafeteriaCount} 个食堂，声望增加 4`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        function buildArtCenter() {
+            const cost = 200000;
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.artCenterCount += 1;
+                gameData.reputation += 8;
+                logEvent(`建造了一个新的艺术中心，现在共有 ${gameData.artCenterCount} 个艺术中心，声望增加 8`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        // 升级设施函数
+        function upgradeLaboratory() {
+            const cost = 50000;
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.reputation += 3;
+                logEvent(`升级了实验室，声望增加 3`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        function upgradeLibrary() {
+            const cost = 75000;
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.reputation += 5;
+                logEvent(`升级了图书馆，声望增加 5`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        function upgradeGym() {
+            const cost = 60000;
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.reputation += 4;
+                logEvent(`升级了体育馆，声望增加 4`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        function upgradeCafeteria() {
+            const cost = 40000;
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.reputation += 2;
+                logEvent(`升级了食堂，声望增加 2`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        function upgradeArtCenter() {
+            const cost = 100000;
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.reputation += 6;
+                logEvent(`升级了艺术中心，声望增加 6`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        // 更新经济UI
+        function updateEconomyUI() {
+            document.getElementById('tuition-income').innerText = gameData.economy.tuitionIncome.toLocaleString();
+            document.getElementById('government-grant').innerText = gameData.economy.governmentGrant.toLocaleString();
+            document.getElementById('donation-income').innerText = gameData.economy.donationIncome.toLocaleString();
+            document.getElementById('teacher-salary').innerText = gameData.economy.teacherSalary.toLocaleString();
+            document.getElementById('maintenance-cost').innerText = gameData.economy.maintenanceCost.toLocaleString();
+            document.getElementById('research-fund').innerText = gameData.economy.researchFund.toLocaleString();
+        }
+
+        // 调整经济策略模态框
+        function openAdjustEconomyModal() {
+            var modal = new bootstrap.Modal(document.getElementById('adjust-economy-modal'));
+            modal.show();
+            // 预填充当前值
+            document.getElementById('tuition-income-input').value = gameData.economy.tuitionIncome;
+            document.getElementById('government-grant-input').value = gameData.economy.governmentGrant;
+            document.getElementById('donation-income-input').value = gameData.economy.donationIncome;
+            document.getElementById('teacher-salary-input').value = gameData.economy.teacherSalary;
+            document.getElementById('maintenance-cost-input').value = gameData.economy.maintenanceCost;
+            document.getElementById('research-fund-input').value = gameData.economy.researchFund;
+        }
+
+        function closeAdjustEconomyModal() {
+            var modalElement = document.getElementById('adjust-economy-modal');
+            var modal = bootstrap.Modal.getInstance(modalElement);
+            modal.hide();
+        }
+
+        // 政策制定模态框
+        function openPolicyModal() {
+            var modal = new bootstrap.Modal(document.getElementById('policy-modal'));
+            modal.show();
+        }
+
+        function closePolicyModal() {
+            var modalElement = document.getElementById('policy-modal');
+            var modal = bootstrap.Modal.getInstance(modalElement);
+            modal.hide();
+        }
+
+        // 实施政策
+        document.getElementById('policy-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const policy = document.getElementById('policy-select').value;
+            switch(policy) {
+                case 'increaseTuition':
+                    gameData.economy.tuitionIncome += 50000;
+                    gameData.reputation -= 10;
+                    logEvent("实施政策：提高学费，学费收入增加，声望减少 10");
+                    break;
+                case 'decreaseTuition':
+                    gameData.economy.tuitionIncome -= 50000;
+                    gameData.reputation += 10;
+                    logEvent("实施政策：降低学费，学费收入减少，声望增加 10");
+                    break;
+                case 'increaseSalaries':
+                    gameData.economy.teacherSalary += 50000;
+                    gameData.reputation += 10;
+                    logEvent("实施政策：提高教师工资，教师工资增加，声望增加 10");
+                    break;
+                case 'decreaseSalaries':
+                    gameData.economy.teacherSalary -= 50000;
+                    gameData.reputation -= 10;
+                    logEvent("实施政策：降低教师工资，教师工资减少，声望减少 10");
+                    break;
+                case 'increaseResearchFund':
+                    gameData.economy.researchFund += 50000;
+                    gameData.reputation += 10;
+                    logEvent("实施政策：增加研究资金，研究资金增加，声望增加 10");
+                    break;
+                case 'decreaseResearchFund':
+                    gameData.economy.researchFund -= 50000;
+                    gameData.reputation -= 10;
+                    logEvent("实施政策：减少研究资金，研究资金减少，声望减少 10");
+                    break;
+                case 'improveFacilities':
+                    if (gameData.funds >= 100000) {
+                        gameData.funds -= 100000;
+                        gameData.reputation += 15;
+                        logEvent("实施政策：改善设施，资金减少 ¥100,000，声望增加 15");
+                    } else {
+                        alert("资金不足！");
+                    }
+                    break;
+                case 'enhanceMarketing':
+                    if (gameData.funds >= 50000) {
+                        gameData.funds -= 50000;
+                        gameData.reputation += 10;
+                        logEvent("实施政策：加强宣传，资金减少 ¥50,000，声望增加 10");
+                    } else {
+                        alert("资金不足！");
+                    }
+                    break;
+            }
+            updateUI();
+            closePolicyModal();
+        });
+
+        // 填充学生申请池表格
+        function populateStudentApplicantTable() {
+            const tbody = document.getElementById('student-applicant-table-body');
+            tbody.innerHTML = '';
+            gameData.studentApplicants.forEach((student, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${student.name}</td>
+                    <td>${Math.floor(student.age)}</td>
+                    <td>${student.grade}</td>
+                    <td>${student.score.toFixed(1)}</td>
+                    <td>${student.specialty}</td>
+                    <td>${student.satisfaction.toFixed(1)}</td>
+                    <td>
+                        <button class="btn btn-success btn-sm" onclick="acceptStudent(${index})">录取</button>
+                        <button class="btn btn-danger btn-sm" onclick="rejectStudent(${index})">拒绝</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 填充已录取学生表格
+        function populateStudentTable() {
+            // 先填充申请池
+            populateStudentApplicantTable();
+
+            const tbody = document.getElementById('student-table-body');
+            tbody.innerHTML = '';
+            gameData.students.forEach(student => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${student.name}</td>
+                    <td>${Math.floor(student.age)}</td>
+                    <td>${student.grade}</td>
+                    <td>${student.score.toFixed(1)}</td>
+                    <td>${student.specialty}</td>
+                    <td>${student.satisfaction.toFixed(1)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 手动刷新学生申请池
+        function refreshStudentApplicants() {
+            gameData.studentApplicants = [];
+            for (let i = 0; i < 5; i++) {
+                generateRandomStudents();
+            }
+            populateStudentApplicantTable();
+        }
+
+        // 生成随机学生
+        function generateRandomStudents() {
+            const firstNames = ['张', '王', '李', '刘', '陈', '杨', '黄', '赵', '周', '吴', '徐', '孙', '胡', '朱', '高', '林', '何', '郭', '马', '罗', '梁', '宋', '郑', '谢', '韩', '唐', '冯', '于', '董', '萧'];
+            const lastNames = ['伟', '芳', '娜', '敏', '静', '秀英', '丽', '强', '磊', '军', '洋', '勇', '艳', '杰', '娟', '涛', '明', '超', '秀兰', '霞', '平', '刚', '桂英', '开', '博', '鹏', '红', '玉', '欣', '华'];
+            const specialties = ['数学', '物理', '化学', '生物', '编程', '艺术', '体育', '音乐', '历史', '地理', '英语', '文学', '经济学', '心理学', '哲学'];
+            const grades = ['初一', '初二', '初三', '高一', '高二', '高三'];
+            const name = firstNames[Math.floor(Math.random() * firstNames.length)] + lastNames[Math.floor(Math.random() * lastNames.length)];
+            const age = Math.floor(Math.random() * 6) + 12; // 年龄12-18
+            const grade = grades[Math.floor(Math.random() * grades.length)];
+            const score = Math.random() * 50 + 50; // 成绩50-100
+            const specialty = specialties[Math.floor(Math.random() * specialties.length)];
+            const satisfaction = Math.random() * 30 + 70; // 满意度70-100
+            const hobbies = ['阅读', '运动', '音乐', '绘画', '编程', '下棋', '摄影', '旅行', '烹饪', '舞蹈'];
+            const personality = ['活泼', '内向', '外向', '稳重', '幽默', '严谨', '开朗', '冷静', '热情', '温和'];
+            const student = {
+                name,
+                age,
+                grade,
+                score,
+                specialty,
+                satisfaction,
+                hobby: hobbies[Math.floor(Math.random() * hobbies.length)],
+                personality: personality[Math.floor(Math.random() * personality.length)]
+            };
+            gameData.studentApplicants.push(student);
+            logEvent(`有一名新学生申请入学：${name}`);
+            populateStudentApplicantTable();
+            updateUI();
+        }
+
+        // 录取学生
+        function acceptStudent(index) {
+            const student = gameData.studentApplicants[index];
+            const cost = 5000; // 招生成本
+            if (gameData.funds >= cost) {
+                gameData.funds -= cost;
+                gameData.reputation += 2;
+                logEvent(`录取了学生 ${student.name}，支付了招生费用 ¥${cost}`);
+                gameData.economy.tuitionIncome += 5000; // 增加学费收入
+                gameData.students.push(student);
+                gameData.studentApplicants.splice(index, 1);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        // 拒绝学生
+        function rejectStudent(index) {
+            const student = gameData.studentApplicants[index];
+            gameData.studentApplicants.splice(index, 1);
+            logEvent(`拒绝了学生 ${student.name} 的入学申请`);
+            updateUI();
+        }
+
+        // 填充教师应聘池表格
+        function populateTeacherApplicantTable() {
+            const tbody = document.getElementById('teacher-applicant-table-body');
+            tbody.innerHTML = '';
+            gameData.teacherApplicants.forEach((teacher, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${teacher.name}</td>
+                    <td>${teacher.age}</td>
+                    <td>${teacher.specialty}</td>
+                    <td>${teacher.title}</td>
+                    <td>¥${teacher.salary.toLocaleString()}</td>
+                    <td>${teacher.experience} 年</td>
+                    <td>
+                        <button class="btn btn-success btn-sm" onclick="hireTeacher(${index})">聘用</button>
+                        <button class="btn btn-danger btn-sm" onclick="rejectTeacher(${index})">拒绝</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 填充已聘用教师表格
+        function populateTeacherTable() {
+            // 先填充应聘池
+            populateTeacherApplicantTable();
+
+            const tbody = document.getElementById('teacher-table-body');
+            tbody.innerHTML = '';
+            gameData.teachers.forEach((teacher, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${teacher.name}</td>
+                    <td>${teacher.age}</td>
+                    <td>${teacher.specialty}</td>
+                    <td>${teacher.title}</td>
+                    <td>¥${teacher.salary.toLocaleString()}</td>
+                    <td>${teacher.experience} 年</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="viewTeacher(${index})">查看</button>
+                        <button class="btn btn-danger btn-sm" onclick="fireTeacher(${index})">解雇</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 手动刷新教师应聘池
+        function refreshTeacherApplicants() {
+            gameData.teacherApplicants = [];
+            for (let i = 0; i < 5; i++) {
+                generateRandomTeachers();
+            }
+            populateTeacherApplicantTable();
+        }
+
+        // 生成随机教师
+        function generateRandomTeachers() {
+            const firstNames = ['李', '王', '张', '刘', '陈', '杨', '黄', '赵', '周', '吴', '徐', '孙', '胡', '朱', '高', '林', '何', '郭', '马', '罗', '梁', '宋', '郑', '谢', '韩', '唐', '冯', '于', '董', '萧'];
+            const lastNames = ['华', '伟', '敏', '洋', '丽', '磊', '勇', '强', '婷', '杰', '峰', '超', '辉', '刚', '健', '明', '静', '艳', '燕', '涛', '霞', '秀', '娟', '兵', '雷', '凯', '云', '晶', '丹', '倩'];
+            const specialties = ['数学', '物理', '化学', '生物', '编程', '艺术', '体育', '音乐', '历史', '地理', '英语', '文学', '经济学', '心理学', '哲学', '计算机科学', '环境科学', '社会学', '政治学', '工程学'];
+            const titles = ['助教', '讲师', '副教授', '教授', '特级教师'];
+            const name = firstNames[Math.floor(Math.random() * firstNames.length)] + lastNames[Math.floor(Math.random() * lastNames.length)];
+            const age = Math.floor(Math.random() * 30) + 25; // 年龄25-55
+            const specialty = specialties[Math.floor(Math.random() * specialties.length)];
+            const title = titles[Math.floor(Math.random() * titles.length)];
+            const salary = (Math.floor(Math.random() * 5) + 3) * 10000; // 薪资3-7万
+            const experience = Math.floor(Math.random() * 20) + 1; // 经验1-20年
+            const education = ['本科', '硕士', '博士', '博士后'][Math.floor(Math.random() * 4)];
+            const previousJob = ['北京大学', '清华大学', '中科院', '复旦大学', '上海交大', '南京大学', '浙江大学', '中国人民大学', '哈尔滨工业大学', '同济大学'][Math.floor(Math.random() * 10)];
+            const personality = ['严谨', '幽默', '严肃', '和蔼', '严格', '耐心', '热情', '冷静'];
+            const teacher = {
+                name,
+                age,
+                specialty,
+                title,
+                salary,
+                experience,
+                education,
+                previousJob,
+                personality
+            };
+            gameData.teacherApplicants.push(teacher);
+            logEvent(`有一名新教师申请任职：${name}`);
+            populateTeacherApplicantTable();
+            updateUI();
+        }
+
+        // 查看教师详情
+        function viewTeacher(index) {
+            const teacher = gameData.teachers[index];
+            alert(`姓名：${teacher.name}\n年龄：${teacher.age}\n专业：${teacher.specialty}\n职称：${teacher.title}\n薪资：¥${teacher.salary}\n经验：${teacher.experience}年\n学历：${teacher.education}\n前任职单位：${teacher.previousJob}\n性格：${teacher.personality}`);
+        }
+
+        // 聘用教师
+        function hireTeacher(index) {
+            const teacher = gameData.teacherApplicants[index];
+            if (gameData.funds >= 0) {
+                gameData.economy.teacherSalary += teacher.salary;
+                gameData.reputation += 5;
+                logEvent(`聘用了教师 ${teacher.name}，月薪 ¥${teacher.salary.toLocaleString()}`);
+                gameData.teachers.push(teacher);
+                gameData.teacherApplicants.splice(index, 1);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        // 解雇教师
+        function fireTeacher(index) {
+            const teacher = gameData.teachers[index];
+            if (confirm(`确定要解雇教师 ${teacher.name} 吗？`)) {
+                gameData.economy.teacherSalary -= teacher.salary;
+                gameData.reputation -= 5;
+                logEvent(`解雇了教师 ${teacher.name}，声望减少 5`);
+                gameData.teachers.splice(index, 1);
+                updateUI();
+            }
+        }
+
+        // 拒绝教师
+        function rejectTeacher(index) {
+            const teacher = gameData.teacherApplicants[index];
+            gameData.teacherApplicants.splice(index, 1);
+            logEvent(`拒绝了教师 ${teacher.name} 的任职申请`);
+            updateUI();
+        }
+
+        // 加载课程选项
+        function loadCourseOptions() {
+            gameData.courseOptions = [
+                { name: '高级数学', teacher: '', credit: 4, impact: '学习效果' },
+                { name: '现代物理', teacher: '', credit: 3, impact: '学习效果' },
+                { name: '计算机科学', teacher: '', credit: 5, impact: '学习效果' },
+                { name: '艺术鉴赏', teacher: '', credit: 2, impact: '满意度' },
+                { name: '体育训练', teacher: '', credit: 2, impact: '满意度' },
+                { name: '文学欣赏', teacher: '', credit: 3, impact: '满意度' },
+                { name: '经济学基础', teacher: '', credit: 3, impact: '学习效果' },
+                { name: '心理学导论', teacher: '', credit: 3, impact: '满意度' },
+                { name: '环境科学', teacher: '', credit: 4, impact: '学习效果' },
+                { name: '历史研究', teacher: '', credit: 3, impact: '学习效果' }
+            ];
+        }
+
+        // 填充课程选项
+        function populateCourseOptions() {
+            const container = document.getElementById('course-options');
+            container.innerHTML = '';
+            gameData.courseOptions.forEach((course, index) => {
+                const div = document.createElement('div');
+                div.className = 'course-option col-md-4';
+                div.innerHTML = `
+                    <h5>${course.name}</h5>
+                    <p>学分：${course.credit}</p>
+                    <p>影响：${course.impact}</p>
+                    <button class="btn btn-primary" onclick="addCourse(${index})">添加课程</button>
+                `;
+                container.appendChild(div);
+            });
+
+            // 显示已添加的课程
+            populateAddedCourses();
+        }
+
+        // 显示已添加的课程
+        function populateAddedCourses() {
+            const container = document.getElementById('added-courses');
+            container.innerHTML = '';
+            if (gameData.courses.length === 0) {
+                container.innerHTML = '<p>尚未添加课程。</p>';
+                return;
+            }
+            gameData.courses.forEach((course, index) => {
+                const div = document.createElement('div');
+                div.className = 'added-course col-md-4';
+                div.innerHTML = `
+                    <h5>${course.name}</h5>
+                    <p>授课教师：${course.teacher}</p>
+                    <p>学分：${course.credit}</p>
+                    <p>影响：${course.impact}</p>
+                    <button class="btn btn-danger" onclick="removeCourse(${index})">移除课程</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 添加课程
+        function addCourse(index) {
+            const course = gameData.courseOptions[index];
+            if (gameData.teachers.length === 0) {
+                alert("没有可用的教师，请先聘用教师。");
+                return;
+            }
+            const teacherName = prompt("请输入授课教师的姓名（必须是已聘用教师）：");
+            const teacher = gameData.teachers.find(t => t.name === teacherName);
+            if (!teacher) {
+                alert("未找到该教师，请确认姓名正确。");
+                return;
+            }
+            course.teacher = teacherName;
+            gameData.courses.push(course);
+            gameData.courseOptions.splice(index, 1);
+            gameData.reputation += 3;
+            logEvent(`添加了新课程 ${course.name}，由 ${teacherName} 授课，声望增加 3`);
+            updateUI();
+        }
+
+        // 移除课程
+        function removeCourse(index) {
+            const course = gameData.courses[index];
+            if (confirm(`确定要移除课程 ${course.name} 吗？`)) {
+                gameData.courses.splice(index, 1);
+                gameData.courseOptions.push({
+                    name: course.name,
+                    teacher: '',
+                    credit: course.credit,
+                    impact: course.impact
+                });
+                gameData.reputation -= 3;
+                logEvent(`移除了课程 ${course.name}，声望减少 3`);
+                updateUI();
+            }
+        }
+
+        // 加载科研项目选项
+        function loadResearchOptions() {
+            gameData.researchOptions = [
+                { name: '量子计算研究', type: '基础研究', leader: '', cost: 500000, reputationBoost: 50, progress: 0 },
+                { name: '人工智能应用', type: '应用研究', leader: '', cost: 400000, reputationBoost: 40, progress: 0 },
+                { name: '新能源技术', type: '合作项目', leader: '', cost: 300000, reputationBoost: 30, progress: 0 },
+                { name: '生物医学研究', type: '基础研究', leader: '', cost: 450000, reputationBoost: 45, progress: 0 },
+                { name: '环境保护项目', type: '合作项目', leader: '', cost: 350000, reputationBoost: 35, progress: 0 }
+            ];
+        }
+
+        // 填充科研项目选项
+        function populateResearchOptions() {
+            const container = document.getElementById('research-options');
+            container.innerHTML = '';
+            gameData.researchOptions.forEach((project, index) => {
+                const div = document.createElement('div');
+                div.className = 'research-option col-md-4';
+                div.innerHTML = `
+                    <h5>${project.name}</h5>
+                    <p>类型：${project.type}</p>
+                    <p>成本：¥${project.cost.toLocaleString()}</p>
+                    <p>声望提升：${project.reputationBoost}</p>
+                    <button class="btn btn-primary" onclick="startResearch(${index})">启动项目</button>
+                `;
+                container.appendChild(div);
+            });
+
+            // 显示已启动的科研项目
+            const startedProjectsContainer = document.createElement('div');
+            startedProjectsContainer.className = 'row';
+            startedProjectsContainer.innerHTML = '<h4>已启动科研项目</h4>';
+            gameData.researchProjects.forEach((project, index) => {
+                const div = document.createElement('div');
+                div.className = 'research-option col-md-4';
+                div.innerHTML = `
+                    <h5>${project.name}</h5>
+                    <p>类型：${project.type}</p>
+                    <p>负责人：${project.leader}</p>
+                    <p>进度：${project.progress.toFixed(1)}%</p>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: ${project.progress}%"></div>
+                    </div>
+                `;
+                startedProjectsContainer.appendChild(div);
+            });
+            container.appendChild(startedProjectsContainer);
+        }
+
+        // 启动科研项目
+        function startResearch(index) {
+            const project = gameData.researchOptions[index];
+            if (gameData.teachers.length === 0) {
+                alert("没有可用的教师，请先聘用教师。");
+                return;
+            }
+            const leaderName = prompt("请输入项目负责人的姓名（必须是已聘用教师）：");
+            const leader = gameData.teachers.find(t => t.name === leaderName);
+            if (!leader) {
+                alert("未找到该教师，请确认姓名正确。");
+                return;
+            }
+            if (gameData.funds >= project.cost) {
+                project.leader = leaderName;
+                gameData.funds -= project.cost;
+                gameData.researchProjects.push(project);
+                gameData.researchOptions.splice(index, 1);
+                gameData.reputation += project.reputationBoost;
+                logEvent(`启动了科研项目 ${project.name}，由 ${leaderName} 负责，声望增加 ${project.reputationBoost}`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        // 加载比赛选项
+        function loadCompetitionOptions() {
+            gameData.competitionOptions = [
+                { name: '全国数学竞赛', type: '学术', cost: 50000, reputationBoost: 20, reward: 100000 },
+                { name: '省级足球比赛', type: '体育', cost: 30000, reputationBoost: 15, reward: 80000 },
+                { name: '全国艺术展演', type: '艺术', cost: 40000, reputationBoost: 18, reward: 90000 },
+                { name: '国际科学奥赛', type: '学术', cost: 80000, reputationBoost: 30, reward: 150000 }
+            ];
+        }
+
+        // 填充比赛选项
+        function populateCompetitionOptions() {
+            const container = document.getElementById('competition-options');
+            container.innerHTML = '';
+            gameData.competitionOptions.forEach((competition, index) => {
+                const div = document.createElement('div');
+                div.className = 'competition-option col-md-4';
+                div.innerHTML = `
+                    <h5>${competition.name}</h5>
+                    <p>类型：${competition.type}</p>
+                    <p>参赛费用：¥${competition.cost.toLocaleString()}</p>
+                    <p>声望提升：${competition.reputationBoost}</p>
+                    <p>可能奖励：¥${competition.reward.toLocaleString()}</p>
+                    <button class="btn btn-primary" onclick="participateCompetition(${index})">参加比赛</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 参加比赛
+        function participateCompetition(index) {
+            const competition = gameData.competitionOptions[index];
+            if (gameData.funds >= competition.cost) {
+                gameData.funds -= competition.cost;
+                const success = Math.random() > 0.5;
+                if (success) {
+                    gameData.funds += competition.reward;
+                    gameData.reputation += competition.reputationBoost;
+                    logEvent(`参加了${competition.name}并获得胜利，声望增加 ${competition.reputationBoost}，资金增加 ¥${competition.reward.toLocaleString()}`);
+                } else {
+                    gameData.reputation += competition.reputationBoost / 2;
+                    logEvent(`参加了${competition.name}但未获胜，声望增加 ${competition.reputationBoost / 2}`);
+                }
+                gameData.competitionOptions.splice(index, 1);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        // 加载社团选项
+        function loadClubOptions() {
+            gameData.clubOptions = [
+                { name: '文学社', type: '文化', cost: 20000, reputationBoost: 10, members: [], activities: [] },
+                { name: '篮球队', type: '体育', cost: 25000, reputationBoost: 12, members: [], activities: [] },
+                { name: '合唱团', type: '艺术', cost: 22000, reputationBoost: 11, members: [], activities: [] },
+                { name: '机器人俱乐部', type: '科技', cost: 30000, reputationBoost: 15, members: [], activities: [] }
+            ];
+        }
+
+        // 填充社团选项
+        function populateClubOptions() {
+            const container = document.getElementById('club-options');
+            container.innerHTML = '';
+            gameData.clubOptions.forEach((club, index) => {
+                const div = document.createElement('div');
+                div.className = 'club-option col-md-4';
+                div.innerHTML = `
+                    <h5>${club.name}</h5>
+                    <p>类型：${club.type}</p>
+                    <p>创建费用：¥${club.cost.toLocaleString()}</p>
+                    <p>声望提升：${club.reputationBoost}</p>
+                    <button class="btn btn-primary" onclick="createClub(${index})">创建社团</button>
+                `;
+                container.appendChild(div);
+            });
+
+            // 显示已创建的社团
+            const createdClubsContainer = document.getElementById('created-clubs');
+            createdClubsContainer.innerHTML = '';
+            gameData.clubs.forEach((club, index) => {
+                const div = document.createElement('div');
+                div.className = 'created-club col-md-4';
+                div.innerHTML = `
+                    <h5>${club.name}</h5>
+                    <p>类型：${club.type}</p>
+                    <p>成员数：${club.members.length}</p>
+                    <p>活动数：${club.activities.length}</p>
+                    <button class="btn btn-secondary" onclick="viewClub(${index})">查看社团</button>
+                    <button class="btn btn-danger" onclick="removeClub(${index})">解散社团</button>
+                `;
+                createdClubsContainer.appendChild(div);
+            });
+        }
+
+        // 创建社团
+        function createClub(index) {
+            const club = gameData.clubOptions[index];
+            if (gameData.funds >= club.cost) {
+                gameData.funds -= club.cost;
+                gameData.reputation += club.reputationBoost;
+                gameData.clubs.push(club);
+                gameData.clubOptions.splice(index, 1);
+                logEvent(`创建了学生社团 ${club.name}，声望增加 ${club.reputationBoost}`);
+                updateUI();
+            } else {
+                alert("资金不足！");
+            }
+        }
+
+        // 查看社团详情
+        function viewClub(index) {
+            const club = gameData.clubs[index];
+            alert(`社团名称：${club.name}\n类型：${club.type}\n成员数：${club.members.length}\n活动数：${club.activities.length}`);
+        }
+
+        // 解散社团
+        function removeClub(index) {
+            const club = gameData.clubs[index];
+            if (confirm(`确定要解散社团 ${club.name} 吗？`)) {
+                gameData.reputation -= club.reputationBoost / 2;
+                logEvent(`解散了学生社团 ${club.name}，声望减少 ${club.reputationBoost / 2}`);
+                gameData.clubs.splice(index, 1);
+                updateUI();
+            }
+        }
+
+        // 填充校友表格
+        function populateAlumniTable() {
+            const tbody = document.getElementById('alumni-table-body');
+            tbody.innerHTML = '';
+            gameData.alumni.forEach((alumni, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${alumni.name}</td>
+                    <td>${alumni.graduationYear}</td>
+                    <td>¥${alumni.donation.toLocaleString()}</td>
+                    <td>${alumni.project}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="removeAlumni(${index})">移除</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 移除校友
+        function removeAlumni(index) {
+            const alumni = gameData.alumni[index];
+            if (confirm(`确定要移除校友 ${alumni.name} 吗？`)) {
+                gameData.alumni.splice(index, 1);
+                gameData.reputation -= 5;
+                logEvent(`移除了校友 ${alumni.name}，声望减少 5`);
+                updateUI();
+            }
+        }
+
+        // 调整经济策略
+        document.getElementById('adjust-economy-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const tuitionIncome = parseInt(document.getElementById('tuition-income-input').value);
+            const governmentGrant = parseInt(document.getElementById('government-grant-input').value);
+            const donationIncome = parseInt(document.getElementById('donation-income-input').value);
+            const teacherSalary = parseInt(document.getElementById('teacher-salary-input').value);
+            const maintenanceCost = parseInt(document.getElementById('maintenance-cost-input').value);
+            const researchFund = parseInt(document.getElementById('research-fund-input').value);
+            // 简单验证
+            if (isNaN(tuitionIncome) || isNaN(governmentGrant) || isNaN(donationIncome) ||
+                isNaN(teacherSalary) || isNaN(maintenanceCost) || isNaN(researchFund)) {
+                alert("请输入有效的数字！");
+                return;
+            }
+            gameData.economy.tuitionIncome = tuitionIncome;
+            gameData.economy.governmentGrant = governmentGrant;
+            gameData.economy.donationIncome = donationIncome;
+            gameData.economy.teacherSalary = teacherSalary;
+            gameData.economy.maintenanceCost = maintenanceCost;
+            gameData.economy.researchFund = researchFund;
+            logEvent("调整了经济策略。");
+            updateUI();
+            closeAdjustEconomyModal();
+        });
+
+        // 图表相关函数
+        let financialChart;
+        let studentChart;
+
+        function createCharts() {
+            const ctx1 = document.getElementById('financial-chart').getContext('2d');
+            financialChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['学费收入', '政府补助', '捐赠收入', '教师工资', '维护费用', '研究资金', '其他支出'],
+                    datasets: [{
+                        label: '金额 (¥)',
+                        data: [
+                            gameData.economy.tuitionIncome,
+                            gameData.economy.governmentGrant,
+                            gameData.economy.donationIncome,
+                            gameData.economy.teacherSalary,
+                            gameData.economy.maintenanceCost,
+                            gameData.economy.researchFund,
+                            calculateOtherExpenses()
+                        ],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(153, 102, 255, 0.6)',
+                            'rgba(255, 159, 64, 0.6)',
+                            'rgba(201, 203, 207, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(201, 203, 207, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            const ctx2 = document.getElementById('student-chart').getContext('2d');
+            studentChart = new Chart(ctx2, {
+                type: 'pie',
+                data: {
+                    labels: ['初一', '初二', '初三', '高一', '高二', '高三'],
+                    datasets: [{
+                        label: '学生分布',
+                        data: countStudentsByGrade(),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)',
+                            'rgba(255, 159, 64, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        }
+
+        // 更新图表
+        function updateCharts() {
+            if (financialChart) {
+                financialChart.data.datasets[0].data = [
+                    gameData.economy.tuitionIncome,
+                    gameData.economy.governmentGrant,
+                    gameData.economy.donationIncome,
+                    gameData.economy.teacherSalary,
+                    gameData.economy.maintenanceCost,
+                    gameData.economy.researchFund,
+                    calculateOtherExpenses()
+                ];
+                financialChart.update();
+            }
+            if (studentChart) {
+                studentChart.data.datasets[0].data = countStudentsByGrade();
+                studentChart.update();
+            }
+        }
+
+        // 计算其他支出
+        function calculateOtherExpenses() {
+            const gymCost = gameData.gymCount * 5000;
+            const cafeteriaCost = gameData.cafeteriaCount * 3000;
+            const artCenterCost = gameData.artCenterCount * 4000;
+            return gymCost + cafeteriaCost + artCenterCost;
+        }
+
+        // 统计各年级学生数量
+        function countStudentsByGrade() {
+            const grades = ['初一', '初二', '初三', '高一', '高二', '高三'];
+            return grades.map(grade => gameData.students.filter(s => s.grade === grade).length);
+        }
+
+        // 保存游戏
+        function saveGame() {
+            localStorage.setItem('beijingMiddleSchoolGame', JSON.stringify(gameData));
+            alert("游戏已保存！");
+            logEvent("游戏进度已保存。");
+            updateUI();
+        }
+
+        // 加载游戏
+        function loadGame() {
+            const savedGame = localStorage.getItem('beijingMiddleSchoolGame');
+            if (savedGame) {
+                gameData = JSON.parse(savedGame);
+                logEvent("游戏进度已加载。");
+                updateUI();
+                alert("游戏已加载！");
+            } else {
+                alert("没有找到保存的游戏进度。");
+            }
+        }
+
+        // 重置游戏
+        function resetGame() {
+            if (confirm("确定要重置游戏吗？所有进度将被清除！")) {
+                localStorage.removeItem('beijingMiddleSchoolGame');
+                location.reload();
+            }
+        }
+
+        // 初始化游戏
+        initGame();
+
+    </script>
+
+</body>
+</html>
