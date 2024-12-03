@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北中游戏站</title>
+    <!-- 内联关键 CSS -->
+    <style>
+        /* 通用样式 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background-color: #ffffff;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar input[type="search"] {
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+            width: 200px;
+        }
+
+        .navbar button {
+            background: none;
+            border: none;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            color: #007bff;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* 主内容 */
+        .container {
+            padding: 2rem;
+        }
+
+        .main-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        /* 分类过滤按钮 */
+        .filters {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            margin: 0.3rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background-color: #0056b3;
+        }
+
+        /* 游戏展示区 */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .game-card {
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .game-card .card-body {
+            padding: 1rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .card-text {
+            flex-grow: 1;
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .btn-start {
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-start:hover {
+            background-color: #218838;
+        }
+
+        /* 页脚 */
+        footer {
+            background-color: #ffffff;
+            padding: 1rem 2rem;
+            text-align: center;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .no-results {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        /* 暗黑模式 */
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .navbar {
+            background-color: #1f1f1f;
+            box-shadow: 0 2px 4px rgba(255,255,255,0.1);
+        }
+
+        body.dark-mode .navbar-brand {
+            color: #bb86fc;
+        }
+
+        body.dark-mode input[type="search"] {
+            background-color: #1f1f1f;
+            color: #e0e0e0;
+            border: 1px solid #333;
+        }
+
+        body.dark-mode button {
+            color: #bb86fc;
+        }
+
+        body.dark-mode .filter-btn {
+            background-color: #bb86fc;
+        }
+
+        body.dark-mode .filter-btn:hover, 
+        body.dark-mode .filter-btn.active {
+            background-color: #9a67ea;
+        }
+
+        body.dark-mode .game-card {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 8px rgba(255,255,255,0.1);
+        }
+
+        body.dark-mode .card-text {
+            color: #bbb;
+        }
+
+        body.dark-mode .btn-start {
+            background-color: #03dac6;
+        }
+
+        body.dark-mode .btn-start:hover {
+            background-color: #00bcd4;
+        }
+
+        body.dark-mode footer {
+            background-color: #1f1f1f;
+            color: #e0e0e0;
+        }
+
+        /* 游戏公告 */
+        .announcement {
+            margin: 2rem auto;
+            padding: 1rem 2rem;
+            background-color: #ffeb3b;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1rem;
+            color: #333;
+            max-width: 800px;
+        }
+
+        body.dark-mode .announcement {
+            background-color: #333;
+            color: #ffeb3b;
+        }
+    </style>
+    <!-- Favicon -->
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <a class="navbar-brand" href="#">北中游戏站</a>
+        <div class="navbar-right">
+            <input type="search" id="searchInput" placeholder="搜索游戏..." aria-label="搜索">
+            <button id="searchButton" aria-label="搜索" title="搜索">
+                <!-- 搜索图标 SVG -->
+                <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                    <path fill="currentColor" d="M505 442.7L405.3 343c28.4-34.9 45.7-79.4 
+                    45.7-128C451 96.5 354.5 0 225.5 0S0 
+                    96.5 0 215.5 96.5 431 215.5 
+                    431c48.6 0 93.1-17.3 128-45.7l99.7 
+                    99.7c4.5 4.5 10.6 7 17 7s12.5-2.5 
+                    17-7c9.4-9.4 9.4-24.6 0-34zM215.5 
+                    368c-80.2 0-152.5-54.8-152.5-152.5S135.3 
+                    63 215.5 63 368 117.8 368 198s-72.3 
+                    152.5-152.5 152.5z"></path>
+                </svg>
+            </button>
+            <button id="themeToggle" aria-label="切换主题" title="切换主题">
+                <!-- 主题图标 SVG -->
+                <svg id="themeIcon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                    <path fill="currentColor" d="M279.135 512c-15.665 
+                    0-31.052-2.351-46.094-6.683-39.611-11.447-73.395-38.789-93.349-73.041 
+                    -19.952-34.252-25.679-73.531-16.408-111.335 
+                    4.65-20.486 12.868-40.047 24.368-57.256 
+                    11.505-17.205 26.14-32.309 42.349-44.299 
+                    16.21-11.989 33.81-21.342 52.32-27.48 
+                    18.51-6.14 37.765-9.72 56.733-9.72 
+                    50.441 0 98.56 19.843 137.368 55.486 
+                    38.808 35.643 61.486 84.984 61.486 138.467 
+                    0 50.441-19.843 98.56-55.486 
+                    137.368-35.643 38.808-84.984 61.486-138.467 
+                    61.486z"></path>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="container">
+        <h1 class="main-title">欢迎来到北中游戏站</h1>
+
+        <!-- 分类过滤 -->
+        <div class="filters">
+            <button class="filter-btn active" data-category="all">全部</button>
+            <button class="filter-btn" data-category="action">剧情</button>
+            <button class="filter-btn" data-category="puzzle">经营策略</button>
+            <button class="filter-btn" data-category="strategy">休闲娱乐</button>
+            <!-- 可根据需要添加更多类别按钮 -->
+        </div>
+
+        <!-- 游戏展示区 -->
+        <div class="games-grid" id="gamesContainer">
+            <!-- 游戏卡片将通过 JavaScript 动态加载 -->
+        </div>
+
+        <!-- 无匹配游戏提示 -->
+        <div id="noResults" class="no-results" style="display: none;">
+            <p>没有找到匹配的游戏。</p>
+        </div>
+    </main>
+
+    <!-- 游戏公告 -->
+    <div class="announcement">
+        请合理控制游戏时间，保持健康的生活方式！
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        &copy; 2024 北中游戏站. 保留所有权利。
+    </footer>
+
+    <!-- 优化后的 JavaScript 加载 -->
+    <script defer>
+        document.addEventListener('DOMContentLoaded', () => {
+            const games = [
+                {
+                    title: "Chris职业生涯模拟",
+                    description: "在一次次人生的路口为Chris作出重要抉择",
+                    image: "assets/images/game1-thumbnail.jpg",
+                    link: "games/game1.html",
+                    category: "action"
+                },
+                {
+                    title: "北中经营模拟",
+                    description: "如何管理一所学校，你说了算",
+                    image: "assets/images/game2-thumbnail.jpg",
+                    link: "games/game2.html",
+                    category: "puzzle"
+                },
+                {
+                    title: "徐浩宸历险记",
+                    description: "娱乐游戏，控制徐浩宸闯关",
+                    image: "assets/images/game3-thumbnail.jpg",
+                    link: "games/game3.html",
+                    category: "strategy"
+                }
+                // 如需添加更多游戏，请在此处继续添加
+            ];
+
+            const gamesContainer = document.getElementById('gamesContainer');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const noResults = document.getElementById('noResults');
+
+            // 渲染游戏卡片
+            function renderGames(gameList) {
+                gamesContainer.innerHTML = '';
+                if (gameList.length === 0) {
+                    noResults.style.display = 'block';
+                    return;
+                } else {
+                    noResults.style.display = 'none';
+                }
+                const fragment = document.createDocumentFragment();
+                gameList.forEach(game => {
+                    const card = document.createElement('div');
+                    card.className = 'game-card';
+                    card.innerHTML = `
+                        <img src="${game.image}" alt="${game.title}" loading="lazy">
+                        <div class="card-body">
+                            <h3 class="card-title">${game.title}</h3>
+                            <p class="card-text">${game.description}</p>
+                            <a href="${game.link}" class="btn-start">开始游戏</a>
+                        </div>
+                    `;
+                    fragment.appendChild(card);
+                });
+                gamesContainer.appendChild(fragment);
+            }
+
+            // 初始化游戏列表
+            renderGames(games);
+
+            // 分类过滤功能
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const activeButton = document.querySelector('.filter-btn.active');
+                    if (activeButton) {
+                        activeButton.classList.remove('active');
+                    }
+                    button.classList.add('active');
+                    const category = button.getAttribute('data-category');
+                    if (category === 'all') {
+                        renderGames(games);
+                    } else {
+                        const filtered = games.filter(game => game.category === category);
+                        renderGames(filtered);
+                    }
+                });
+            });
+
+            // 搜索功能
+            function searchGames() {
+                const query = searchInput.value.trim().toLowerCase();
+                const filtered = games.filter(game => 
+                    game.title.toLowerCase().includes(query) || 
+                    game.description.toLowerCase().includes(query)
+                );
+                renderGames(filtered);
+            }
+
+            searchButton.addEventListener('click', searchGames);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchGames();
+                }
+            });
+
+            // 主题切换功能
+            function toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dark-mode')) {
+                    themeIcon.innerHTML = `
+                        <path fill="currentColor" d="M279.135 512c-15.665 
+                        0-31.052-2.351-46.094-6.683-39.611-11.447-73.395-38.789-93.349-73.041 
+                        -19.952-34.252-25.679-73.531-16.408-111.335 
+                        4.65-20.486 12.868-40.047 24.368-57.256 
+                        11.505-17.205 26.14-32.309 42.349-44.299 
+                        16.21-11.989 33.81-21.342 52.32-27.48 
+                        18.51-6.14 37.765-9.72 56.733-9.72 
+                        50.441 0 98.56 19.843 137.368 55.486 
+                        38.808 35.643 61.486 84.984 61.486 138.467 
+                        0 50.441-19.843 98.56-55.486 
+                        137.368-35.643 38.808-84.984 61.486-138.467 
+                        61.486z"></path>
+                    `;
+                } else {
+                    themeIcon.innerHTML = `
+                        <path fill="currentColor" d="M505 442.7L405.3 343c28.4-34.9 45.7-79.4 
+                        45.7-128C451 96.5 354.5 0 225.5 0S0 
+                        96.5 0 215.5 96.5 431 215.5 
+                        431c48.6 0 93.1-17.3 128-45.7l99.7 
+                        99.7c4.5 4.5 10.6 7 17 7s12.5-2.5 
+                        17-7c9.4-9.4 9.4-24.6 0-34zM215.5 
+                        368c-80.2 0-152.5-54.8-152.5-152.5S135.3 
+                        63 215.5 63 368 117.8 368 198s-72.3 
+                        152.5-152.5 152.5z"></path>
+                    `;
+                }
+                // 保存主题偏好
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+
+            // 初始化主题
+            (function initTheme() {
+                const theme = localStorage.getItem('theme');
+                if (theme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    themeIcon.innerHTML = `
+                        <path fill="currentColor" d="M279.135 512c-15.665 
+                        0-31.052-2.351-46.094-6.683-39.611-11.447-73.395-38.789-93.349-73.041 
+                        -19.952-34.252-25.679-73.531-16.408-111.335 
+                        4.65-20.486 12.868-40.047 24.368-57.256 
+                        11.505-17.205 26.14-32.309 42.349-44.299 
+                        16.21-11.989 33.81-21.342 52.32-27.48 
+                        18.51-6.14 37.765-9.72 56.733-9.72 
+                        50.441 0 98.56 19.843 137.368 55.486 
+                        38.808 35.643 61.486 84.984 61.486 138.467 
+                        0 50.441-19.843 98.56-55.486 
+                        137.368-35.643 38.808-84.984 61.486-138.467 
+                        61.486z"></path>
+                    `;
+                } else {
+                    themeIcon.innerHTML = `
+                        <path fill="currentColor" d="M505 442.7L405.3 343c28.4-34.9 45.7-79.4 
+                        45.7-128C451 96.5 354.5 0 225.5 0S0 
+                        96.5 0 215.5 96.5 431 215.5 
+                        431c48.6 0 93.1-17.3 128-45.7l99.7 
+                        99.7c4.5 4.5 10.6 7 17 7s12.5-2.5 
+                        17-7c9.4-9.4 9.4-24.6 0-34zM215.5 
+                        368c-80.2 0-152.5-54.8-152.5-152.5S135.3 
+                        63 215.5 63 368 117.8 368 198s-72.3 
+                        152.5-152.5 152.5z"></path>
+                    `;
+                }
+            })();
+
+            themeToggle.addEventListener('click', toggleTheme);
+        });
+    </script>
+</body>
+</html>
