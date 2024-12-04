@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>救助受伤的Chris</title>
+    <style>
+        /* 重置默认样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e272e;
+            color: #d2dae2;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* 主菜单、游戏说明、排行榜、游戏结束界面、成就界面 */
+        .screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 700px;
+            background: rgba(30, 39, 46, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            display: none;
+            z-index: 2;
+        }
+
+        .active {
+            display: block;
+        }
+
+        h1, h2 {
+            margin-bottom: 20px;
+            color: #ffa801;
+        }
+
+        p {
+            margin: 10px 0;
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        button {
+            padding: 12px 25px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #00a8ff;
+            color: #d2dae2;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0097e6;
+        }
+
+        /* HUD样式 */
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+            font-size: 20px;
+            z-index: 1;
+        }
+
+        #hud div {
+            background: rgba(26, 188, 156, 0.8);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        /* Canvas样式 */
+        #game-canvas {
+            background: linear-gradient(to bottom, #485460, #283048);
+            display: none;
+            margin: 0 auto;
+            border: 2px solid #d2dae2;
+            border-radius: 10px;
+            z-index: 1;
+        }
+
+        /* 游戏结束界面 */
+        #game-over {
+            z-index: 3;
+        }
+
+        /* Leaderboard样式 */
+        #leaderboard ul {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+            text-align: left;
+            padding-left: 0;
+            margin-bottom: 20px;
+        }
+
+        #leaderboard li {
+            padding: 8px 0;
+            border-bottom: 1px solid #7f8c8d;
+            font-size: 18px;
+        }
+
+        /* 成就界面 */
+        #achievements ul {
+            list-style: none;
+            text-align: left;
+            padding-left: 0;
+        }
+
+        #achievements li {
+            padding: 8px 0;
+            border-bottom: 1px solid #7f8c8d;
+            font-size: 18px;
+        }
+
+        /* 成就徽章 */
+        .achievement-badge {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: #fbc531;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 主菜单 -->
+    <div id="main-menu" class="screen active">
+        <h1>救助受伤的Chris</h1>
+        <button id="start-game-btn">开始游戏</button>
+        <button id="instructions-btn">游戏说明</button>
+        <button id="leaderboard-btn">排行榜</button>
+        <button id="achievements-btn">成就</button>
+        <button id="settings-btn">设置</button>
+    </div>
+
+    <!-- 游戏说明 -->
+    <div id="game-instructions" class="screen">
+        <h2>游戏说明</h2>
+        <p><strong>背景：</strong>Chris在一次意外中受伤，现在需要你的帮助将他送到医院。</p>
+        <p><strong>操作方法：</strong>使用方向键或WASD键控制Chris移动，避开障碍物和敌人，收集急救包和道具。</p>
+        <p><strong>目标：</strong>在限定时间内成功到达医院，收集尽可能多的急救包和道具以提高得分。</p>
+        <button id="back-from-instructions">返回主菜单</button>
+    </div>
+
+    <!-- 排行榜 -->
+    <div id="leaderboard" class="screen">
+        <h2>排行榜</h2>
+        <ul id="leaderboard-list">
+            <!-- 高分列表 -->
+        </ul>
+        <button id="back-from-leaderboard">返回主菜单</button>
+    </div>
+
+    <!-- 成就界面 -->
+    <div id="achievements" class="screen">
+        <h2>成就</h2>
+        <ul id="achievements-list">
+            <!-- 成就列表 -->
+        </ul>
+        <button id="back-from-achievements">返回主菜单</button>
+    </div>
+
+    <!-- 设置界面 -->
+    <div id="settings" class="screen">
+        <h2>设置</h2>
+        <p>背景音乐:</p>
+        <button id="toggle-music-btn">开启/关闭</button>
+        <p>音效:</p>
+        <button id="toggle-sound-btn">开启/关闭</button>
+        <button id="back-from-settings">返回主菜单</button>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud" style="display: none;">
+        <div>得分: <span id="score">0</span></div>
+        <div>生命: <span id="lives">3</span></div>
+        <div>时间: <span id="time">60</span>秒</div>
+        <div>关卡: <span id="level">1</span></div>
+    </div>
+
+    <!-- 游戏画布 -->
+    <canvas id="game-canvas" width="800" height="600"></canvas>
+
+    <!-- 游戏结束界面 -->
+    <div id="game-over" class="screen">
+        <h2 id="game-over-message">游戏结束</h2>
+        <p>你的得分: <span id="final-score">0</span></p>
+        <button id="restart-game-btn">重新开始</button>
+        <button id="back-to-menu-btn">返回主菜单</button>
+    </div>
+
+    <!-- 背景音乐 -->
+    <audio id="background-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
+
+    <!-- 音效 -->
+    <audio id="collect-sound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
+    <audio id="collision-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+    <audio id="victory-sound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
+    <audio id="defeat-sound" src="https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3"></audio>
+
+    <script>
+        // 获取元素
+        const mainMenu = document.getElementById('main-menu');
+        const instructions = document.getElementById('game-instructions');
+        const leaderboard = document.getElementById('leaderboard');
+        const achievements = document.getElementById('achievements');
+        const settings = document.getElementById('settings');
+        const gameOver = document.getElementById('game-over');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const instructionsBtn = document.getElementById('instructions-btn');
+        const leaderboardBtn = document.getElementById('leaderboard-btn');
+        const achievementsBtn = document.getElementById('achievements-btn');
+        const settingsBtn = document.getElementById('settings-btn');
+        const backFromInstructions = document.getElementById('back-from-instructions');
+        const backFromLeaderboard = document.getElementById('back-from-leaderboard');
+        const backFromAchievements = document.getElementById('back-from-achievements');
+        const backFromSettings = document.getElementById('back-from-settings');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const backToMenuBtn = document.getElementById('back-to-menu-btn');
+        const scoreElement = document.getElementById('score');
+        const livesElement = document.getElementById('lives');
+        const timeElement = document.getElementById('time');
+        const levelElement = document.getElementById('level');
+        const finalScoreElement = document.getElementById('final-score');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const achievementsList = document.getElementById('achievements-list');
+        const toggleMusicBtn = document.getElementById('toggle-music-btn');
+        const toggleSoundBtn = document.getElementById('toggle-sound-btn');
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const backgroundMusic = document.getElementById('background-music');
+        const collectSound = document.getElementById('collect-sound');
+        const collisionSound = document.getElementById('collision-sound');
+        const victorySound = document.getElementById('victory-sound');
+        const defeatSound = document.getElementById('defeat-sound');
+
+        // 游戏状态
+        let gameState = 'menu'; // menu, instructions, leaderboard, achievements, settings, playing, gameover, paused
+        let score = 0;
+        let lives = 3;
+        let timeLeft = 60;
+        let level = 1;
+        let gameTimer;
+        let animationId;
+        let isMusicOn = true;
+        let isSoundOn = true;
+
+        // 玩家对象
+        const player = {
+            x: canvas.width / 2 - 20,
+            y: canvas.height - 80,
+            width: 40,
+            height: 40,
+            speed: 5,
+            dx: 0,
+            dy: 0,
+            color: '#2ecc71',
+            img: new Image(),
+            frame: 0,
+            maxFrame: 3,
+            frameSpeed: 10,
+            currentFrame: 0
+        };
+        player.img.src = 'https://i.imgur.com/OdL0XPt.png'; // 示例角色图片（请替换为合适的图片URL）
+
+        // 确保图片加载完成后再开始游戏
+        let isPlayerImageLoaded = false;
+        player.img.onload = () => {
+            isPlayerImageLoaded = true;
+        };
+
+        // 敌人和障碍物
+        const enemies = [];
+        const obstacles = [];
+        const items = [];
+        const powerUps = [];
+
+        // 控制键
+        const keys = {
+            ArrowUp: false,
+            ArrowDown: false,
+            ArrowLeft: false,
+            ArrowRight: false,
+            w: false,
+            a: false,
+            s: false,
+            d: false,
+            p: false // 暂停键
+        };
+
+        // 初始化游戏
+        function init() {
+            // 绑定按钮事件
+            startGameBtn.addEventListener('click', startGame);
+            instructionsBtn.addEventListener('click', () => switchScreen('instructions'));
+            leaderboardBtn.addEventListener('click', () => {
+                loadLeaderboard();
+                switchScreen('leaderboard');
+            });
+            achievementsBtn.addEventListener('click', () => {
+                loadAchievements();
+                switchScreen('achievements');
+            });
+            settingsBtn.addEventListener('click', () => switchScreen('settings'));
+            backFromInstructions.addEventListener('click', () => switchScreen('menu'));
+            backFromLeaderboard.addEventListener('click', () => switchScreen('menu'));
+            backFromAchievements.addEventListener('click', () => switchScreen('menu'));
+            backFromSettings.addEventListener('click', () => switchScreen('menu'));
+            restartGameBtn.addEventListener('click', startGame);
+            backToMenuBtn.addEventListener('click', () => switchScreen('menu'));
+            toggleMusicBtn.addEventListener('click', toggleMusic);
+            toggleSoundBtn.addEventListener('click', toggleSound);
+
+            // 绑定键盘事件
+            document.addEventListener('keydown', keyDown);
+            document.addEventListener('keyup', keyUp);
+        }
+
+        // 切换屏幕
+        function switchScreen(screen) {
+            // 隐藏所有屏幕
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            mainMenu.classList.remove('active');
+            instructions.classList.remove('active');
+            leaderboard.classList.remove('active');
+            achievements.classList.remove('active');
+            settings.classList.remove('active');
+            gameOver.classList.remove('active');
+            canvas.style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+
+            if (screen === 'menu') {
+                mainMenu.classList.add('active');
+            } else if (screen === 'instructions') {
+                instructions.classList.add('active');
+            } else if (screen === 'leaderboard') {
+                leaderboard.classList.add('active');
+            } else if (screen === 'achievements') {
+                achievements.classList.add('active');
+            } else if (screen === 'settings') {
+                settings.classList.add('active');
+            } else if (screen === 'playing') {
+                canvas.style.display = 'block';
+                document.getElementById('hud').style.display = 'flex';
+            } else if (screen === 'gameover') {
+                gameOver.classList.add('active');
+            }
+        }
+
+        // 开始游戏
+        function startGame() {
+            if (!isPlayerImageLoaded) {
+                alert('角色图片未加载完成，请稍候再试。');
+                return;
+            }
+
+            // 重置游戏状态
+            score = 0;
+            lives = 3;
+            timeLeft = 60;
+            level = 1;
+            scoreElement.textContent = score;
+            livesElement.textContent = lives;
+            timeElement.textContent = timeLeft;
+            levelElement.textContent = level;
+            player.x = canvas.width / 2 - player.width / 2;
+            player.y = canvas.height - 80;
+            enemies.length = 0;
+            obstacles.length = 0;
+            items.length = 0;
+            powerUps.length = 0;
+
+            // 生成初始敌人、障碍物和物品
+            generateEnemies(5);
+            generateObstacles(5);
+            generateItems(10);
+            generatePowerUps(3);
+
+            // 切换到游戏界面
+            switchScreen('playing');
+
+            // 启动背景音乐
+            if (isMusicOn) backgroundMusic.play();
+
+            // 启动计时器和游戏循环
+            gameTimer = setInterval(updateTimer, 1000);
+            gameState = 'playing';
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // 更新计时器
+        function updateTimer() {
+            timeLeft--;
+            timeElement.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                endGame(false);
+            }
+        }
+
+        // 游戏循环
+        function gameLoop() {
+            if (gameState !== 'playing') return;
+
+            update();
+            draw();
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // 更新游戏状态
+        function update() {
+            // 处理暂停
+            if (keys.p) {
+                togglePause();
+                keys.p = false;
+                return;
+            }
+
+            // 更新玩家位置
+            player.dx = 0;
+            player.dy = 0;
+            if (keys.ArrowUp || keys.w) player.dy = -player.speed;
+            if (keys.ArrowDown || keys.s) player.dy = player.speed;
+            if (keys.ArrowLeft || keys.a) player.dx = -player.speed;
+            if (keys.ArrowRight || keys.d) player.dx = player.speed;
+            player.x += player.dx;
+            player.y += player.dy;
+
+            // 边界检测
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+            if (player.y < 0) player.y = 0;
+            if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
+
+            // 更新敌人位置
+            enemies.forEach(enemy => {
+                enemy.y += enemy.speed;
+                if (enemy.y > canvas.height) {
+                    enemy.y = -enemy.height;
+                    enemy.x = Math.random() * (canvas.width - enemy.width);
+                }
+                // 碰撞检测
+                if (isColliding(player, enemy)) {
+                    if (isSoundOn) collisionSound.play();
+                    lives--;
+                    livesElement.textContent = lives;
+                    // 移动敌人到随机位置
+                    enemy.y = Math.random() * -canvas.height;
+                    enemy.x = Math.random() * (canvas.width - enemy.width);
+                    if (lives <= 0) {
+                        endGame(false);
+                    }
+                }
+            });
+
+            // 更新障碍物位置
+            obstacles.forEach(obstacle => {
+                obstacle.y += obstacle.speed;
+                if (obstacle.y > canvas.height) {
+                    obstacle.y = -obstacle.height;
+                    obstacle.x = Math.random() * (canvas.width - obstacle.width);
+                }
+                // 碰撞检测
+                if (isColliding(player, obstacle)) {
+                    if (isSoundOn) collisionSound.play();
+                    lives--;
+                    livesElement.textContent = lives;
+                    // 移动障碍物到随机位置
+                    obstacle.y = Math.random() * -canvas.height;
+                    obstacle.x = Math.random() * (canvas.width - obstacle.width);
+                    if (lives <= 0) {
+                        endGame(false);
+                    }
+                }
+            });
+
+            // 更新物品位置
+            items.forEach((item, index) => {
+                item.y += item.speed;
+                if (item.y > canvas.height) {
+                    items.splice(index, 1);
+                    generateItems(1);
+                }
+                // 碰撞检测（圆形与矩形）
+                if (isCollidingCircleRect(item, player)) {
+                    if (isSoundOn) collectSound.play();
+                    score += 10;
+                    scoreElement.textContent = score;
+                    items.splice(index, 1);
+                    generateItems(1);
+                    checkAchievements();
+                }
+            });
+
+            // 更新道具位置
+            powerUps.forEach((powerUp, index) => {
+                powerUp.y += powerUp.speed;
+                if (powerUp.y > canvas.height) {
+                    powerUps.splice(index, 1);
+                    generatePowerUps(1);
+                }
+                // 碰撞检测（圆形与矩形）
+                if (isCollidingCircleRect(powerUp, player)) {
+                    if (isSoundOn) collectSound.play();
+                    activatePowerUp(powerUp.type);
+                    powerUps.splice(index, 1);
+                    generatePowerUps(1);
+                }
+            });
+
+            // 检查是否到达医院
+            if (player.y <= 50) { // 假设医院在顶部
+                if (isSoundOn) victorySound.play();
+                score += 50; // 到达医院奖励
+                checkAchievements();
+                level++;
+                levelElement.textContent = level;
+                timeLeft += 10; // 完成关卡奖励时间
+                timeElement.textContent = timeLeft;
+                // 生成下一关的敌人、障碍物和物品
+                generateEnemies(3 + level);
+                generateObstacles(2 + level);
+                generateItems(5 + level);
+                generatePowerUps(1 + Math.floor(level / 2));
+                // 重置玩家位置
+                player.x = canvas.width / 2 - player.width / 2;
+                player.y = canvas.height - 80;
+            }
+
+            // 动态难度调整（根据关卡调整敌人速度）
+            enemies.forEach(enemy => {
+                enemy.speed = 2 + level * 0.5;
+            });
+            obstacles.forEach(obstacle => {
+                obstacle.speed = 1 + level * 0.3;
+            });
+            items.forEach(item => {
+                item.speed = 3 + level * 0.2;
+            });
+            powerUps.forEach(powerUp => {
+                powerUp.speed = 4 + level * 0.2;
+            });
+        }
+
+        // 绘制游戏元素
+        function draw() {
+            // 清除画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制医院
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(canvas.width / 2 - 50, 20, 100, 30);
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = '16px Arial';
+            ctx.fillText('医院', canvas.width / 2 - 15, 40);
+
+            // 绘制玩家
+            if (player.img.complete) {
+                ctx.drawImage(player.img, player.x, player.y, player.width, player.height);
+            } else {
+                // 如果图片未加载，绘制一个占位方块
+                ctx.fillStyle = player.color;
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+            }
+
+            // 绘制敌人
+            enemies.forEach(enemy => {
+                ctx.fillStyle = enemy.color;
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            });
+
+            // 绘制障碍物
+            obstacles.forEach(obstacle => {
+                ctx.fillStyle = obstacle.color;
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            });
+
+            // 绘制物品
+            items.forEach(item => {
+                ctx.fillStyle = item.color;
+                ctx.beginPath();
+                ctx.arc(item.x + item.radius, item.y + item.radius, item.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // 绘制道具
+            powerUps.forEach(powerUp => {
+                ctx.fillStyle = powerUp.color;
+                ctx.beginPath();
+                ctx.arc(powerUp.x + powerUp.radius, powerUp.y + powerUp.radius, powerUp.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.fillText(powerUp.symbol, powerUp.x + powerUp.radius - 5, powerUp.y + powerUp.radius + 4);
+            });
+        }
+
+        // 生成敌人
+        function generateEnemies(count) {
+            for (let i = 0; i < count; i++) {
+                enemies.push({
+                    x: Math.random() * (canvas.width - 40),
+                    y: Math.random() * -canvas.height,
+                    width: 40,
+                    height: 40,
+                    speed: 2 + level * 0.5,
+                    color: '#e74c3c',
+                    type: 'basic'
+                });
+            }
+        }
+
+        // 生成障碍物
+        function generateObstacles(count) {
+            for (let i = 0; i < count; i++) {
+                obstacles.push({
+                    x: Math.random() * (canvas.width - 50),
+                    y: Math.random() * -canvas.height,
+                    width: 50,
+                    height: 50,
+                    speed: 1 + level * 0.3,
+                    color: '#f1c40f',
+                    type: 'static'
+                });
+            }
+        }
+
+        // 生成物品
+        function generateItems(count) {
+            for (let i = 0; i < count; i++) {
+                items.push({
+                    x: Math.random() * (canvas.width - 20),
+                    y: Math.random() * -canvas.height,
+                    radius: 10,
+                    speed: 3 + level * 0.2,
+                    color: '#2ecc71'
+                });
+            }
+        }
+
+        // 生成道具
+        function generatePowerUps(count) {
+            const types = ['shield', 'speed', 'health'];
+            for (let i = 0; i < count; i++) {
+                const type = types[Math.floor(Math.random() * types.length)];
+                let color, symbol;
+                if (type === 'shield') {
+                    color = '#9b59b6';
+                    symbol = 'S';
+                } else if (type === 'speed') {
+                    color = '#f39c12';
+                    symbol = 'F';
+                } else if (type === 'health') {
+                    color = '#e67e22';
+                    symbol = 'H';
+                }
+                powerUps.push({
+                    x: Math.random() * (canvas.width - 24),
+                    y: Math.random() * -canvas.height,
+                    radius: 12,
+                    speed: 4 + level * 0.2,
+                    color: color,
+                    type: type,
+                    symbol: symbol
+                });
+            }
+        }
+
+        // 激活道具
+        function activatePowerUp(type) {
+            if (type === 'shield') {
+                player.color = '#ffffff';
+                setTimeout(() => {
+                    player.color = '#2ecc71';
+                }, 5000);
+            } else if (type === 'speed') {
+                player.speed = 10;
+                setTimeout(() => {
+                    player.speed = 5;
+                }, 5000);
+            } else if (type === 'health') {
+                lives++;
+                livesElement.textContent = lives;
+            }
+        }
+
+        // 碰撞检测（矩形与矩形）
+        function isColliding(a, b) {
+            return a.x < b.x + b.width &&
+                   a.x + a.width > b.x &&
+                   a.y < b.y + b.height &&
+                   a.y + a.height > b.y;
+        }
+
+        // 碰撞检测（圆形与矩形）
+        function isCollidingCircleRect(circle, rect) {
+            // 找到圆心到矩形最近的点
+            let closestX = clamp(circle.x + circle.radius, rect.x, rect.x + rect.width);
+            let closestY = clamp(circle.y + circle.radius, rect.y, rect.y + rect.height);
+
+            // 计算距离
+            let distanceX = (circle.x + circle.radius) - closestX;
+            let distanceY = (circle.y + circle.radius) - closestY;
+
+            let distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+            return distanceSquared < (circle.radius * circle.radius);
+        }
+
+        // 辅助函数：限制值在min和max之间
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        // 结束游戏
+        function endGame(victory) {
+            clearInterval(gameTimer);
+            cancelAnimationFrame(animationId);
+            gameState = 'gameover';
+            canvas.style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+            finalScoreElement.textContent = score;
+            if (victory) {
+                gameOverMessage.textContent = '恭喜你，成功将Chris送到医院！';
+                if (isSoundOn) victorySound.play();
+            } else {
+                gameOverMessage.textContent = '游戏结束，你失败了！';
+                if (isSoundOn) defeatSound.play();
+            }
+            saveScore(score);
+            checkAchievements();
+            switchScreen('gameover');
+        }
+
+        // 保存分数到排行榜
+        function saveScore(newScore) {
+            let scores = JSON.parse(localStorage.getItem('chrisScores')) || [];
+            scores.push(newScore);
+            scores.sort((a, b) => b - a);
+            scores = scores.slice(0, 10); // 只保留前10名
+            localStorage.setItem('chrisScores', JSON.stringify(scores));
+        }
+
+        // 加载排行榜
+        function loadLeaderboard() {
+            leaderboardList.innerHTML = '';
+            let scores = JSON.parse(localStorage.getItem('chrisScores')) || [];
+            if (scores.length === 0) {
+                leaderboardList.innerHTML = '<li>暂无高分记录</li>';
+                return;
+            }
+            scores.forEach((score, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${score} 分`;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        // 加载成就
+        function loadAchievements() {
+            achievementsList.innerHTML = '';
+            let achievementsData = JSON.parse(localStorage.getItem('chrisAchievements')) || {
+                firstLevel: false,
+                collect100: false,
+                noDamage: false
+                // 更多成就
+            };
+            if (achievementsData.firstLevel) {
+                addAchievementToList('首次完成关卡');
+            }
+            if (achievementsData.collect100) {
+                addAchievementToList('收集100个急救包');
+            }
+            if (achievementsData.noDamage) {
+                addAchievementToList('无损通关');
+            }
+            // 更多成就检查
+        }
+
+        function addAchievementToList(name) {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="achievement-badge"></span>${name}`;
+            achievementsList.appendChild(li);
+        }
+
+        // 检查成就
+        function checkAchievements() {
+            let achievementsData = JSON.parse(localStorage.getItem('chrisAchievements')) || {
+                firstLevel: false,
+                collect100: false,
+                noDamage: false
+                // 更多成就
+            };
+            // 首次完成关卡
+            if (level > 1 && !achievementsData.firstLevel) {
+                achievementsData.firstLevel = true;
+                showAchievement('首次完成关卡');
+            }
+            // 收集100个急救包
+            if (score >= 100 && !achievementsData.collect100) {
+                achievementsData.collect100 = true;
+                showAchievement('收集100个急救包');
+            }
+            // 无损通关
+            if (lives > 0 && gameState === 'gameover' && !achievementsData.noDamage) {
+                achievementsData.noDamage = true;
+                showAchievement('无损通关');
+            }
+            // 更多成就条件
+
+            // 保存成就
+            localStorage.setItem('chrisAchievements', JSON.stringify(achievementsData));
+        }
+
+        // 保存成就
+        function saveAchievements(data) {
+            localStorage.setItem('chrisAchievements', JSON.stringify(data));
+        }
+
+        // 键盘按下事件
+        function keyDown(e) {
+            if (e.key in keys) {
+                keys[e.key] = true;
+            }
+            // 防止按P键触发其他操作
+            if (e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+            }
+        }
+
+        // 键盘松开事件
+        function keyUp(e) {
+            if (e.key in keys) {
+                keys[e.key] = false;
+            }
+        }
+
+        // 切换音乐
+        function toggleMusic() {
+            isMusicOn = !isMusicOn;
+            if (isMusicOn) {
+                backgroundMusic.play();
+            } else {
+                backgroundMusic.pause();
+            }
+        }
+
+        // 切换音效
+        function toggleSound() {
+            isSoundOn = !isSoundOn;
+        }
+
+        // 暂停与继续
+        function togglePause() {
+            if (gameState === 'playing') {
+                gameState = 'paused';
+                backgroundMusic.pause();
+                cancelAnimationFrame(animationId);
+                clearInterval(gameTimer);
+                // 显示暂停提示
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, canvas.height / 2 - 30, canvas.width, 60);
+                ctx.fillStyle = '#fff';
+                ctx.font = '30px Arial';
+                ctx.fillText('游戏已暂停', canvas.width / 2 - 80, canvas.height / 2 + 10);
+            } else if (gameState === 'paused') {
+                gameState = 'playing';
+                backgroundMusic.play();
+                gameTimer = setInterval(updateTimer, 1000);
+                animationId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // 成就解锁提示
+        function showAchievement(name) {
+            // 简单的提示（可扩展为更复杂的动画）
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(canvas.width / 2 - 150, canvas.height / 2 - 40, 300, 80);
+            ctx.fillStyle = '#ffa801';
+            ctx.font = '20px Arial';
+            ctx.fillText(`成就解锁: ${name}`, canvas.width / 2 - 100, canvas.height / 2);
+            setTimeout(() => {
+                // 清除提示
+                ctx.clearRect(canvas.width / 2 - 150, canvas.height / 2 - 40, 300, 80);
+            }, 3000);
+        }
+
+        // 键盘事件监听
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'p' || e.key === 'P') {
+                togglePause();
+            }
+        });
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
