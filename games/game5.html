@@ -180,10 +180,7 @@
     <!-- 设置界面 -->
     <div id="settings" class="screen">
         <h2>设置</h2>
-        <p>背景音乐:</p>
-        <button id="toggle-music-btn">开启/关闭</button>
-        <p>音效:</p>
-        <button id="toggle-sound-btn">开启/关闭</button>
+        <p>（当前无设置项）</p>
         <button id="back-from-settings">返回主菜单</button>
     </div>
 
@@ -205,15 +202,6 @@
         <button id="restart-game-btn">重新开始</button>
         <button id="back-to-menu-btn">返回主菜单</button>
     </div>
-
-    <!-- 背景音乐 -->
-    <audio id="background-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
-
-    <!-- 音效 -->
-    <audio id="collect-sound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
-    <audio id="collision-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
-    <audio id="victory-sound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
-    <audio id="defeat-sound" src="https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3"></audio>
 
     <script>
         // 获取元素
@@ -242,15 +230,8 @@
         const gameOverMessage = document.getElementById('game-over-message');
         const leaderboardList = document.getElementById('leaderboard-list');
         const achievementsList = document.getElementById('achievements-list');
-        const toggleMusicBtn = document.getElementById('toggle-music-btn');
-        const toggleSoundBtn = document.getElementById('toggle-sound-btn');
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        const backgroundMusic = document.getElementById('background-music');
-        const collectSound = document.getElementById('collect-sound');
-        const collisionSound = document.getElementById('collision-sound');
-        const victorySound = document.getElementById('victory-sound');
-        const defeatSound = document.getElementById('defeat-sound');
 
         // 游戏状态
         let gameState = 'menu'; // menu, instructions, leaderboard, achievements, settings, playing, gameover, paused
@@ -260,8 +241,6 @@
         let level = 1;
         let gameTimer;
         let animationId;
-        let isMusicOn = true;
-        let isSoundOn = true;
 
         // 玩家对象
         const player = {
@@ -272,19 +251,7 @@
             speed: 5,
             dx: 0,
             dy: 0,
-            color: '#2ecc71',
-            img: new Image(),
-            frame: 0,
-            maxFrame: 3,
-            frameSpeed: 10,
-            currentFrame: 0
-        };
-        player.img.src = 'https://i.imgur.com/OdL0XPt.png'; // 示例角色图片（请替换为合适的图片URL）
-
-        // 确保图片加载完成后再开始游戏
-        let isPlayerImageLoaded = false;
-        player.img.onload = () => {
-            isPlayerImageLoaded = true;
+            color: '#2ecc71'
         };
 
         // 敌人和障碍物
@@ -326,8 +293,6 @@
             backFromSettings.addEventListener('click', () => switchScreen('menu'));
             restartGameBtn.addEventListener('click', startGame);
             backToMenuBtn.addEventListener('click', () => switchScreen('menu'));
-            toggleMusicBtn.addEventListener('click', toggleMusic);
-            toggleSoundBtn.addEventListener('click', toggleSound);
 
             // 绑定键盘事件
             document.addEventListener('keydown', keyDown);
@@ -367,11 +332,6 @@
 
         // 开始游戏
         function startGame() {
-            if (!isPlayerImageLoaded) {
-                alert('角色图片未加载完成，请稍候再试。');
-                return;
-            }
-
             // 重置游戏状态
             score = 0;
             lives = 3;
@@ -396,9 +356,6 @@
 
             // 切换到游戏界面
             switchScreen('playing');
-
-            // 启动背景音乐
-            if (isMusicOn) backgroundMusic.play();
 
             // 启动计时器和游戏循环
             gameTimer = setInterval(updateTimer, 1000);
@@ -426,13 +383,6 @@
 
         // 更新游戏状态
         function update() {
-            // 处理暂停
-            if (keys.p) {
-                togglePause();
-                keys.p = false;
-                return;
-            }
-
             // 更新玩家位置
             player.dx = 0;
             player.dy = 0;
@@ -458,7 +408,6 @@
                 }
                 // 碰撞检测
                 if (isColliding(player, enemy)) {
-                    if (isSoundOn) collisionSound.play();
                     lives--;
                     livesElement.textContent = lives;
                     // 移动敌人到随机位置
@@ -479,7 +428,6 @@
                 }
                 // 碰撞检测
                 if (isColliding(player, obstacle)) {
-                    if (isSoundOn) collisionSound.play();
                     lives--;
                     livesElement.textContent = lives;
                     // 移动障碍物到随机位置
@@ -500,7 +448,6 @@
                 }
                 // 碰撞检测（圆形与矩形）
                 if (isCollidingCircleRect(item, player)) {
-                    if (isSoundOn) collectSound.play();
                     score += 10;
                     scoreElement.textContent = score;
                     items.splice(index, 1);
@@ -518,7 +465,6 @@
                 }
                 // 碰撞检测（圆形与矩形）
                 if (isCollidingCircleRect(powerUp, player)) {
-                    if (isSoundOn) collectSound.play();
                     activatePowerUp(powerUp.type);
                     powerUps.splice(index, 1);
                     generatePowerUps(1);
@@ -527,7 +473,6 @@
 
             // 检查是否到达医院
             if (player.y <= 50) { // 假设医院在顶部
-                if (isSoundOn) victorySound.play();
                 score += 50; // 到达医院奖励
                 checkAchievements();
                 level++;
@@ -571,14 +516,9 @@
             ctx.font = '16px Arial';
             ctx.fillText('医院', canvas.width / 2 - 15, 40);
 
-            // 绘制玩家
-            if (player.img.complete) {
-                ctx.drawImage(player.img, player.x, player.y, player.width, player.height);
-            } else {
-                // 如果图片未加载，绘制一个占位方块
-                ctx.fillStyle = player.color;
-                ctx.fillRect(player.x, player.y, player.width, player.height);
-            }
+            // 绘制玩家（Chris）
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
 
             // 绘制敌人
             enemies.forEach(enemy => {
@@ -606,9 +546,11 @@
                 ctx.beginPath();
                 ctx.arc(powerUp.x + powerUp.radius, powerUp.y + powerUp.radius, powerUp.radius, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#fff';
+                ctx.fillStyle = '#ffffff';
                 ctx.font = '12px Arial';
-                ctx.fillText(powerUp.symbol, powerUp.x + powerUp.radius - 5, powerUp.y + powerUp.radius + 4);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(powerUp.symbol, powerUp.x + powerUp.radius, powerUp.y + powerUp.radius);
             });
         }
 
@@ -738,10 +680,8 @@
             finalScoreElement.textContent = score;
             if (victory) {
                 gameOverMessage.textContent = '恭喜你，成功将Chris送到医院！';
-                if (isSoundOn) victorySound.play();
             } else {
                 gameOverMessage.textContent = '游戏结束，你失败了！';
-                if (isSoundOn) defeatSound.play();
             }
             saveScore(score);
             checkAchievements();
@@ -828,9 +768,20 @@
             localStorage.setItem('chrisAchievements', JSON.stringify(achievementsData));
         }
 
-        // 保存成就
-        function saveAchievements(data) {
-            localStorage.setItem('chrisAchievements', JSON.stringify(data));
+        // 成就解锁提示
+        function showAchievement(name) {
+            // 简单的提示（可扩展为更复杂的动画）
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(canvas.width / 2 - 150, canvas.height / 2 - 40, 300, 80);
+            ctx.fillStyle = '#ffa801';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`成就解锁: ${name}`, canvas.width / 2, canvas.height / 2);
+            setTimeout(() => {
+                // 清除提示
+                ctx.clearRect(canvas.width / 2 - 150, canvas.height / 2 - 40, 300, 80);
+            }, 3000);
         }
 
         // 键盘按下事件
@@ -851,57 +802,28 @@
             }
         }
 
-        // 切换音乐
-        function toggleMusic() {
-            isMusicOn = !isMusicOn;
-            if (isMusicOn) {
-                backgroundMusic.play();
-            } else {
-                backgroundMusic.pause();
-            }
-        }
-
-        // 切换音效
-        function toggleSound() {
-            isSoundOn = !isSoundOn;
-        }
-
         // 暂停与继续
         function togglePause() {
             if (gameState === 'playing') {
                 gameState = 'paused';
-                backgroundMusic.pause();
-                cancelAnimationFrame(animationId);
                 clearInterval(gameTimer);
+                cancelAnimationFrame(animationId);
                 // 显示暂停提示
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.fillRect(0, canvas.height / 2 - 30, canvas.width, 60);
                 ctx.fillStyle = '#fff';
                 ctx.font = '30px Arial';
-                ctx.fillText('游戏已暂停', canvas.width / 2 - 80, canvas.height / 2 + 10);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('游戏已暂停', canvas.width / 2, canvas.height / 2);
             } else if (gameState === 'paused') {
                 gameState = 'playing';
-                backgroundMusic.play();
                 gameTimer = setInterval(updateTimer, 1000);
                 animationId = requestAnimationFrame(gameLoop);
             }
         }
 
-        // 成就解锁提示
-        function showAchievement(name) {
-            // 简单的提示（可扩展为更复杂的动画）
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(canvas.width / 2 - 150, canvas.height / 2 - 40, 300, 80);
-            ctx.fillStyle = '#ffa801';
-            ctx.font = '20px Arial';
-            ctx.fillText(`成就解锁: ${name}`, canvas.width / 2 - 100, canvas.height / 2);
-            setTimeout(() => {
-                // 清除提示
-                ctx.clearRect(canvas.width / 2 - 150, canvas.height / 2 - 40, 300, 80);
-            }, 3000);
-        }
-
-        // 键盘事件监听
+        // 监听P键进行暂停与继续
         document.addEventListener('keydown', function(e) {
             if (e.key === 'p' || e.key === 'P') {
                 togglePause();
