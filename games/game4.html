@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>与 Chris 的英语学习冒险</title>
+    <style>
+        /* 基础样式 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #83a4d4, #b6fbff);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* 游戏容器 */
+        #game-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 90%;
+            padding: 20px;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+        }
+
+        /* 主体内容 */
+        #main-content {
+            flex: 3;
+        }
+
+        /* 词汇面板 */
+        #vocab-panel {
+            flex: 1;
+            background: #f9f9f9;
+            border-left: 2px solid #ddd;
+            padding: 10px;
+            border-radius: 10px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        #vocab-panel h2 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #555;
+        }
+
+        .vocab-item {
+            margin-bottom: 8px;
+            padding: 5px;
+            background: #eef;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .vocab-item .definition {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 5px;
+            border-radius: 5px;
+            width: 200px;
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .vocab-item:hover .definition {
+            display: block;
+        }
+
+        /* 故事文本 */
+        #story {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* 选项按钮 */
+        #choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .choice-button {
+            padding: 10px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+        }
+
+        .choice-button:hover {
+            background: #45a049;
+        }
+
+        /* 词汇高亮 */
+        .vocab {
+            color: #d9534f;
+            font-weight: bold;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .vocab::after {
+            content: 'ⓘ';
+            font-size: 0.8em;
+            margin-left: 5px;
+            color: #555;
+        }
+
+        /* 结束画面 */
+        #end-screen {
+            text-align: center;
+            font-size: 1.2em;
+            padding: 20px;
+        }
+
+        #restart-button {
+            padding: 10px 20px;
+            background: #0275d8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        #restart-button:hover {
+            background: #025aa5;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            #game-container {
+                flex-direction: column;
+            }
+
+            #vocab-panel {
+                border-left: none;
+                border-top: 2px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="main-content">
+            <h1>与 Chris 的英语学习冒险</h1>
+            <div id="story"></div>
+            <div id="choices"></div>
+        </div>
+        <div id="vocab-panel">
+            <h2>已学词汇</h2>
+            <div id="vocab-list">
+                <!-- 词汇将动态添加到这里 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const storyElement = document.getElementById('story');
+        const choicesElement = document.getElementById('choices');
+        const vocabListElement = document.getElementById('vocab-list');
+
+        let state = {
+            vocab: {}
+        };
+
+        function startGame() {
+            state = {
+                vocab: {}
+            };
+            vocabListElement.innerHTML = '';
+            showTextNode(1);
+        }
+
+        function showTextNode(textNodeIndex) {
+            const textNode = textNodes.find(node => node.id === textNodeIndex);
+            if (!textNode) {
+                endGame();
+                return;
+            }
+
+            // 替换并高亮词汇
+            const processedText = processText(textNode.text);
+            storyElement.innerHTML = processedText;
+
+            // 显示选项
+            choicesElement.innerHTML = '';
+            textNode.options.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('choice-button');
+                button.innerText = option.text;
+                button.addEventListener('click', () => selectOption(option));
+                choicesElement.appendChild(button);
+            });
+        }
+
+        function selectOption(option) {
+            const nextTextNodeId = option.nextText;
+            if (nextTextNodeId <= 0) {
+                endGame();
+                return;
+            }
+            showTextNode(nextTextNodeId);
+        }
+
+        function endGame() {
+            storyElement.innerHTML = '<div id="end-screen">感谢游玩！点击下方按钮重新开始。</div>';
+            choicesElement.innerHTML = '';
+            const restartButton = document.createElement('button');
+            restartButton.id = 'restart-button';
+            restartButton.innerText = '重新开始';
+            restartButton.addEventListener('click', startGame);
+            choicesElement.appendChild(restartButton);
+        }
+
+        function processText(text) {
+            const vocabWords = {
+                'alleviate': '减轻，缓解',
+                'candid': '坦率的，直言不讳的',
+                'diligent': '勤勉的，勤奋的',
+                'emulate': '模仿，效仿',
+                'fortuitous': '偶然的，意外的',
+                'gregarious': '合群的，爱交际的',
+                'impeccable': '无可挑剔的，完美的',
+                'lucid': '清晰的，明了的',
+                'meticulous': '一丝不苟的，精确的',
+                'negligible': '微不足道的，可以忽略的',
+                'ostentatious': '炫耀的，浮华的',
+                'pragmatic': '实际的，务实的',
+                'quintessential': '典型的，精髓的',
+                'scrutinize': '仔细检查，详审',
+                'ubiquitous': '无处不在的，普遍存在的',
+                'invigorate': '激励，使有活力',
+                'invaluable': '非常宝贵的，无法估价的',
+                'lucidly': '清晰地，明了地'
+            };
+
+            let processed = text;
+            for (const [word, definition] of Object.entries(vocabWords)) {
+                const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                if (regex.test(processed)) {
+                    // 添加到已学词汇
+                    addVocab(word, definition);
+                    // 高亮显示
+                    processed = processed.replace(regex, `<span class="vocab">${word}<span class="definition">${definition}</span></span>`);
+                }
+            }
+            return processed;
+        }
+
+        function addVocab(word, definition) {
+            if (!state.vocab[word.toLowerCase()]) {
+                state.vocab[word.toLowerCase()] = definition;
+                const vocabItem = document.createElement('div');
+                vocabItem.classList.add('vocab-item');
+                vocabItem.innerHTML = `<strong>${word}</strong>: ${definition}`;
+                vocabListElement.appendChild(vocabItem);
+            }
+        }
+
+        const textNodes = [
+            {
+                id: 1,
+                text: '你来到北京中学，满怀期待地开始新的一天。当你走在走廊上时，看到足球队的 <span class="vocab">gregarious</span> 中场队员 Chris 正在向你招手。',
+                options: [
+                    {
+                        text: '热情地回挥手。',
+                        nextText: 2
+                    },
+                    {
+                        text: '微笑并继续走。',
+                        nextText: 3
+                    }
+                ]
+            },
+            {
+                id: 2,
+                text: 'Chris 带着 <span class="vocab">ostentatious</span> 的笑容走向你。"嘿！准备好迎接今天的比赛了吗？"他问道。',
+                options: [
+                    {
+                        text: '表达你的兴奋并询问比赛细节。',
+                        nextText: 4
+                    },
+                    {
+                        text: '承认你有点紧张。',
+                        nextText: 5
+                    }
+                ]
+            },
+            {
+                id: 3,
+                text: 'Chris 注意到你保守的态度，决定稍后再找你。你前往教室，感到 <span class="vocab">negligible</span> 的热情。',
+                options: [
+                    {
+                        text: '重新考虑并决定和 Chris 交谈。',
+                        nextText: 2
+                    },
+                    {
+                        text: '继续前往你的教室。',
+                        nextText: 6
+                    }
+                ]
+            },
+            {
+                id: 4,
+                text: '"我们需要你 <span class="vocab">diligent</span> 的支持，"Chris 说。"我们的胜利取决于此！"',
+                options: [
+                    {
+                        text: '保证会到场并大声加油。',
+                        nextText: 7
+                    },
+                    {
+                        text: '为比赛提出一些 <span class="vocab">pragmatic</span> 的策略。',
+                        nextText: 8
+                    }
+                ]
+            },
+            {
+                id: 5,
+                text: 'Chris 拍了拍你的肩膀。"别担心，你的支持对我们来说是 <span class="vocab">invaluable</span> 的，"他 <span class="vocab">candid</span> 地说道。',
+                options: [
+                    {
+                        text: '感谢他并感觉好些了。',
+                        nextText: 7
+                    },
+                    {
+                        text: '仍然感到不安。',
+                        nextText: 9
+                    }
+                ]
+            },
+            {
+                id: 6,
+                text: '在课堂上，你发现很难集中注意力。你意识到也许与他人互动可以 <span class="vocab">alleviate</span> 你的无聊。',
+                options: [
+                    {
+                        text: '决定在午餐时间加入 Chris 和其他人。',
+                        nextText: 10
+                    },
+                    {
+                        text: '留在教室里学习。',
+                        nextText: 11
+                    }
+                ]
+            },
+            {
+                id: 7,
+                text: '在比赛中，你的支持似乎 <span class="vocab">invigorate</span> 了球队。他们以 <span class="vocab">meticulous</span> 的精准度比赛并取得胜利！',
+                options: [
+                    {
+                        text: '与球队一起庆祝。',
+                        nextText: 12
+                    },
+                    {
+                        text: '祝贺 Chris 的 <span class="vocab">impeccable</span> 表现。',
+                        nextText: 13
+                    }
+                ]
+            },
+            {
+                id: 8,
+                text: 'Chris 赞赏你 <span class="vocab">pragmatic</span> 的方法。"你应该考虑加入我们的战略会议，"他说。',
+                options: [
+                    {
+                        text: '同意提供帮助。',
+                        nextText: 14
+                    },
+                    {
+                        text: '礼貌地拒绝。',
+                        nextText: 9
+                    }
+                ]
+            },
+            {
+                id: 9,
+                text: 'Chris 感觉到了你的犹豫。"如果你改变主意，我们随时欢迎，"他说。',
+                options: [
+                    {
+                        text: '反思他的话。',
+                        nextText: 15
+                    },
+                    {
+                        text: '忽略这次谈话。',
+                        nextText: 11
+                    }
+                ]
+            },
+            {
+                id: 10,
+                text: '在午餐时，你加入了 Chris 和他的朋友们。谈话 <span class="vocab">lucidly</span> 而愉快。',
+                options: [
+                    {
+                        text: '积极参与。',
+                        nextText: 16
+                    },
+                    {
+                        text: '安静地倾听。',
+                        nextText: 17
+                    }
+                ]
+            },
+            {
+                id: 11,
+                text: '你花了一天时间学习，但总觉得缺了些什么。',
+                options: [
+                    {
+                        text: '决定明天更加社交。',
+                        nextText: 15
+                    },
+                    {
+                        text: '继续专注于学习。',
+                        nextText: 18
+                    }
+                ]
+            },
+            // 更多剧情节点
+            {
+                id: 12,
+                text: '整个学校都在 <span class="vocab">ubiquitous</span> 地庆祝。你感到一种归属感。',
+                options: [
+                    {
+                        text: '结束',
+                        nextText: -1
+                    }
+                ]
+            },
+            {
+                id: 13,
+                text: 'Chris 微笑道："谢谢！你的支持带来了 <span class="vocab">quintessential</span> 的影响！"',
+                options: [
+                    {
+                        text: '结束',
+                        nextText: -1
+                    }
+                ]
+            },
+            {
+                id: 14,
+                text: '你成为球队成功的关键部分。',
+                options: [
+                    {
+                        text: '结束',
+                        nextText: -1
+                    }
+                ]
+            },
+            {
+                id: 15,
+                text: '你意识到平衡社交生活和学习的重要性。',
+                options: [
+                    {
+                        text: '结束',
+                        nextText: -1
+                    }
+                ]
+            },
+            {
+                id: 16,
+                text: '你 <span class="vocab">gregarious</span> 的性格帮助你结交了新朋友。',
+                options: [
+                    {
+                        text: '结束',
+                        nextText: -1
+                    }
+                ]
+            },
+            {
+                id: 17,
+                text: '即使作为一个安静的旁观者，你也感到了联系。',
+                options: [
+                    {
+                        text: '结束',
+                        nextText: -1
+                    }
+                ]
+            },
+            {
+                id: 18,
+                text: '你的努力在学业上得到了回报，但你考虑更多地融入社交生活。',
+                options: [
+                    {
+                        text: '结束',
+                        nextText: -1
+                    }
+                ]
+            }
+        ];
+
+        // 启动游戏
+        startGame();
+    </script>
+</body>
+</html>
