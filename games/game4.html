@@ -15,50 +15,145 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 隐藏所有视图 */
+        .view {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+            animation: fadeIn 1s ease-in-out;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 主菜单视图 */
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #main-menu h1 {
+            font-size: 2.5em;
+            color: #007bff;
+            text-align: center;
+        }
+
+        .menu-button {
+            padding: 15px 30px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background 0.3s, transform 0.2s;
+            width: 220px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .menu-button:hover {
+            background: #218838;
+            transform: translateY(-2px);
         }
 
         /* 游戏容器 */
         #game-container {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            max-width: 800px;
-            width: 90%;
-            padding: 20px;
             display: flex;
             flex-direction: row;
-            gap: 20px;
+            gap: 30px;
+            position: relative;
+            flex: 1;
+        }
+
+        /* 实时排行榜 */
+        #live-leaderboard {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #fff3cd;
+            border: 2px solid #ffeeba;
+            border-radius: 10px;
+            padding: 15px;
+            width: 250px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        #live-leaderboard h3 {
+            margin-top: 0;
+            color: #856404;
+            text-align: center;
+        }
+
+        #live-leaderboard-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .live-leaderboard-item {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 5px;
+            padding: 8px;
+            margin-bottom: 10px;
+            position: relative;
+            transition: background 0.3s;
         }
 
         /* 主体内容 */
         #main-content {
             flex: 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
         }
 
         /* 词汇面板 */
         #vocab-panel {
             flex: 1;
-            background: #f9f9f9;
-            border-left: 2px solid #ddd;
-            padding: 10px;
+            background: #f0f8ff;
+            border-left: 3px solid #ddd;
+            padding: 15px;
             border-radius: 10px;
-            max-height: 600px;
+            max-height: 700px;
             overflow-y: auto;
+            position: relative;
         }
 
         #vocab-panel h2 {
-            font-size: 1.2em;
-            margin-bottom: 10px;
+            font-size: 1.4em;
+            margin-bottom: 15px;
             text-align: center;
             color: #555;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
         }
 
         .vocab-item {
-            margin-bottom: 8px;
-            padding: 5px;
+            margin-bottom: 10px;
+            padding: 7px;
             background: #eef;
             border-radius: 5px;
             position: relative;
+            transition: background 0.3s;
+        }
+
+        .vocab-item:hover {
+            background: #dde;
         }
 
         .vocab-item .definition {
@@ -68,11 +163,12 @@
             left: 0;
             background: #fff;
             border: 1px solid #ddd;
-            padding: 5px;
+            padding: 8px;
             border-radius: 5px;
-            width: 200px;
+            width: 220px;
             z-index: 10;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: opacity 0.3s;
         }
 
         .vocab-item:hover .definition {
@@ -81,31 +177,34 @@
 
         /* 故事文本 */
         #story {
-            font-size: 1.1em;
-            line-height: 1.6;
-            margin-bottom: 20px;
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            transition: opacity 0.5s;
         }
 
         /* 选项按钮 */
         #choices {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
 
         .choice-button {
-            padding: 10px 15px;
-            background: #4CAF50;
+            padding: 12px 20px;
+            background: #28a745;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1em;
-            transition: background 0.3s;
+            font-size: 1.1em;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .choice-button:hover {
-            background: #45a049;
+            background: #218838;
+            transform: translateY(-2px);
         }
 
         /* 词汇高亮 */
@@ -114,6 +213,7 @@
             font-weight: bold;
             position: relative;
             cursor: pointer;
+            transition: color 0.3s;
         }
 
         .vocab::after {
@@ -123,160 +223,401 @@
             color: #555;
         }
 
+        .vocab:hover {
+            color: #c9302c;
+        }
+
         /* 结束画面 */
         #end-screen {
             text-align: center;
-            font-size: 1.2em;
-            padding: 20px;
+            font-size: 1.4em;
+            padding: 30px;
+            animation: fadeIn 1s ease-in-out;
         }
 
-        #restart-button {
-            padding: 10px 20px;
-            background: #0275d8;
+        #restart-button, #quiz-button, #achievement-button, #settings-button, #close-settings, #close-leaderboard {
+            padding: 12px 25px;
+            background: #007bff;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1em;
-            transition: background 0.3s;
+            font-size: 1.1em;
+            transition: background 0.3s, transform 0.2s;
             margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 200px;
         }
 
-        #restart-button:hover {
-            background: #025aa5;
+        #restart-button:hover, #quiz-button:hover, #achievement-button:hover, #settings-button:hover, #close-settings:hover, #close-leaderboard:hover {
+            background: #0069d9;
+            transform: translateY(-2px);
+        }
+
+        /* 设置面板 */
+        #settings-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 100;
+        }
+
+        #settings-panel h3 {
+            margin-top: 0;
+            text-align: center;
+            color: #333;
+        }
+
+        .setting-item {
+            margin-bottom: 15px;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        /* 成就面板 */
+        #achievement-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #fffbe6;
+            border: 2px solid #ffecb3;
+            border-radius: 10px;
+            padding: 15px;
+            width: 250px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 100;
+            animation: slideIn 0.5s forwards;
+        }
+
+        #achievement-panel h3 {
+            margin-top: 0;
+            color: #856404;
+            text-align: center;
+        }
+
+        #achievement-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .achievement-item {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 5px;
+            padding: 8px;
+            margin-bottom: 10px;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .achievement-item.unlocked {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        /* 排行榜面板 */
+        #leaderboard-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #e2e3e5;
+            border: 2px solid #d6d8db;
+            border-radius: 10px;
+            padding: 15px;
+            width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 100;
+            animation: slideIn 0.5s forwards;
+        }
+
+        #leaderboard-panel h3 {
+            margin-top: 0;
+            color: #383d41;
+            text-align: center;
+        }
+
+        #leaderboard-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .leaderboard-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 8px;
+            margin-bottom: 10px;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        /* 计时器 */
+        #timer {
+            font-size: 1.1em;
+            color: #555;
+            text-align: right;
+        }
+
+        /* 背景音乐与音效 */
+        audio {
+            display: none;
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         /* 响应式设计 */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             #game-container {
                 flex-direction: column;
             }
 
             #vocab-panel {
                 border-left: none;
-                border-top: 2px solid #ddd;
+                border-top: 3px solid #ddd;
+            }
+
+            /* 调整设置按钮的位置 */
+            #main-content {
+                position: relative;
+            }
+
+            #settings-button-game {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                margin: 10px 0 0 0;
+            }
+
+            /* 调整实时排行榜位置 */
+            #live-leaderboard {
+                top: 10px;
+                left: 10px;
+                width: 200px;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #game-container {
+                padding: 20px;
+                flex-direction: column;
+            }
+
+            .choice-button, .menu-button, #restart-button, #quiz-button, #achievement-button, #settings-button, #close-settings, #close-leaderboard {
+                font-size: 1em;
+                padding: 10px 18px;
+                width: 100%;
+            }
+
+            #vocab-panel h2 {
+                font-size: 1.2em;
+            }
+
+            #main-menu h1 {
+                font-size: 1.8em;
+            }
+
+            /* 调整实时排行榜位置 */
+            #live-leaderboard {
+                top: 10px;
+                left: 10px;
+                width: 200px;
+                padding: 10px;
             }
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="main-content">
-            <h1>与 Chris 的英语学习冒险</h1>
-            <div id="story"></div>
-            <div id="choices"></div>
-        </div>
-        <div id="vocab-panel">
-            <h2>已学词汇</h2>
-            <div id="vocab-list">
-                <!-- 词汇将动态添加到这里 -->
+    <!-- 主菜单视图 -->
+    <div id="main-menu" class="view" style="display: flex;">
+        <h1>与 Chris 的英语学习冒险</h1>
+        <button class="menu-button" id="start-game-button">开始游戏</button>
+        <button class="menu-button" id="leaderboard-button">排行榜</button>
+        <button class="menu-button" id="settings-button-menu">设置</button>
+    </div>
+
+    <!-- 游戏视图 -->
+    <div id="game-view" class="view">
+        <div id="game-container">
+            <!-- 实时排行榜 -->
+            <div id="live-leaderboard">
+                <h3>实时排行榜</h3>
+                <ul id="live-leaderboard-list">
+                    <!-- 实时排行榜项将动态添加到这里 -->
+                </ul>
+            </div>
+
+            <!-- 主体内容 -->
+            <div id="main-content">
+                <h1>与 Chris 的英语学习冒险</h1>
+                <div id="timer">计时器: 00:00</div>
+                <div id="story"></div>
+                <div id="choices"></div>
+                <button class="menu-button" id="settings-button-game">设置</button>
+            </div>
+
+            <!-- 词汇面板 -->
+            <div id="vocab-panel">
+                <h2>已学词汇</h2>
+                <div id="vocab-list">
+                    <!-- 词汇将动态添加到这里 -->
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- 设置面板 -->
+    <div id="settings-panel">
+        <h3>设置</h3>
+        <div class="setting-item">
+            <label for="music-toggle">背景音乐</label>
+            <input type="checkbox" id="music-toggle" checked>
+        </div>
+        <div class="setting-item">
+            <label for="sound-toggle">音效</label>
+            <input type="checkbox" id="sound-toggle" checked>
+        </div>
+        <div class="setting-item">
+            <label for="music-volume">音乐音量</label>
+            <input type="range" id="music-volume" min="0" max="1" step="0.01" value="0.3">
+        </div>
+        <div class="setting-item">
+            <label for="sound-volume">音效音量</label>
+            <input type="range" id="sound-volume" min="0" max="1" step="0.01" value="1">
+        </div>
+        <button class="menu-button" id="close-settings">关闭</button>
+    </div>
+
+    <!-- 成就面板 -->
+    <div id="achievement-panel">
+        <h3>新成就解锁！</h3>
+        <ul id="achievement-list">
+            <!-- 成就将动态添加到这里 -->
+        </ul>
+    </div>
+
+    <!-- 排行榜面板 -->
+    <div id="leaderboard-panel">
+        <h3>排行榜</h3>
+        <ul id="leaderboard-list">
+            <!-- 排行榜项将动态添加到这里 -->
+        </ul>
+        <button class="menu-button" id="close-leaderboard">关闭</button>
+    </div>
+
+    <!-- 背景音乐 -->
+    <audio id="background-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- 交互音效 -->
+    <audio id="click-sound">
+        <source src="https://www.soundjay.com/buttons/sounds/button-16.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- 正确与错误音效 -->
+    <audio id="correct-sound">
+        <source src="https://www.soundjay.com/buttons/sounds/button-4.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <audio id="wrong-sound">
+        <source src="https://www.soundjay.com/buttons/sounds/button-10.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
     <script>
+        // 获取元素
+        const mainMenu = document.getElementById('main-menu');
+        const gameView = document.getElementById('game-view');
+        const startGameButton = document.getElementById('start-game-button');
+        const settingsButtonMenu = document.getElementById('settings-button-menu');
+        const settingsButtonGame = document.getElementById('settings-button-game');
+        const leaderboardButton = document.getElementById('leaderboard-button');
+        const closeSettingsButton = document.getElementById('close-settings');
+        const closeLeaderboardButton = document.getElementById('close-leaderboard');
+        const settingsPanel = document.getElementById('settings-panel');
+        const leaderboardPanel = document.getElementById('leaderboard-panel');
+        const leaderboardList = document.getElementById('leaderboard-list');
         const storyElement = document.getElementById('story');
         const choicesElement = document.getElementById('choices');
         const vocabListElement = document.getElementById('vocab-list');
+        const achievementPanel = document.getElementById('achievement-panel');
+        const achievementList = document.getElementById('achievement-list');
+        const timerElement = document.getElementById('timer');
+        const liveLeaderboardList = document.getElementById('live-leaderboard-list');
 
+        const backgroundMusic = document.getElementById('background-music');
+        const clickSound = document.getElementById('click-sound');
+        const correctSound = document.getElementById('correct-sound');
+        const wrongSound = document.getElementById('wrong-sound');
+
+        const musicToggle = document.getElementById('music-toggle');
+        const soundToggle = document.getElementById('sound-toggle');
+        const musicVolume = document.getElementById('music-volume');
+        const soundVolume = document.getElementById('sound-volume');
+
+        // AI对手定义
+        const aiOpponents = [
+            { name: '杨金', score: 10 },
+            { name: '姜辉', score: 8 },
+            { name: '李娜', score: 7 }
+        ];
+
+        // 游戏状态
         let state = {
-            vocab: {}
+            vocab: {},
+            achievements: [],
+            leaderboard: [],
+            score: 0,
+            timeElapsed: 0,
+            timerInterval: null,
+            settings: {
+                music: true,
+                sound: true,
+                musicVolume: 0.3,
+                soundVolume: 1
+            }
         };
 
-        function startGame() {
-            state = {
-                vocab: {}
-            };
-            vocabListElement.innerHTML = '';
-            showTextNode(1);
-        }
+        // 成就定义
+        const achievementsList = [
+            { id: 1, name: '首次学习', description: '学习了第一个新词汇！' },
+            { id: 2, name: '词汇小白', description: '学习了5个新词汇！' },
+            { id: 3, name: '词汇达人', description: '学习了15个新词汇！' },
+            { id: 4, name: '测验通关', description: '成功通过一次词汇测验！' },
+            { id: 5, name: '快速答题', description: '在测验中全部题目5秒内作答！' },
+            { id: 6, name: '探索者', description: '探索了所有的剧情路径！' }
+        ];
 
-        function showTextNode(textNodeIndex) {
-            const textNode = textNodes.find(node => node.id === textNodeIndex);
-            if (!textNode) {
-                endGame();
-                return;
-            }
-
-            // 替换并高亮词汇
-            const processedText = processText(textNode.text);
-            storyElement.innerHTML = processedText;
-
-            // 显示选项
-            choicesElement.innerHTML = '';
-            textNode.options.forEach(option => {
-                const button = document.createElement('button');
-                button.classList.add('choice-button');
-                button.innerText = option.text;
-                button.addEventListener('click', () => selectOption(option));
-                choicesElement.appendChild(button);
-            });
-        }
-
-        function selectOption(option) {
-            const nextTextNodeId = option.nextText;
-            if (nextTextNodeId <= 0) {
-                endGame();
-                return;
-            }
-            showTextNode(nextTextNodeId);
-        }
-
-        function endGame() {
-            storyElement.innerHTML = '<div id="end-screen">感谢游玩！点击下方按钮重新开始。</div>';
-            choicesElement.innerHTML = '';
-            const restartButton = document.createElement('button');
-            restartButton.id = 'restart-button';
-            restartButton.innerText = '重新开始';
-            restartButton.addEventListener('click', startGame);
-            choicesElement.appendChild(restartButton);
-        }
-
-        function processText(text) {
-            const vocabWords = {
-                'alleviate': '减轻，缓解',
-                'candid': '坦率的，直言不讳的',
-                'diligent': '勤勉的，勤奋的',
-                'emulate': '模仿，效仿',
-                'fortuitous': '偶然的，意外的',
-                'gregarious': '合群的，爱交际的',
-                'impeccable': '无可挑剔的，完美的',
-                'lucid': '清晰的，明了的',
-                'meticulous': '一丝不苟的，精确的',
-                'negligible': '微不足道的，可以忽略的',
-                'ostentatious': '炫耀的，浮华的',
-                'pragmatic': '实际的，务实的',
-                'quintessential': '典型的，精髓的',
-                'scrutinize': '仔细检查，详审',
-                'ubiquitous': '无处不在的，普遍存在的',
-                'invigorate': '激励，使有活力',
-                'invaluable': '非常宝贵的，无法估价的',
-                'lucidly': '清晰地，明了地'
-            };
-
-            let processed = text;
-            for (const [word, definition] of Object.entries(vocabWords)) {
-                const regex = new RegExp(`\\b${word}\\b`, 'gi');
-                if (regex.test(processed)) {
-                    // 添加到已学词汇
-                    addVocab(word, definition);
-                    // 高亮显示
-                    processed = processed.replace(regex, `<span class="vocab">${word}<span class="definition">${definition}</span></span>`);
-                }
-            }
-            return processed;
-        }
-
-        function addVocab(word, definition) {
-            if (!state.vocab[word.toLowerCase()]) {
-                state.vocab[word.toLowerCase()] = definition;
-                const vocabItem = document.createElement('div');
-                vocabItem.classList.add('vocab-item');
-                vocabItem.innerHTML = `<strong>${word}</strong>: ${definition}`;
-                vocabListElement.appendChild(vocabItem);
-            }
-        }
-
+        // 剧情节点定义
         const textNodes = [
             {
                 id: 1,
@@ -432,14 +773,13 @@
                     }
                 ]
             },
-            // 更多剧情节点
             {
                 id: 12,
                 text: '整个学校都在 <span class="vocab">ubiquitous</span> 地庆祝。你感到一种归属感。',
                 options: [
                     {
-                        text: '结束',
-                        nextText: -1
+                        text: '进行词汇测验',
+                        nextText: 'quiz'
                     }
                 ]
             },
@@ -448,8 +788,8 @@
                 text: 'Chris 微笑道："谢谢！你的支持带来了 <span class="vocab">quintessential</span> 的影响！"',
                 options: [
                     {
-                        text: '结束',
-                        nextText: -1
+                        text: '进行词汇测验',
+                        nextText: 'quiz'
                     }
                 ]
             },
@@ -458,8 +798,8 @@
                 text: '你成为球队成功的关键部分。',
                 options: [
                     {
-                        text: '结束',
-                        nextText: -1
+                        text: '进行词汇测验',
+                        nextText: 'quiz'
                     }
                 ]
             },
@@ -468,8 +808,8 @@
                 text: '你意识到平衡社交生活和学习的重要性。',
                 options: [
                     {
-                        text: '结束',
-                        nextText: -1
+                        text: '进行词汇测验',
+                        nextText: 'quiz'
                     }
                 ]
             },
@@ -478,8 +818,8 @@
                 text: '你 <span class="vocab">gregarious</span> 的性格帮助你结交了新朋友。',
                 options: [
                     {
-                        text: '结束',
-                        nextText: -1
+                        text: '进行词汇测验',
+                        nextText: 'quiz'
                     }
                 ]
             },
@@ -488,8 +828,8 @@
                 text: '即使作为一个安静的旁观者，你也感到了联系。',
                 options: [
                     {
-                        text: '结束',
-                        nextText: -1
+                        text: '进行词汇测验',
+                        nextText: 'quiz'
                     }
                 ]
             },
@@ -498,15 +838,640 @@
                 text: '你的努力在学业上得到了回报，但你考虑更多地融入社交生活。',
                 options: [
                     {
-                        text: '结束',
-                        nextText: -1
+                        text: '进行词汇测验',
+                        nextText: 'quiz'
                     }
                 ]
             }
         ];
 
+        // 测验题目定义
+        const quizQuestions = [
+            {
+                question: '1. "gregarious" 意思是？',
+                type: 'multiple-choice',
+                options: [
+                    { text: 'A. 爱独处的', correct: false },
+                    { text: 'B. 合群的，爱交际的', correct: true },
+                    { text: 'C. 内向的', correct: false }
+                ],
+                explanation: '"gregarious" 意思是合群的，爱交际的。'
+            },
+            {
+                question: '2. "meticulous" 意思是？',
+                type: 'multiple-choice',
+                options: [
+                    { text: 'A. 粗心的', correct: false },
+                    { text: 'B. 一丝不苟的，精确的', correct: true },
+                    { text: 'C. 快速的', correct: false }
+                ],
+                explanation: '"meticulous" 意思是一丝不苟的，精确的。'
+            },
+            {
+                question: '3. "pragmatic" 意思是？',
+                type: 'multiple-choice',
+                options: [
+                    { text: 'A. 理想主义的', correct: false },
+                    { text: 'B. 实际的，务实的', correct: true },
+                    { text: 'C. 不切实际的', correct: false }
+                ],
+                explanation: '"pragmatic" 意思是实际的，务实的。'
+            },
+            {
+                question: '4. "alleviate" 的近义词是？',
+                type: 'fill-in-the-blank',
+                correctAnswer: 'reduce',
+                explanation: '"alleviate" 的近义词是 reduce，意思是减轻。'
+            },
+            {
+                question: '5. "ubiquitous" 的反义词是？',
+                type: 'fill-in-the-blank',
+                correctAnswer: 'rare',
+                explanation: '"ubiquitous" 的反义词是 rare，意思是稀有的。'
+            },
+            {
+                question: '6. "invaluable" 的意思是？',
+                type: 'multiple-choice',
+                options: [
+                    { text: 'A. 无价的，非常宝贵的', correct: true },
+                    { text: 'B. 无关紧要的', correct: false },
+                    { text: 'C. 容易忽略的', correct: false }
+                ],
+                explanation: '"invaluable" 意思是无价的，非常宝贵的。'
+            },
+            {
+                question: '7. "candid" 的意思是？',
+                type: 'fill-in-the-blank',
+                correctAnswer: '坦率的',
+                explanation: '"candid" 的意思是坦率的，直言不讳的。'
+            },
+            {
+                question: '8. "lucidly" 的意思是？',
+                type: 'multiple-choice',
+                options: [
+                    { text: 'A. 模糊地', correct: false },
+                    { text: 'B. 清晰地，明了地', correct: true },
+                    { text: 'C. 听不清地', correct: false }
+                ],
+                explanation: '"lucidly" 的意思是清晰地，明了地。'
+            }
+        ];
+
+        // 设置面板事件
+        settingsButtonMenu.addEventListener('click', () => {
+            settingsPanel.style.display = 'block';
+        });
+
+        settingsButtonGame.addEventListener('click', () => {
+            settingsPanel.style.display = 'block';
+        });
+
+        closeSettingsButton.addEventListener('click', () => {
+            settingsPanel.style.display = 'none';
+        });
+
+        leaderboardButton.addEventListener('click', () => {
+            renderLeaderboard();
+            leaderboardPanel.style.display = 'block';
+        });
+
+        closeLeaderboardButton.addEventListener('click', () => {
+            leaderboardPanel.style.display = 'none';
+        });
+
+        musicToggle.addEventListener('change', (e) => {
+            state.settings.music = e.target.checked;
+            backgroundMusic.muted = !state.settings.music;
+            playClickSound();
+            saveProgress();
+        });
+
+        soundToggle.addEventListener('change', (e) => {
+            state.settings.sound = e.target.checked;
+            playClickSound();
+            saveProgress();
+        });
+
+        musicVolume.addEventListener('input', (e) => {
+            state.settings.musicVolume = e.target.value;
+            backgroundMusic.volume = state.settings.musicVolume;
+            saveProgress();
+        });
+
+        soundVolume.addEventListener('input', (e) => {
+            state.settings.soundVolume = e.target.value;
+            clickSound.volume = state.settings.soundVolume;
+            correctSound.volume = state.settings.soundVolume;
+            wrongSound.volume = state.settings.soundVolume;
+            saveProgress();
+        });
+
+        // 主菜单按钮事件
+        startGameButton.addEventListener('click', () => {
+            playClickSound();
+            mainMenu.style.display = 'none';
+            gameView.style.display = 'flex';
+            startGame(); // 在点击开始游戏按钮后启动游戏
+        });
+
+        // 设置面板控制
+        function openSettings() {
+            settingsPanel.style.display = 'block';
+        }
+
+        // 监听从主菜单和游戏视图的设置按钮
+        settingsButtonMenu.addEventListener('click', openSettings);
+        settingsButtonGame.addEventListener('click', openSettings);
+
         // 启动游戏
-        startGame();
+        function startGame() {
+            // 从localStorage加载进度
+            const savedState = JSON.parse(localStorage.getItem('gameState'));
+            if (savedState) {
+                state = savedState;
+                // 确保AI对手在排行榜中
+                aiOpponents.forEach(ai => {
+                    if (!state.leaderboard.find(entry => entry.name === ai.name)) {
+                        state.leaderboard.push(ai);
+                    }
+                });
+                // 设置音乐和音效
+                backgroundMusic.volume = state.settings.musicVolume;
+                backgroundMusic.muted = !state.settings.music;
+                if (state.settings.music) backgroundMusic.play();
+                clickSound.volume = state.settings.soundVolume;
+                correctSound.volume = state.settings.soundVolume;
+                wrongSound.volume = state.settings.soundVolume;
+                renderVocabList();
+                renderAchievements();
+                renderLeaderboard();
+                renderLiveLeaderboard();
+                startTimer();
+                showTextNode(1);
+            } else {
+                state = {
+                    vocab: {},
+                    achievements: [],
+                    leaderboard: [...aiOpponents], // 初始化时添加AI对手
+                    score: 0,
+                    timeElapsed: 0,
+                    timerInterval: null,
+                    settings: {
+                        music: true,
+                        sound: true,
+                        musicVolume: 0.3,
+                        soundVolume: 1
+                    }
+                };
+                backgroundMusic.volume = state.settings.musicVolume;
+                if (state.settings.music) backgroundMusic.play();
+                vocabListElement.innerHTML = '';
+                startTimer();
+                showTextNode(1);
+                saveProgress();
+            }
+        }
+
+        // 显示故事节点
+        function showTextNode(textNodeIndex) {
+            if (textNodeIndex === -1) {
+                endGame();
+                return;
+            }
+
+            const textNode = textNodes.find(node => node.id === textNodeIndex);
+            if (!textNode) {
+                endGame();
+                return;
+            }
+
+            // 替换并高亮词汇
+            const processedText = processText(textNode.text);
+            storyElement.innerHTML = processedText;
+            storyElement.style.opacity = 0;
+            setTimeout(() => { storyElement.style.opacity = 1; }, 100);
+
+            // 显示选项
+            choicesElement.innerHTML = '';
+            textNode.options.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('choice-button');
+                button.innerText = option.text;
+                button.addEventListener('click', () => {
+                    playClickSound();
+                    selectOption(option);
+                });
+                choicesElement.appendChild(button);
+            });
+
+            saveProgress();
+        }
+
+        // 处理用户选择
+        function selectOption(option) {
+            const nextTextNodeId = option.nextText;
+            if (nextTextNodeId <= 0) {
+                endGame();
+                return;
+            }
+            if (nextTextNodeId === 'quiz') {
+                showQuiz();
+            } else {
+                showTextNode(nextTextNodeId);
+            }
+        }
+
+        // 结束游戏
+        function endGame() {
+            clearInterval(state.timerInterval);
+            storyElement.innerHTML = '<div id="end-screen">感谢游玩！点击下方按钮重新开始。</div>';
+            choicesElement.innerHTML = '';
+            const restartButton = document.createElement('button');
+            restartButton.id = 'restart-button';
+            restartButton.innerText = '重新开始';
+            restartButton.addEventListener('click', () => {
+                playClickSound();
+                resetGame();
+                mainMenu.style.display = 'flex';
+                gameView.style.display = 'none';
+            });
+            choicesElement.appendChild(restartButton);
+            saveProgress();
+        }
+
+        // 重置游戏
+        function resetGame() {
+            localStorage.removeItem('gameState');
+            state = {
+                vocab: {},
+                achievements: [],
+                leaderboard: [...aiOpponents], // 重置排行榜，仅包含AI对手
+                score: 0,
+                timeElapsed: 0,
+                timerInterval: null,
+                settings: {
+                    music: true,
+                    sound: true,
+                    musicVolume: 0.3,
+                    soundVolume: 1
+                }
+            };
+            vocabListElement.innerHTML = '';
+            achievementList.innerHTML = '';
+            leaderboardList.innerHTML = '';
+            liveLeaderboardList.innerHTML = '';
+            backgroundMusic.volume = state.settings.musicVolume;
+            backgroundMusic.muted = !state.settings.music;
+            if (state.settings.music) backgroundMusic.play();
+            startTimer();
+            showTextNode(1);
+            saveProgress();
+        }
+
+        // 处理文本，替换词汇并高亮
+        function processText(text) {
+            const vocabWords = {
+                'alleviate': '减轻，缓解',
+                'candid': '坦率的，直言不讳的',
+                'diligent': '勤勉的，勤奋的',
+                'emulate': '模仿，效仿',
+                'fortuitous': '偶然的，意外的',
+                'gregarious': '合群的，爱交际的',
+                'impeccable': '无可挑剔的，完美的',
+                'lucid': '清晰的，明了的',
+                'meticulous': '一丝不苟的，精确的',
+                'negligible': '微不足道的，可以忽略的',
+                'ostentatious': '炫耀的，浮华的',
+                'pragmatic': '实际的，务实的',
+                'quintessential': '典型的，精髓的',
+                'scrutinize': '仔细检查，详审',
+                'ubiquitous': '无处不在的，普遍存在的',
+                'invigorate': '激励，使有活力',
+                'invaluable': '非常宝贵的，无法估价的',
+                'lucidly': '清晰地，明了地'
+            };
+
+            let processed = text;
+            for (const [word, definition] of Object.entries(vocabWords)) {
+                const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                if (regex.test(processed)) {
+                    // 添加到已学词汇
+                    addVocab(word, definition);
+                    // 高亮显示
+                    processed = processed.replace(regex, `<span class="vocab">${word}<span class="definition">${definition}</span></span>`);
+                }
+            }
+            return processed;
+        }
+
+        // 添加词汇到词汇面板
+        function addVocab(word, definition) {
+            if (!state.vocab[word.toLowerCase()]) {
+                state.vocab[word.toLowerCase()] = definition;
+                const vocabItem = document.createElement('div');
+                vocabItem.classList.add('vocab-item');
+                vocabItem.innerHTML = `<strong>${word}</strong>: ${definition}`;
+                vocabListElement.appendChild(vocabItem);
+
+                // 检查并解锁成就
+                checkAchievements();
+            }
+        }
+
+        // 渲染词汇列表
+        function renderVocabList() {
+            vocabListElement.innerHTML = '';
+            for (const [word, definition] of Object.entries(state.vocab)) {
+                const vocabItem = document.createElement('div');
+                vocabItem.classList.add('vocab-item');
+                vocabItem.innerHTML = `<strong>${word}</strong>: ${definition}`;
+                vocabListElement.appendChild(vocabItem);
+            }
+        }
+
+        // 检查并解锁成就
+        function checkAchievements() {
+            // 解锁首次学习
+            if (Object.keys(state.vocab).length === 1 && !state.achievements.includes(1)) {
+                unlockAchievement(1);
+            }
+            // 解锁词汇小白
+            if (Object.keys(state.vocab).length === 5 && !state.achievements.includes(2)) {
+                unlockAchievement(2);
+            }
+            // 解锁词汇达人
+            if (Object.keys(state.vocab).length === 15 && !state.achievements.includes(3)) {
+                unlockAchievement(3);
+            }
+            // 可以在这里添加更多的成就检查
+        }
+
+        // 解锁成就
+        function unlockAchievement(id) {
+            state.achievements.push(id);
+            const achievement = achievementsList.find(a => a.id === id);
+            const achievementItem = document.createElement('li');
+            achievementItem.classList.add('achievement-item', 'unlocked');
+            achievementItem.innerHTML = `<strong>${achievement.name}</strong><br>${achievement.description}`;
+            achievementList.appendChild(achievementItem);
+
+            // 显示成就面板
+            achievementPanel.style.display = 'block';
+            setTimeout(() => {
+                achievementPanel.style.display = 'none';
+            }, 3000);
+
+            saveProgress();
+        }
+
+        // 渲染成就列表
+        function renderAchievements() {
+            achievementList.innerHTML = '';
+            state.achievements.forEach(id => {
+                const achievement = achievementsList.find(a => a.id === id);
+                const achievementItem = document.createElement('li');
+                achievementItem.classList.add('achievement-item', 'unlocked');
+                achievementItem.innerHTML = `<strong>${achievement.name}</strong><br>${achievement.description}`;
+                achievementList.appendChild(achievementItem);
+            });
+        }
+
+        // 渲染排行榜
+        function renderLeaderboard() {
+            leaderboardList.innerHTML = '';
+            // 确保AI对手在排行榜中
+            aiOpponents.forEach(ai => {
+                if (!state.leaderboard.find(entry => entry.name === ai.name)) {
+                    state.leaderboard.push(ai);
+                }
+            });
+            // 排序并保留前5名
+            state.leaderboard.sort((a, b) => b.score - a.score);
+            const topEntries = state.leaderboard.slice(0, 5);
+            topEntries.forEach(entry => {
+                const leaderboardItem = document.createElement('li');
+                leaderboardItem.classList.add('leaderboard-item');
+                leaderboardItem.innerHTML = `<strong>${entry.name}</strong>: ${entry.score} 分`;
+                leaderboardList.appendChild(leaderboardItem);
+            });
+        }
+
+        // 渲染实时排行榜
+        function renderLiveLeaderboard() {
+            liveLeaderboardList.innerHTML = '';
+            const topEntries = state.leaderboard.slice(0, 5);
+            topEntries.forEach(entry => {
+                const liveLeaderboardItem = document.createElement('li');
+                liveLeaderboardItem.classList.add('live-leaderboard-item');
+                liveLeaderboardItem.innerHTML = `<strong>${entry.name}</strong>: ${entry.score} 分`;
+                liveLeaderboardList.appendChild(liveLeaderboardItem);
+            });
+        }
+
+        // 显示测验
+        function showQuiz() {
+            let currentQuizQuestion = 0;
+            let quizScore = 0;
+            let quizTimer = null;
+            const totalQuestions = quizQuestions.length;
+
+            function loadQuizQuestion(index) {
+                if (index >= quizQuestions.length) {
+                    finishQuiz();
+                    return;
+                }
+
+                const q = quizQuestions[index];
+                storyElement.innerHTML = `<h2>词汇测验</h2><p>${q.question}</p>`;
+                choicesElement.innerHTML = '';
+
+                // 设置计时器
+                let timeLeft = 15; // 15秒
+                timerElement.innerText = `计时器: ${timeLeft}s`;
+                clearInterval(quizTimer);
+                quizTimer = setInterval(() => {
+                    timeLeft--;
+                    timerElement.innerText = `计时器: ${timeLeft}s`;
+                    if (timeLeft <= 0) {
+                        clearInterval(quizTimer);
+                        alert('时间到！');
+                        loadQuizQuestion(index + 1);
+                    }
+                }, 1000);
+
+                if (q.type === 'multiple-choice') {
+                    q.options.forEach(option => {
+                        const button = document.createElement('button');
+                        button.classList.add('choice-button');
+                        button.innerText = option.text;
+                        button.addEventListener('click', () => {
+                            clearInterval(quizTimer);
+                            if (option.correct) {
+                                quizScore++;
+                                if (state.settings.sound) correctSound.play();
+                                alert('正确！\n' + q.explanation);
+                            } else {
+                                if (state.settings.sound) wrongSound.play();
+                                alert('错误。\n' + q.explanation);
+                            }
+                            loadQuizQuestion(index + 1);
+                        });
+                        choicesElement.appendChild(button);
+                    });
+                } else if (q.type === 'fill-in-the-blank') {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = 'quiz-input';
+                    input.placeholder = '请输入你的答案';
+                    input.style.padding = '10px';
+                    input.style.fontSize = '1em';
+                    input.style.width = '80%';
+                    choicesElement.appendChild(input);
+
+                    const submitButton = document.createElement('button');
+                    submitButton.classList.add('choice-button');
+                    submitButton.innerText = '提交';
+                    submitButton.style.marginTop = '10px';
+                    submitButton.addEventListener('click', () => {
+                        clearInterval(quizTimer);
+                        const userAnswer = input.value.trim().toLowerCase();
+                        if (userAnswer === q.correctAnswer.toLowerCase()) {
+                            quizScore++;
+                            if (state.settings.sound) correctSound.play();
+                            alert('正确！\n' + q.explanation);
+                        } else {
+                            if (state.settings.sound) wrongSound.play();
+                            alert('错误。\n' + q.explanation);
+                        }
+                        loadQuizQuestion(index + 1);
+                    });
+                    choicesElement.appendChild(submitButton);
+                }
+
+                currentQuizQuestion = index;
+                saveProgress();
+            }
+
+            function finishQuiz() {
+                storyElement.innerHTML = `<h2>测验完成！</h2><p>你的得分是 ${quizScore} / ${totalQuestions}</p>`;
+                choicesElement.innerHTML = '';
+
+                // 更新成绩
+                state.score += quizScore;
+                checkAchievementsForQuiz();
+
+                // 更新排行榜
+                updateLeaderboard(quizScore);
+
+                const continueButton = document.createElement('button');
+                continueButton.id = 'quiz-button';
+                continueButton.innerText = '继续游戏';
+                continueButton.addEventListener('click', () => {
+                    playClickSound();
+                    showTextNode(1); // 返回游戏继续
+                });
+                choicesElement.appendChild(continueButton);
+
+                saveProgress();
+            }
+
+            function checkAchievementsForQuiz() {
+                // 解锁测验通关
+                if (quizScore === quizQuestions.length && !state.achievements.includes(4)) {
+                    unlockAchievement(4);
+                }
+                // 解锁快速答题（假设完成测验并满分）
+                if (quizScore === quizQuestions.length && !state.achievements.includes(5)) {
+                    unlockAchievement(5);
+                }
+            }
+
+            function updateLeaderboard(score) {
+                let name = prompt('请输入你的名字以记录排行榜：', '玩家');
+                if (name) {
+                    name = name.trim();
+                    if (name === '') {
+                        name = '玩家';
+                    }
+                    state.leaderboard.push({ name: name, score: score });
+                    // 确保AI对手不重复添加
+                    aiOpponents.forEach(ai => {
+                        if (!state.leaderboard.find(entry => entry.name === ai.name)) {
+                            state.leaderboard.push(ai);
+                        }
+                    });
+                    // 排序并保留前5名
+                    state.leaderboard.sort((a, b) => b.score - a.score);
+                    state.leaderboard = state.leaderboard.slice(0, 5);
+                    renderLeaderboard();
+                    renderLiveLeaderboard();
+                    saveProgress();
+                }
+            }
+
+            loadQuizQuestion(0);
+        }
+
+        // 播放点击音效
+        function playClickSound() {
+            if (state.settings.sound) {
+                clickSound.currentTime = 0;
+                clickSound.play();
+            }
+        }
+
+        // 保存游戏进度到localStorage
+        function saveProgress() {
+            localStorage.setItem('gameState', JSON.stringify(state));
+        }
+
+        // 启动计时器
+        function startTimer() {
+            state.startTime = Date.now() - state.timeElapsed * 1000;
+            state.timerInterval = setInterval(() => {
+                state.timeElapsed = Math.floor((Date.now() - state.startTime) / 1000);
+                timerElement.innerText = `计时器: ${formatTime(state.timeElapsed)}`;
+                saveProgress();
+            }, 1000);
+        }
+
+        // 格式化时间显示
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // 初始化排行榜
+        function initLeaderboard() {
+            // 确保AI对手在排行榜中
+            aiOpponents.forEach(ai => {
+                if (!state.leaderboard.find(entry => entry.name === ai.name)) {
+                    state.leaderboard.push(ai);
+                }
+            });
+            // 排序并保留前5名
+            state.leaderboard.sort((a, b) => b.score - a.score);
+            state.leaderboard = state.leaderboard.slice(0, 5);
+            renderLeaderboard();
+            renderLiveLeaderboard();
+            saveProgress();
+        }
+
+        // 渲染实时排行榜
+        function renderLiveLeaderboard() {
+            liveLeaderboardList.innerHTML = '';
+            const topEntries = state.leaderboard.slice(0, 5);
+            topEntries.forEach(entry => {
+                const liveLeaderboardItem = document.createElement('li');
+                liveLeaderboardItem.classList.add('live-leaderboard-item');
+                liveLeaderboardItem.innerHTML = `<strong>${entry.name}</strong>: ${entry.score} 分`;
+                liveLeaderboardList.appendChild(liveLeaderboardItem);
+            });
+        }
+
+        // 初始化游戏（不再在页面加载时调用）
+        // startGame(); // 移除
     </script>
 </body>
 </html>
