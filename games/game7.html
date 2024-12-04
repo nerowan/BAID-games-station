@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>跟着Chris学AP化学</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 全局样式 */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #4682B4;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+        header {
+            background-color: #000080;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        /* 主菜单样式 */
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .menu-btn {
+            background-color: #FF8C00;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 200px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .menu-btn:hover {
+            background-color: #FFA500;
+            transform: scale(1.05);
+        }
+        /* 章节选择界面样式 */
+        #chapter-select {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .chapter-btn {
+            background-color: #20B2AA;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 220px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .chapter-btn:hover {
+            background-color: #3CB371;
+            transform: scale(1.05);
+        }
+        .back-btn {
+            background-color: #FF6347;
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .back-btn:hover {
+            background-color: #FF4500;
+            transform: scale(1.05);
+        }
+        /* 游戏容器样式 */
+        #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+            display: none;
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            height: 600px;
+            background: #006400; /* 球场绿色 */
+            border: 5px solid #000080;
+            margin: 20px 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        /* 使用CSS绘制Chris */
+        #chris {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            width: 80px;
+            height: 120px;
+            background-color: #FFD700;
+            border: 2px solid #000;
+            border-radius: 10px;
+            transition: left 0.5s, bottom 0.5s, transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            z-index: 2;
+        }
+        /* Chris的身体部分 */
+        .chris-body {
+            width: 60%;
+            height: 60%;
+            background-color: #1E90FF;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        /* Chris的头部 */
+        .chris-head {
+            width: 40px;
+            height: 40px;
+            background-color: #FFE4C4;
+            border: 2px solid #000;
+            border-radius: 50%;
+            margin-top: -20px;
+        }
+        /* 使用CSS绘制足球 */
+        #ball {
+            position: absolute;
+            bottom: 100px;
+            left: 400px;
+            width: 40px;
+            height: 40px;
+            background-color: #FFFFFF;
+            border: 2px solid #000;
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 4px #000;
+            transition: left 1s, bottom 1s;
+            z-index: 1;
+        }
+        /* 问题框样式 */
+        #question-box {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 128, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 4;
+        }
+        #question-box h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        #answers {
+            display: flex;
+            flex-direction: column;
+            margin-top: 15px;
+        }
+        .answer-btn {
+            background-color: #20B2AA;
+            border: none;
+            padding: 12px;
+            margin: 8px 0;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .answer-btn:hover {
+            background-color: #3CB371;
+        }
+        /* 反馈框样式 */
+        #feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #000;
+            padding: 30px;
+            border-radius: 15px;
+            display: none;
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            z-index: 5;
+        }
+        #feedback p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        #feedback button {
+            background-color: #1E90FF;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            transition: background-color 0.3s;
+        }
+        #feedback button:hover {
+            background-color: #1C86EE;
+        }
+        /* 成就和排行榜样式 */
+        .container-title {
+            text-align: center;
+            font-size: 2em;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .list {
+            list-style: none;
+            padding: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .list-item {
+            background-color: #000080;
+            margin: 10px auto;
+            padding: 15px;
+            border-radius: 10px;
+            width: 80%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            font-size: 1.2em;
+        }
+        /* 词汇卡样式 */
+        #vocab-container {
+            padding: 20px;
+            position: relative;
+            height: 600px;
+            overflow-y: auto;
+        }
+        .vocab-card {
+            background-color: #20B2AA;
+            border: none;
+            padding: 20px;
+            margin: 10px auto;
+            color: #fff;
+            border-radius: 10px;
+            width: 80%;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            perspective: 1000px;
+        }
+        .vocab-card:hover {
+            background-color: #3CB371;
+            transform: scale(1.02);
+        }
+        .vocab-term {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .vocab-definition {
+            display: none;
+            margin-top: 10px;
+            font-size: 1.2em;
+        }
+        .vocab-card.flipped .vocab-definition {
+            display: block;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        /* 进度条样式 */
+        #progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 10px;
+            background-color: #FF8C00;
+            width: 0%;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            transition: width 0.5s;
+            z-index: 6;
+        }
+        /* 添加动画关键帧 */
+        @keyframes celebrate {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            50% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-10px, -10px); }
+            50% { transform: translate(10px, -10px); }
+            75% { transform: translate(-10px, 10px); }
+            100% { transform: translate(10px, 10px); }
+        }
+        @keyframes kick {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes shoot-own-goal {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(30px); }
+            100% { transform: translateY(0); }
+        }
+        .celebrate {
+            animation: celebrate 0.5s ease-in-out;
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        .kick {
+            animation: kick 0.5s ease-in-out;
+        }
+        .shoot-own-goal {
+            animation: shoot-own-goal 0.5s ease-in-out;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            header {
+                font-size: 1.5em;
+                padding: 15px;
+            }
+            #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+                height: 500px;
+            }
+            #chris {
+                width: 60px;
+                height: 90px;
+            }
+            .chris-body {
+                width: 50%;
+                height: 50%;
+            }
+            .chris-head {
+                width: 30px;
+                height: 30px;
+            }
+            #ball {
+                width: 30px;
+                height: 30px;
+            }
+            #question-box h3 {
+                font-size: 1.2em;
+            }
+            .answer-btn {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            #feedback p {
+                font-size: 1em;
+            }
+            #start-btn, #restart-btn, .back-btn {
+                padding: 15px 30px;
+                font-size: 1.2em;
+            }
+            .vocab-card {
+                width: 90%;
+            }
+            .list-item {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>跟着Chris学AP化学</header>
+
+    <!-- 主菜单 -->
+    <div id="main-menu">
+        <button class="menu-btn" id="start-game-btn">开始游戏</button>
+        <button class="menu-btn" id="vocab-btn">词汇卡</button>
+        <button class="menu-btn" id="achievements-btn">成就</button>
+        <button class="menu-btn" id="leaderboard-btn">排行榜</button>
+    </div>
+
+    <!-- 章节选择界面 -->
+    <div id="chapter-select">
+        <div class="container-title">选择章节</div>
+        <button class="chapter-btn" data-chapter="1">第一章：化学的基本概念</button>
+        <button class="chapter-btn" data-chapter="2">第二章：化学反应与平衡</button>
+        <!-- 可以继续添加更多章节按钮 -->
+        <button class="back-btn" id="back-from-chapter-btn">返回主菜单</button>
+    </div>
+
+    <!-- 游戏容器 -->
+    <div id="game-container">
+        <!-- 进度条 -->
+        <div id="progress-bar"></div>
+        <!-- Chris角色 -->
+        <div id="chris">
+            <div class="chris-head"></div>
+            <div class="chris-body"></div>
+        </div>
+        <!-- 足球 -->
+        <div id="ball"></div>
+
+        <!-- 问题框 -->
+        <div id="question-box">
+            <h3 id="question">问题文本</h3>
+            <div id="answers">
+                <!-- 答案按钮 -->
+            </div>
+        </div>
+
+        <!-- 反馈框 -->
+        <div id="feedback">
+            <p id="feedback-text">反馈信息</p>
+            <button id="next-btn">继续</button>
+        </div>
+    </div>
+
+    <!-- 词汇卡容器 -->
+    <div id="vocab-container">
+        <button class="close-btn" id="close-vocab-btn">&times;</button>
+        <div class="container-title">化学词汇卡</div>
+        <div id="vocab-cards">
+            <!-- 词汇卡 -->
+        </div>
+    </div>
+
+    <!-- 成就容器 -->
+    <div id="achievements-container">
+        <button class="close-btn" id="close-achievements-btn">&times;</button>
+        <div class="container-title">成就</div>
+        <ul class="list" id="achievements-list">
+            <!-- 成就列表 -->
+        </ul>
+    </div>
+
+    <!-- 排行榜容器 -->
+    <div id="leaderboard-container">
+        <button class="close-btn" id="close-leaderboard-btn">&times;</button>
+        <div class="container-title">排行榜</div>
+        <ul class="list" id="leaderboard-list">
+            <!-- 排行榜列表 -->
+        </ul>
+    </div>
+
+    <script>
+        // 问题库
+        const questions = [
+            // 第一章
+            {
+                chapter: 1,
+                story: "第一章：Chris初识化学，了解基本概念。",
+                question: "What is the smallest unit of an element that retains the properties of that element?",
+                questionCN: "保持元素性质的最小单位是什么？",
+                answers: ["Molecule", "Atom", "Ion", "Electron"],
+                correct: 1,
+                explanation: "An atom is the smallest unit of an element that retains the properties of that element.",
+                difficulty: "easy"
+            },
+            {
+                chapter: 1,
+                story: "Chris学习元素周期表，认识不同元素。",
+                question: "Which element has the chemical symbol 'O'?",
+                questionCN: "哪个元素的化学符号是 'O'？",
+                answers: ["Gold", "Oxygen", "Osmium", "Oganesson"],
+                correct: 1,
+                explanation: "Oxygen has the chemical symbol 'O'.",
+                difficulty: "easy"
+            },
+            {
+                chapter: 1,
+                story: "Chris了解化学键，探索分子的形成。",
+                question: "True or False: Ionic bonds are formed by the sharing of electrons.",
+                questionCN: "真或假：离子键是通过共享电子形成的。",
+                answers: ["True", "False"],
+                correct: 1,
+                explanation: "False. Ionic bonds are formed by the transfer of electrons, not sharing.",
+                difficulty: "easy"
+            },
+            {
+                chapter: 1,
+                story: "Chris探索分子的结构，理解化学键的类型。",
+                question: "What type of bond involves the sharing of electron pairs between atoms?",
+                questionCN: "哪种键涉及原子之间电子对的共享？",
+                answers: ["Ionic bond", "Covalent bond", "Metallic bond", "Hydrogen bond"],
+                correct: 1,
+                explanation: "Covalent bonds involve the sharing of electron pairs between atoms.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 1,
+                story: "Chris深入学习化学反应，理解反应类型。",
+                question: "Which of the following is not a type of chemical reaction?",
+                questionCN: "以下哪项不是化学反应的类型？",
+                answers: ["Synthesis", "Decomposition", "Combustion", "Photosynthesis"],
+                correct: 3,
+                explanation: "Photosynthesis is a biological process, not a fundamental type of chemical reaction.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 1,
+                story: "Chris了解摩尔概念，计算物质的量。",
+                question: "What is the molar mass of water (H₂O)? (Approximate to the nearest g/mol)",
+                questionCN: "水（H₂O）的摩尔质量是多少？（近似到最近的 g/mol）",
+                answers: ["18 g/mol", "16 g/mol", "20 g/mol", "14 g/mol"],
+                correct: 0,
+                explanation: "H (1 g/mol) ×2 + O (16 g/mol) = 18 g/mol.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 1,
+                story: "Chris学习化学方程式的配平，掌握反应过程。",
+                question: "Balance the following equation: ___ H₂ + ___ O₂ → ___ H₂O",
+                questionCN: "平衡以下方程式：___ H₂ + ___ O₂ → ___ H₂O",
+                answers: ["2, 1, 2", "1, 1, 1", "3, 2, 3", "2, 2, 2"],
+                correct: 0,
+                explanation: "2 H₂ + 1 O₂ → 2 H₂O.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 1,
+                story: "Chris了解化学反应的能量变化，探索反应热。",
+                question: "Which term describes the energy released when bonds are formed?",
+                questionCN: "描述形成键时释放的能量的术语是什么？",
+                answers: ["Endothermic", "Exothermic", "Activation energy", "Enthalpy"],
+                correct: 1,
+                explanation: "Exothermic reactions release energy when bonds are formed.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 1,
+                story: "Chris探索化学动力学，理解反应速率。",
+                question: "What factor does not affect the rate of a chemical reaction?",
+                questionCN: "以下哪个因素不会影响化学反应的速率？",
+                answers: ["Concentration", "Temperature", "Catalyst", "Color of Reactants"],
+                correct: 3,
+                explanation: "The color of reactants does not affect the reaction rate.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 1,
+                story: "Chris学习化学平衡，理解反应的动态平衡。",
+                question: "Le Chatelier's principle predicts that if a system at equilibrium is disturbed, the system will adjust to:",
+                questionCN: "勒沙特列原理预测，如果一个处于平衡状态的系统受到干扰，系统将调整以：",
+                answers: ["Increase temperature", "Decrease concentration", "Re-establish equilibrium", "Stop the reaction"],
+                correct: 2,
+                explanation: "Le Chatelier's principle states that the system will adjust to re-establish equilibrium.",
+                difficulty: "hard"
+            },
+            // 第二章
+            {
+                chapter: 2,
+                story: "第二章：Chris深入研究化学反应与平衡。",
+                question: "Which gas law relates pressure and volume at constant temperature?",
+                questionCN: "哪一个气体定律在温度恒定的情况下描述压力和体积的关系？",
+                answers: ["Charles's Law", "Boyle's Law", "Avogadro's Law", "Gay-Lussac's Law"],
+                correct: 1,
+                explanation: "Boyle's Law states that pressure and volume are inversely proportional at constant temperature.",
+                difficulty: "easy"
+            },
+            {
+                chapter: 2,
+                story: "Chris学习酸碱平衡，理解pH值的意义。",
+                question: "What is the pH of a neutral solution at 25°C?",
+                questionCN: "25°C时中性溶液的pH值是多少？",
+                answers: ["0", "7", "14", "1"],
+                correct: 1,
+                explanation: "At 25°C, a neutral solution has a pH of 7.",
+                difficulty: "easy"
+            },
+            {
+                chapter: 2,
+                story: "Chris了解氧化还原反应，探索电子转移。",
+                question: "In a redox reaction, which species is reduced?",
+                questionCN: "在氧化还原反应中，哪个物质被还原？",
+                answers: ["The oxidizing agent", "The reducing agent", "Both", "Neither"],
+                correct: 0,
+                explanation: "The oxidizing agent is reduced by gaining electrons.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 2,
+                story: "Chris研究电化学，理解电池的工作原理。",
+                question: "What is the standard electrode potential of the hydrogen electrode?",
+                questionCN: "氢电极的标准电极电位是多少？",
+                answers: ["0 V", "1.23 V", "-0.76 V", "2.00 V"],
+                correct: 0,
+                explanation: "The standard electrode potential of the hydrogen electrode is defined as 0 V.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 2,
+                story: "Chris探索有机化学，理解碳链的结构。",
+                question: "Which functional group is characterized by a carbon double-bonded to an oxygen?",
+                questionCN: "哪种官能团的特征是一个碳与一个氧形成双键？",
+                answers: ["Hydroxyl", "Carbonyl", "Amino", "Carboxyl"],
+                correct: 1,
+                explanation: "The carbonyl group is characterized by a carbon double-bonded to an oxygen.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 2,
+                story: "Chris学习化学反应速率，理解影响因素。",
+                question: "Which of the following increases the rate of a chemical reaction?",
+                questionCN: "以下哪项会增加化学反应的速率？",
+                answers: ["Lower temperature", "Higher activation energy", "Adding a catalyst", "Decreasing concentration"],
+                correct: 2,
+                explanation: "Adding a catalyst lowers the activation energy, increasing the reaction rate.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 2,
+                story: "Chris研究化学热力学，理解反应的自发性。",
+                question: "A reaction with ΔG < 0 is:",
+                questionCN: "ΔG < 0 的反应是：",
+                answers: ["Endergonic", "Exergonic", "At equilibrium", "Non-spontaneous"],
+                correct: 1,
+                explanation: "A reaction with ΔG < 0 is exergonic and spontaneous.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 2,
+                story: "Chris探索溶液化学，理解溶解度与溶剂的关系。",
+                question: "What is the solubility of a substance measured in?",
+                questionCN: "物质的溶解度用什么来衡量？",
+                answers: ["moles per liter (M)", "grams per milliliter", "pH units", "joules per mole"],
+                correct: 0,
+                explanation: "Solubility is typically measured in moles per liter (M).",
+                difficulty: "hard"
+            },
+            {
+                chapter: 2,
+                story: "Chris学习化学平衡，理解系统的动态调整。",
+                question: "Which of the following will shift the equilibrium of the reaction N₂ + 3H₂ ⇌ 2NH₃ to the right?",
+                questionCN: "以下哪项会使反应 N₂ + 3H₂ ⇌ 2NH₃ 的平衡向右移动？",
+                answers: ["Increasing temperature", "Removing NH₃", "Increasing pressure", "Adding a catalyst"],
+                correct: 2,
+                explanation: "Increasing pressure shifts the equilibrium toward the side with fewer gas molecules, which is the right side.",
+                difficulty: "hard"
+            },
+            // 可以继续添加更多问题
+        ];
+
+        // 词汇库
+        const vocabulary = [
+            { term: "Atom", definition: "原子，元素的最小单位。" },
+            { term: "Molecule", definition: "分子，由两个或多个原子通过化学键结合而成。" },
+            { term: "Ionic Bond", definition: "离子键，通过电子的转移形成。" },
+            { term: "Covalent Bond", definition: "共价键，通过电子对的共享形成。" },
+            { term: "Electron", definition: "电子，带负电荷的基本粒子。" },
+            { term: "Proton", definition: "质子，带正电荷的基本粒子。" },
+            { term: "Neutron", definition: "中子，不带电荷的基本粒子。" },
+            { term: "Catalyst", definition: "催化剂，加速化学反应但不被消耗。" },
+            { term: "Enthalpy", definition: "焓，系统的总热能。" },
+            { term: "Entropy", definition: "熵，系统的无序度。" },
+            { term: "Equilibrium", definition: "平衡，化学反应的动态稳定状态。" },
+            { term: "Redox Reaction", definition: "氧化还原反应，涉及电子转移的反应。" },
+            { term: "Molarity", definition: "摩尔浓度，溶液中溶质的浓度。" },
+            { term: "Hydroxyl Group", definition: "羟基，一个氧和一个氢组成的官能团。" },
+            { term: "Carbonyl Group", definition: "羰基，一个碳和一个氧形成的双键官能团。" },
+            { term: "Activation Energy", definition: "活化能，反应开始所需的最小能量。" },
+            { term: "Le Chatelier's Principle", definition: "勒沙特列原理，系统在受扰动时会调整以重新达到平衡。" },
+            { term: "Exothermic Reaction", definition: "放热反应，释放能量的化学反应。" },
+            { term: "Endothermic Reaction", definition: "吸热反应，吸收能量的化学反应。" },
+            { term: "Solubility", definition: "溶解度，物质在溶剂中的溶解能力。" },
+            // 更多词汇
+        ];
+
+        // 成就库
+        const achievements = [
+            { name: "初级化学师", description: "完成第一章游戏。", achieved: false },
+            { name: "优秀回答", description: "连续回答5个问题正确。", achieved: false },
+            { name: "超级回答者", description: "回答所有问题正确。", achieved: false },
+            { name: "词汇达人", description: "学习10个词汇卡。", achieved: false },
+            { name: "高分达人", description: "在排行榜中进入前5名。", achieved: false },
+            { name: "知识渊博", description: "完成所有章节。", achieved: false },
+            // 更多成就
+        ];
+
+        // 初始化变量
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let currentChapter = null;
+        let consecutiveCorrect = 0;
+        const totalChapters = 2; // 根据问题级别调整
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+        // 获取DOM元素
+        const mainMenu = document.getElementById('main-menu');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const vocabBtn = document.getElementById('vocab-btn');
+        const achievementsBtn = document.getElementById('achievements-btn');
+        const leaderboardBtn = document.getElementById('leaderboard-btn');
+
+        const chapterSelect = document.getElementById('chapter-select');
+        const chapterButtons = document.querySelectorAll('.chapter-btn');
+        const backFromChapterBtn = document.getElementById('back-from-chapter-btn');
+
+        const gameContainer = document.getElementById('game-container');
+        const chris = document.getElementById('chris');
+        const ball = document.getElementById('ball');
+        const questionBox = document.getElementById('question-box');
+        const questionText = document.getElementById('question');
+        const answersDiv = document.getElementById('answers');
+        const feedback = document.getElementById('feedback');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+
+        const vocabContainer = document.getElementById('vocab-container');
+        const vocabCards = document.getElementById('vocab-cards');
+        const closeVocabBtn = document.getElementById('close-vocab-btn');
+
+        const achievementsContainer = document.getElementById('achievements-container');
+        const achievementsList = document.getElementById('achievements-list');
+        const closeAchievementsBtn = document.getElementById('close-achievements-btn');
+
+        const leaderboardContainer = document.getElementById('leaderboard-container');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
+
+        // 添加动画关键帧
+        const styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText = `
+            @keyframes celebrate {
+                0% { transform: rotate(0deg); }
+                25% { transform: rotate(10deg); }
+                50% { transform: rotate(-10deg); }
+                75% { transform: rotate(10deg); }
+                100% { transform: rotate(0deg); }
+            }
+            @keyframes shake {
+                0% { transform: translate(0, 0); }
+                25% { transform: translate(-10px, -10px); }
+                50% { transform: translate(10px, -10px); }
+                75% { transform: translate(-10px, 10px); }
+                100% { transform: translate(10px, 10px); }
+            }
+            @keyframes kick {
+                0% { transform: translateX(0); }
+                50% { transform: translateX(20px); }
+                100% { transform: translateX(0); }
+            }
+            @keyframes shoot-own-goal {
+                0% { transform: translateY(0); }
+                50% { transform: translateY(30px); }
+                100% { transform: translateY(0); }
+            }
+            .celebrate {
+                animation: celebrate 0.5s ease-in-out;
+            }
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+            .kick {
+                animation: kick 0.5s ease-in-out;
+            }
+            .shoot-own-goal {
+                animation: shoot-own-goal 0.5s ease-in-out;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // 生成词汇卡
+        function generateVocabCards() {
+            vocabCards.innerHTML = '';
+            vocabulary.forEach((vocab, index) => {
+                const card = document.createElement('div');
+                card.classList.add('vocab-card');
+                card.innerHTML = `
+                    <div class="vocab-term">${vocab.term}</div>
+                    <div class="vocab-definition">${vocab.definition}</div>
+                `;
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
+                });
+                vocabCards.appendChild(card);
+            });
+        }
+
+        // 生成成就列表
+        function generateAchievements() {
+            achievementsList.innerHTML = '';
+            achievements.forEach((achv, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.innerHTML = `
+                    <strong>${achv.name}</strong><br>
+                    ${achv.description} <br>
+                    ${achv.achieved ? '✅ 已达成' : '❌ 未达成'}
+                `;
+                achievementsList.appendChild(li);
+            });
+        }
+
+        // 更新成就
+        function updateAchievements() {
+            achievements.forEach(achv => {
+                if (!achv.achieved) {
+                    if (achv.name === "初级化学师" && currentChapter > 1) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "优秀回答" && consecutiveCorrect >= 5) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "超级回答者" && score >= getTotalQuestionsByChapter(currentChapter)) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "词汇达人" && vocabulary.length >= 10) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "知识渊博" && currentChapter > totalChapters) {
+                        achv.achieved = true;
+                    }
+                    // 更多成就条件
+                }
+            });
+            generateAchievements();
+        }
+
+        // 生成排行榜
+        function generateLeaderboard() {
+            leaderboardList.innerHTML = '';
+            // 排序并取前10名
+            const sortedLeaderboard = leaderboard.sort((a, b) => b.score - a.score).slice(0, 10);
+            sortedLeaderboard.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.textContent = `${index + 1}. ${entry.name} - ${entry.score}`;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        // 保存排行榜
+        function saveLeaderboard(name, score) {
+            leaderboard.push({ name, score });
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            generateLeaderboard();
+            updateAchievements();
+        }
+
+        // 获取当前章节的总问题数
+        function getTotalQuestionsByChapter(chapter) {
+            return questions.filter(q => q.chapter === chapter).length;
+        }
+
+        // 初始化词汇卡和成就
+        generateVocabCards();
+        generateAchievements();
+        generateLeaderboard();
+
+        // 导航按钮事件
+        startGameBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            chapterSelect.style.display = 'flex';
+        });
+
+        vocabBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            vocabContainer.style.display = 'block';
+        });
+
+        achievementsBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            achievementsContainer.style.display = 'block';
+        });
+
+        leaderboardBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            leaderboardContainer.style.display = 'block';
+        });
+
+        backFromChapterBtn.addEventListener('click', () => {
+            chapterSelect.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 章节选择按钮事件
+        chapterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const selectedChapter = parseInt(button.getAttribute('data-chapter'));
+                currentChapter = selectedChapter;
+                mainMenu.style.display = 'none';
+                chapterSelect.style.display = 'none';
+                gameContainer.style.display = 'block';
+                startChapter();
+            });
+        });
+
+        closeVocabBtn.addEventListener('click', () => {
+            vocabContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeAchievementsBtn.addEventListener('click', () => {
+            achievementsContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeLeaderboardBtn.addEventListener('click', () => {
+            leaderboardContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 游戏逻辑
+        function startChapter() {
+            currentQuestionIndex = 0;
+            score = 0;
+            consecutiveCorrect = 0;
+            progressBar.style.width = '0%';
+            chris.style.left = '50px'; // 重置Chris的位置
+            moveBall();
+        }
+
+        function moveBall() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            if (currentQuestionIndex >= currentChapterQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const q = currentChapterQuestions[currentQuestionIndex];
+            // 设置进度条
+            const progress = ((currentQuestionIndex) / getTotalQuestionsByChapter(currentChapter)) * 100;
+            progressBar.style.width = progress + '%';
+            // 随机位置
+            const randomPositionX = Math.floor(Math.random() * (gameContainer.clientWidth - 100)) + 50;
+            const randomPositionY = Math.floor(Math.random() * (gameContainer.clientHeight - 200)) + 100;
+            ball.style.left = randomPositionX + 'px';
+            ball.style.bottom = randomPositionY + 'px';
+            // 添加动画效果
+            ball.style.transition = 'left 1s, bottom 1s';
+            setTimeout(triggerQuestion, 1000);
+        }
+
+        function triggerQuestion() {
+            questionBox.style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            if (!q) {
+                endGame();
+                return;
+            }
+            questionText.innerHTML = `<strong>${q.question}</strong><br><em>${q.questionCN}</em>`;
+            answersDiv.innerHTML = '';
+            q.answers.forEach((ans, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = ans;
+                btn.classList.add('answer-btn');
+                btn.addEventListener('click', () => checkAnswer(index));
+                answersDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            questionBox.style.display = 'none';
+            if (selected === q.correct) {
+                score++;
+                consecutiveCorrect++;
+                feedbackText.innerHTML = `<strong>回答正确！👏</strong><br>Chris助攻破门！<br><em>${q.explanation}</em>`;
+                triggerPositiveEvent();
+            } else {
+                consecutiveCorrect = 0;
+                feedbackText.innerHTML = `<strong>回答错误！😅</strong><br>Chris爆射自家球门造成乌龙！<br><em>${q.explanation}</em>`;
+                triggerNegativeEvent();
+            }
+            updateAchievements();
+            feedback.style.display = 'block';
+        }
+
+        function triggerPositiveEvent() {
+            // 移动Chris向右
+            const newLeft = Math.min(gameContainer.clientWidth - 100, parseInt(chris.style.left) + 100);
+            chris.style.left = newLeft + 'px';
+            // 添加庆祝动画
+            chris.classList.add('celebrate');
+            setTimeout(() => {
+                chris.classList.remove('celebrate');
+            }, 500);
+        }
+
+        function triggerNegativeEvent() {
+            // 移动Chris向左
+            const newLeft = Math.max(50, parseInt(chris.style.left) - 50);
+            chris.style.left = newLeft + 'px';
+            // 添加失误动画
+            chris.classList.add('shake');
+            setTimeout(() => {
+                chris.classList.remove('shake');
+            }, 500);
+        }
+
+        function endGame() {
+            feedbackText.innerHTML = `<strong>游戏结束！🎉</strong><br>你的得分是 ${score} / ${questions.filter(q => q.chapter === currentChapter).length}`;
+            nextBtn.style.display = 'none';
+            feedback.style.display = 'block';
+            // 保存到排行榜
+            let playerName = prompt("请输入你的名字:", "玩家");
+            if (playerName) {
+                saveLeaderboard(playerName, score);
+            }
+        }
+
+        nextBtn.addEventListener('click', () => {
+            feedback.style.display = 'none';
+            currentQuestionIndex++;
+            moveBall();
+        });
+
+        // 生成词汇卡
+        generateVocabCards();
+
+        // 生成成就列表
+        generateAchievements();
+
+        // 生成排行榜
+        generateLeaderboard();
+    </script>
+
+</body>
+</html>
