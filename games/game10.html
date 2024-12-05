@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>跟着Chris学古吉拉特语</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 全局样式 */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #6A5ACD;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+        header {
+            background-color: #483D8B;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        /* 主菜单样式 */
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .menu-btn {
+            background-color: #20B2AA;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 200px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .menu-btn:hover {
+            background-color: #3CB371;
+            transform: scale(1.05);
+        }
+        /* 章节选择界面样式 */
+        #chapter-select {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .chapter-btn {
+            background-color: #4682B4;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 220px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .chapter-btn:hover {
+            background-color: #5F9EA0;
+            transform: scale(1.05);
+        }
+        .back-btn {
+            background-color: #DC143C;
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .back-btn:hover {
+            background-color: #B22222;
+            transform: scale(1.05);
+        }
+        /* 游戏容器样式 */
+        #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+            display: none;
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            height: 600px;
+            background: #2F4F4F; /* 足球场绿色 */
+            border: 5px solid #2E8B57;
+            margin: 20px 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        /* 使用CSS绘制Chris */
+        #chris {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            width: 80px;
+            height: 120px;
+            background-color: #FFD700;
+            border: 2px solid #000;
+            border-radius: 10px;
+            transition: left 0.5s, bottom 0.5s, transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            z-index: 2;
+        }
+        /* Chris的身体部分 */
+        .chris-body {
+            width: 60%;
+            height: 60%;
+            background-color: #1E90FF;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        /* Chris的头部 */
+        .chris-head {
+            width: 40px;
+            height: 40px;
+            background-color: #FFE4C4;
+            border: 2px solid #000;
+            border-radius: 50%;
+            margin-top: -20px;
+        }
+        /* 使用CSS绘制足球 */
+        #ball {
+            position: absolute;
+            bottom: 100px;
+            left: 400px;
+            width: 40px;
+            height: 40px;
+            background-color: #FFFFFF;
+            border: 2px solid #000;
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 4px #000;
+            transition: left 1s, bottom 1s;
+            z-index: 1;
+        }
+        /* 问题框样式 */
+        #question-box {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 100, 0, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 4;
+        }
+        #question-box h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        #answers {
+            display: flex;
+            flex-direction: column;
+            margin-top: 15px;
+        }
+        .answer-btn {
+            background-color: #20B2AA;
+            border: none;
+            padding: 12px;
+            margin: 8px 0;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .answer-btn:hover {
+            background-color: #3CB371;
+        }
+        /* 反馈框样式 */
+        #feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #000;
+            padding: 30px;
+            border-radius: 15px;
+            display: none;
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            z-index: 5;
+        }
+        #feedback p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        #feedback button {
+            background-color: #20B2AA;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            transition: background-color 0.3s;
+        }
+        #feedback button:hover {
+            background-color: #3CB371;
+        }
+        /* 成就和排行榜样式 */
+        .container-title {
+            text-align: center;
+            font-size: 2em;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .list {
+            list-style: none;
+            padding: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .list-item {
+            background-color: #2E8B57;
+            margin: 10px auto;
+            padding: 15px;
+            border-radius: 10px;
+            width: 80%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            font-size: 1.2em;
+        }
+        /* 词汇卡样式 */
+        #vocab-container {
+            padding: 20px;
+            position: relative;
+            height: 600px;
+            overflow-y: auto;
+        }
+        .vocab-card {
+            background-color: #20B2AA;
+            border: none;
+            padding: 20px;
+            margin: 10px auto;
+            color: #fff;
+            border-radius: 10px;
+            width: 80%;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            perspective: 1000px;
+        }
+        .vocab-card:hover {
+            background-color: #3CB371;
+            transform: scale(1.02);
+        }
+        .vocab-term {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .vocab-definition {
+            display: none;
+            margin-top: 10px;
+            font-size: 1.2em;
+        }
+        .vocab-card.flipped .vocab-definition {
+            display: block;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        /* 进度条样式 */
+        #progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 10px;
+            background-color: #20B2AA;
+            width: 0%;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            transition: width 0.5s;
+            z-index: 6;
+        }
+        /* 添加动画关键帧 */
+        @keyframes celebrate {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            50% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-10px, -10px); }
+            50% { transform: translate(10px, -10px); }
+            75% { transform: translate(-10px, 10px); }
+            100% { transform: translate(10px, 10px); }
+        }
+        @keyframes kick {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes shoot-own-goal {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(30px); }
+            100% { transform: translateY(0); }
+        }
+        .celebrate {
+            animation: celebrate 0.5s ease-in-out;
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        .kick {
+            animation: kick 0.5s ease-in-out;
+        }
+        .shoot-own-goal {
+            animation: shoot-own-goal 0.5s ease-in-out;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            header {
+                font-size: 1.5em;
+                padding: 15px;
+            }
+            #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+                height: 500px;
+            }
+            #chris {
+                width: 60px;
+                height: 90px;
+            }
+            .chris-body {
+                width: 50%;
+                height: 50%;
+            }
+            .chris-head {
+                width: 30px;
+                height: 30px;
+            }
+            #ball {
+                width: 30px;
+                height: 30px;
+            }
+            #question-box h3 {
+                font-size: 1.2em;
+            }
+            .answer-btn {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            #feedback p {
+                font-size: 1em;
+            }
+            #feedback button, .back-btn {
+                padding: 15px 30px;
+                font-size: 1.2em;
+            }
+            .vocab-card {
+                width: 90%;
+            }
+            .list-item {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>跟着Chris学古吉拉特语</header>
+
+    <!-- 主菜单 -->
+    <div id="main-menu">
+        <button class="menu-btn" id="start-game-btn">开始游戏</button>
+        <button class="menu-btn" id="vocab-btn">词汇卡</button>
+        <button class="menu-btn" id="achievements-btn">成就</button>
+        <button class="menu-btn" id="leaderboard-btn">排行榜</button>
+    </div>
+
+    <!-- 章节选择界面 -->
+    <div id="chapter-select">
+        <div class="container-title">选择章节</div>
+        <button class="chapter-btn" data-chapter="1">第一章：基础词汇</button>
+        <button class="chapter-btn" data-chapter="2">第二章：日常对话</button>
+        <!-- 可以继续添加更多章节按钮 -->
+        <button class="back-btn" id="back-from-chapter-btn">返回主菜单</button>
+    </div>
+
+    <!-- 游戏容器 -->
+    <div id="game-container">
+        <!-- 进度条 -->
+        <div id="progress-bar"></div>
+        <!-- Chris角色 -->
+        <div id="chris">
+            <div class="chris-head"></div>
+            <div class="chris-body"></div>
+        </div>
+        <!-- 足球 -->
+        <div id="ball"></div>
+        
+        <!-- 问题框 -->
+        <div id="question-box">
+            <h3 id="question">问题文本</h3>
+            <div id="answers">
+                <!-- 答案按钮 -->
+            </div>
+        </div>
+
+        <!-- 反馈框 -->
+        <div id="feedback">
+            <p id="feedback-text">反馈信息</p>
+            <button id="next-btn">继续</button>
+        </div>
+    </div>
+
+    <!-- 词汇卡容器 -->
+    <div id="vocab-container">
+        <button class="close-btn" id="close-vocab-btn">&times;</button>
+        <div class="container-title">古吉拉特语词汇卡</div>
+        <div id="vocab-cards">
+            <!-- 词汇卡 -->
+        </div>
+    </div>
+
+    <!-- 成就容器 -->
+    <div id="achievements-container">
+        <button class="close-btn" id="close-achievements-btn">&times;</button>
+        <div class="container-title">成就</div>
+        <ul class="list" id="achievements-list">
+            <!-- 成就列表 -->
+        </ul>
+    </div>
+
+    <!-- 排行榜容器 -->
+    <div id="leaderboard-container">
+        <button class="close-btn" id="close-leaderboard-btn">&times;</button>
+        <div class="container-title">排行榜</div>
+        <ul class="list" id="leaderboard-list">
+            <!-- 排行榜列表 -->
+        </ul>
+    </div>
+
+    <script>
+        // 问题库
+        const questions = [
+            // 第一章：基础词汇
+            {
+                chapter: 1,
+                story: "第一章：Chris刚开始学习古吉拉特语，遇到了第一个挑战。",
+                question: "What is the Gujarati word for 'Hello'?",
+                questionCN: "‘Hello’的古吉拉特语是什么？",
+                answers: ["નમસ્તે (Namaste)", "શુભ (Shubh)", "ધન્યવાદ (Dhanyavaad)", "કૃપા (Krupa)"],
+                correct: 0,
+                explanation: "‘Hello’在古吉拉特语中是‘નમસ્તે (Namaste)’。",
+                difficulty: "easy"
+            },
+            {
+                chapter: 1,
+                story: "Chris需要记住更多的日常用语。",
+                question: "What is the Gujarati word for 'Thank you'?",
+                questionCN: "‘Thank you’的古吉拉特语是什么？",
+                answers: ["નમસ્તે (Namaste)", "શુભ (Shubh)", "ધન્યવાદ (Dhanyavaad)", "કૃપા (Krupa)"],
+                correct: 2,
+                explanation: "‘Thank you’在古吉拉特语中是‘ધન્યવાદ (Dhanyavaad)’。",
+                difficulty: "easy"
+            },
+            {
+                chapter: 1,
+                story: "Chris在学习如何表达感情。",
+                question: "How do you say 'Yes' in Gujarati?",
+                questionCN: "‘Yes’的古吉拉特语是什么？",
+                answers: ["હા (Ha)", "ના (Na)", "કદાચ (Kadaach)", "શા (Sha)"],
+                correct: 0,
+                explanation: "‘Yes’在古吉拉特语中是‘હા (Ha)’。",
+                difficulty: "easy"
+            },
+            {
+                chapter: 1,
+                story: "Chris遇到了一些否定词。",
+                question: "What is the Gujarati word for 'No'?",
+                questionCN: "‘No’的古吉拉特语是什么？",
+                answers: ["હા (Ha)", "ના (Na)", "કદાચ (Kadaach)", "શા (Sha)"],
+                correct: 1,
+                explanation: "‘No’在古吉拉特语中是‘ના (Na)’。",
+                difficulty: "easy"
+            },
+            {
+                chapter: 1,
+                story: "Chris学习了问候语的更多变化。",
+                question: "How do you say 'Good Morning' in Gujarati?",
+                questionCN: "‘Good Morning’的古吉拉特语是什么？",
+                answers: ["શુભ સવાર (Shubh Savar)", "શુભ રાત્રિ (Shubh Raatri)", "શુભ દિવસ (Shubh Divas)", "શુભ સંધ્યા (Shubh Sandhya)"],
+                correct: 0,
+                explanation: "‘Good Morning’在古吉拉特语中是‘શુભ સવાર (Shubh Savar)’。",
+                difficulty: "medium"
+            },
+            {
+                chapter: 1,
+                story: "Chris需要学习颜色词汇。",
+                question: "What is the Gujarati word for 'Red'?",
+                questionCN: "‘Red’的古吉拉特语是什么？",
+                answers: ["લીલો (Lilo)", "લાલ (Lal)", "નિલો (Nilo)", "પીળો (Peelo)"],
+                correct: 1,
+                explanation: "‘Red’在古吉拉特语中是‘લાલ (Lal)’。",
+                difficulty: "medium"
+            },
+            {
+                chapter: 1,
+                story: "Chris学习了更多的家庭成员称呼。",
+                question: "How do you say 'Mother' in Gujarati?",
+                questionCN: "‘Mother’的古吉拉特语是什么？",
+                answers: ["પિતાજી (Pitaji)", "ભાભી (Bhabhi)", "માતા (Mata)", "દાદી (Dadi)"],
+                correct: 2,
+                explanation: "‘Mother’在古吉拉特语中是‘માતા (Mata)’。",
+                difficulty: "medium"
+            },
+            {
+                chapter: 1,
+                story: "Chris开始了解古吉拉特语的基本语法。",
+                question: "What is the Gujarati word for 'Friend'?",
+                questionCN: "‘Friend’的古吉拉特语是什么？",
+                answers: ["મિત્ર (Mitra)", "પત્ની (Patni)", "શિક્ષક (Shikshak)", "બાળક (Baalak)"],
+                correct: 0,
+                explanation: "‘Friend’在古吉拉特语中是‘મિત્ર (Mitra)’。",
+                difficulty: "hard"
+            },
+            {
+                chapter: 1,
+                story: "Chris在学习时间表达。",
+                question: "How do you say 'Today' in Gujarati?",
+                questionCN: "‘Today’的古吉拉特语是什么？",
+                answers: ["કાલ (Kaal)", "આજે (Aaje)", "મિઠ્ઠું (Miththu)", "કાલે (Kaale)"],
+                correct: 1,
+                explanation: "‘Today’在古吉拉特语中是‘આજે (Aaje)’。",
+                difficulty: "hard"
+            },
+            {
+                chapter: 1,
+                story: "Chris准备迎接第一章的挑战结束。",
+                question: "What is the Gujarati word for 'Book'?",
+                questionCN: "‘Book’的古吉拉特语是什么？",
+                answers: ["પેન (Pen)", "પુસ્તક (Pustak)", "કાગળ (Kagdal)", "પેપર (Paper)"],
+                correct: 1,
+                explanation: "‘Book’在古吉拉特语中是‘પુસ્તક (Pustak)’。",
+                difficulty: "hard"
+            },
+            // 第二章：日常对话
+            {
+                chapter: 2,
+                story: "第二章：Chris进入更复杂的日常对话。",
+                question: "How do you ask 'How are you?' in Gujarati?",
+                questionCN: "‘How are you?’的古吉拉特语是什么？",
+                answers: ["તમે કેમ છો? (Tame kem cho?)", "શું છે? (Shu chhe?)", "કેમ છો? (Kem cho?)", "તમે ક્યાં છો? (Tame kyam cho?)"],
+                correct: 0,
+                explanation: "‘How are you?’在古吉拉特语中是‘તમે કેમ છો? (Tame kem cho?)’。",
+                difficulty: "easy"
+            },
+            {
+                chapter: 2,
+                story: "Chris需要表达自己的需求。",
+                question: "What is the Gujarati phrase for 'I need help'?",
+                questionCN: "‘I need help’的古吉拉特语是什么？",
+                answers: ["મને મદદ જોઈએ (Mane madad joye)", "મને ખોરાક જોઈએ (Mane khoraak joye)", "મને પાણી જોઈએ (Mane paani joye)", "મને બસ જોઈએ (Mane bas joye)"],
+                correct: 0,
+                explanation: "‘I need help’在古吉拉特语中是‘મને મદદ જોઈએ (Mane madad joye)’。",
+                difficulty: "medium"
+            },
+            {
+                chapter: 2,
+                story: "Chris在餐厅点餐。",
+                question: "How do you say 'I would like to order food' in Gujarati?",
+                questionCN: "‘I would like to order food’的古吉拉特语是什么？",
+                answers: ["મને ભોજન કરવું છે (Mane bhojan karvu chhe)", "મને ખોરાક ઓર્ડર કરવો છે (Mane khoraak order karvo chhe)", "મને પાણી જોઇએ (Mane paani joiye)", "મને દવા જોઈએ (Mane dava joiye)"],
+                correct: 1,
+                explanation: "‘I would like to order food’在古吉拉特语中是‘મને ખોરાક ઓર્ડર કરવો છે (Mane khoraak order karvo chhe)’。",
+                difficulty: "medium"
+            },
+            {
+                chapter: 2,
+                story: "Chris需要询问方向。",
+                question: "What is the Gujarati phrase for 'Where is the bathroom?'",
+                questionCN: "‘Where is the bathroom?’的古吉拉特语是什么？",
+                answers: ["બાથરૂમ ક્યાં છે? (Bathroom kyam chhe?)", "પાણી ક્યાં છે? (Paani kyam chhe?)", "મકાન ક્યાં છે? (Makaan kyam chhe?)", "સપોર્ટ ક્યાં છે? (Support kyam chhe?)"],
+                correct: 0,
+                explanation: "‘Where is the bathroom?’在古吉拉特语中是‘બાથરૂમ ક્યાં છે? (Bathroom kyam chhe?)’。",
+                difficulty: "medium"
+            },
+            {
+                chapter: 2,
+                story: "Chris在商店购物。",
+                question: "How do you say 'How much does this cost?' in Gujarati?",
+                questionCN: "‘How much does this cost?’的古吉拉特语是什么？",
+                answers: ["આનું મૂલ્ય કેટલું છે? (Aanu moolya ketlu chhe?)", "આવું શું છે? (Aavu shu chhe?)", "તમે ક્યાં છે? (Tame kyam chhe?)", "મને મદદ કરો (Mane madad karo)"],
+                correct: 0,
+                explanation: "‘How much does this cost?’在古吉拉特语中是‘આનું મૂલ્ય કેટલું છે? (Aanu moolya ketlu chhe?)’。",
+                difficulty: "hard"
+            },
+            {
+                chapter: 2,
+                story: "Chris在与朋友交流。",
+                question: "What is the Gujarati word for 'Friend'?",
+                questionCN: "‘Friend’的古吉拉特语是什么？",
+                answers: ["મિત્ર (Mitra)", "પરિચય (Parichay)", "વિચાર (Vichar)", "સમય (Samay)"],
+                correct: 0,
+                explanation: "‘Friend’在古吉拉特语中是‘મિત્ર (Mitra)’。",
+                difficulty: "hard"
+            },
+            {
+                chapter: 2,
+                story: "Chris需要表达感情。",
+                question: "How do you say 'I love you' in Gujarati?",
+                questionCN: "‘I love you’的古吉拉特语是什么？",
+                answers: ["હું તમને પ્રેમ કરું છું (Huṁ tamne prem karuṁ chuṁ)", "હું તમને ભૂલું છું (Huṁ tamne bhuluṁ chuṁ)", "હું તમને નથી જોઈતું (Huṁ tamne nathī joytu)", "હું અહીં છું (Huṁ ahīṁ chuṁ)"],
+                correct: 0,
+                explanation: "‘I love you’在古吉拉特语中是‘હું તમને પ્રેમ કરું છું (Huṁ tamne prem karuṁ chuṁ)’。",
+                difficulty: "hard"
+            },
+            {
+                chapter: 2,
+                story: "Chris结束了第二章的学习。",
+                question: "What is the Gujarati phrase for 'See you later'?",
+                questionCN: "‘See you later’的古吉拉特语是什么？",
+                answers: ["ફરી મળીએ (Phari maliye)", "કેમ છો? (Kem cho?)", "શુભ રાત્રિ (Shubh Raatri)", "આપણાં મળશું (Apanaṁ malashuṁ)"],
+                correct: 0,
+                explanation: "‘See you later’在古吉拉特语中是‘ફરી મળીએ (Phari maliye)’。",
+                difficulty: "hard"
+            },
+            // 可以继续添加更多问题
+        ];
+
+        // 词汇库
+        const vocabulary = [
+            { term: "Hello", definition: "नमस्ते (Namaste) - 用于问候。" },
+            { term: "Thank you", definition: "धन्यवाद (Dhanyavaad) - 表示感谢。" },
+            { term: "Yes", definition: "हाँ (Ha) - 表示肯定。" },
+            { term: "No", definition: "ना (Na) - 表示否定。" },
+            { term: "Good Morning", definition: "शुभ सવાર (Shubh Savar) - 早上好。" },
+            { term: "Red", definition: "लाल (Lal) - 颜色红色。" },
+            { term: "Mother", definition: "माता (Mata) - 母亲。" },
+            { term: "Today", definition: "आज (Aaje) - 今天。" },
+            { term: "Book", definition: "पुस्तक (Pustak) - 书。" },
+            { term: "Friend", definition: "मित्र (Mitra) - 朋友。" },
+            { term: "I love you", definition: "હું તમને પ્રેમ કરું છું (Huṁ tamne prem karuṁ chuṁ) - 我爱你。" },
+            { term: "See you later", definition: "ફરી મળીએ (Phari maliye) - 待会儿见。" },
+            // 更多词汇
+        ];
+
+        // 成就库
+        const achievements = [
+            { name: "初级学者", description: "完成第一章游戏。", achieved: false },
+            { name: "优秀回答", description: "连续回答5个问题正确。", achieved: false },
+            { name: "超级回答者", description: "回答所有问题正确。", achieved: false },
+            { name: "词汇达人", description: "学习10个词汇卡。", achieved: false },
+            { name: "高分达人", description: "在排行榜中进入前5名。", achieved: false },
+            { name: "语言大师", description: "完成所有章节。", achieved: false },
+            // 更多成就
+        ];
+
+        // 初始化变量
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let currentChapter = null;
+        let consecutiveCorrect = 0;
+        const totalChapters = 2; // 根据问题级别调整
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+        // 获取DOM元素
+        const mainMenu = document.getElementById('main-menu');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const vocabBtn = document.getElementById('vocab-btn');
+        const achievementsBtn = document.getElementById('achievements-btn');
+        const leaderboardBtn = document.getElementById('leaderboard-btn');
+
+        const chapterSelect = document.getElementById('chapter-select');
+        const chapterButtons = document.querySelectorAll('.chapter-btn');
+        const backFromChapterBtn = document.getElementById('back-from-chapter-btn');
+
+        const gameContainer = document.getElementById('game-container');
+        const chris = document.getElementById('chris');
+        const ball = document.getElementById('ball');
+        const questionBox = document.getElementById('question-box');
+        const questionText = document.getElementById('question');
+        const answersDiv = document.getElementById('answers');
+        const feedback = document.getElementById('feedback');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+
+        const vocabContainer = document.getElementById('vocab-container');
+        const vocabCards = document.getElementById('vocab-cards');
+        const closeVocabBtn = document.getElementById('close-vocab-btn');
+
+        const achievementsContainer = document.getElementById('achievements-container');
+        const achievementsList = document.getElementById('achievements-list');
+        const closeAchievementsBtn = document.getElementById('close-achievements-btn');
+
+        const leaderboardContainer = document.getElementById('leaderboard-container');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
+
+        // 添加动画关键帧
+        const styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText = `
+            @keyframes celebrate {
+                0% { transform: rotate(0deg); }
+                25% { transform: rotate(10deg); }
+                50% { transform: rotate(-10deg); }
+                75% { transform: rotate(10deg); }
+                100% { transform: rotate(0deg); }
+            }
+            @keyframes shake {
+                0% { transform: translate(0, 0); }
+                25% { transform: translate(-10px, -10px); }
+                50% { transform: translate(10px, -10px); }
+                75% { transform: translate(-10px, 10px); }
+                100% { transform: translate(10px, 10px); }
+            }
+            @keyframes kick {
+                0% { transform: translateX(0); }
+                50% { transform: translateX(20px); }
+                100% { transform: translateX(0); }
+            }
+            @keyframes shoot-own-goal {
+                0% { transform: translateY(0); }
+                50% { transform: translateY(30px); }
+                100% { transform: translateY(0); }
+            }
+            .celebrate {
+                animation: celebrate 0.5s ease-in-out;
+            }
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+            .kick {
+                animation: kick 0.5s ease-in-out;
+            }
+            .shoot-own-goal {
+                animation: shoot-own-goal 0.5s ease-in-out;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // 生成词汇卡
+        function generateVocabCards() {
+            vocabCards.innerHTML = '';
+            vocabulary.forEach((vocab, index) => {
+                const card = document.createElement('div');
+                card.classList.add('vocab-card');
+                card.innerHTML = `
+                    <div class="vocab-term">${vocab.term}</div>
+                    <div class="vocab-definition">${vocab.definition}</div>
+                `;
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
+                });
+                vocabCards.appendChild(card);
+            });
+        }
+
+        // 生成成就列表
+        function generateAchievements() {
+            achievementsList.innerHTML = '';
+            achievements.forEach((achv, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.innerHTML = `
+                    <strong>${achv.name}</strong><br>
+                    ${achv.description} <br>
+                    ${achv.achieved ? '✅ 已达成' : '❌ 未达成'}
+                `;
+                achievementsList.appendChild(li);
+            });
+        }
+
+        // 更新成就
+        function updateAchievements() {
+            achievements.forEach(achv => {
+                if (!achv.achieved) {
+                    if (achv.name === "初级学者" && currentChapter > 1) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "优秀回答" && consecutiveCorrect >= 5) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "超级回答者" && score >= getTotalQuestionsByChapter(currentChapter)) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "词汇达人" && vocabulary.length >= 10) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "语言大师" && currentChapter > totalChapters) {
+                        achv.achieved = true;
+                    }
+                    // 更多成就条件
+                }
+            });
+            generateAchievements();
+        }
+
+        // 生成排行榜
+        function generateLeaderboard() {
+            leaderboardList.innerHTML = '';
+            // 排序并取前10名
+            const sortedLeaderboard = leaderboard.sort((a, b) => b.score - a.score).slice(0, 10);
+            sortedLeaderboard.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.textContent = `${index + 1}. ${entry.name} - ${entry.score}`;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        // 保存排行榜
+        function saveLeaderboard(name, score) {
+            leaderboard.push({ name, score });
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            generateLeaderboard();
+            updateAchievements();
+        }
+
+        // 获取当前章节的总问题数
+        function getTotalQuestionsByChapter(chapter) {
+            return questions.filter(q => q.chapter === chapter).length;
+        }
+
+        // 初始化词汇卡和成就
+        generateVocabCards();
+        generateAchievements();
+        generateLeaderboard();
+
+        // 导航按钮事件
+        startGameBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            chapterSelect.style.display = 'flex';
+        });
+
+        vocabBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            vocabContainer.style.display = 'block';
+        });
+
+        achievementsBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            achievementsContainer.style.display = 'block';
+        });
+
+        leaderboardBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            leaderboardContainer.style.display = 'block';
+        });
+
+        backFromChapterBtn.addEventListener('click', () => {
+            chapterSelect.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 章节选择按钮事件
+        chapterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const selectedChapter = parseInt(button.getAttribute('data-chapter'));
+                currentChapter = selectedChapter;
+                mainMenu.style.display = 'none';
+                chapterSelect.style.display = 'none';
+                gameContainer.style.display = 'block';
+                startChapter();
+            });
+        });
+
+        closeVocabBtn.addEventListener('click', () => {
+            vocabContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeAchievementsBtn.addEventListener('click', () => {
+            achievementsContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeLeaderboardBtn.addEventListener('click', () => {
+            leaderboardContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 游戏逻辑
+        function startChapter() {
+            currentQuestionIndex = 0;
+            score = 0;
+            consecutiveCorrect = 0;
+            progressBar.style.width = '0%';
+            chris.style.left = '50px'; // 重置Chris的位置
+            moveBall();
+        }
+
+        function moveBall() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            if (currentQuestionIndex >= currentChapterQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const q = currentChapterQuestions[currentQuestionIndex];
+            // 设置进度条
+            const progress = ((currentQuestionIndex) / getTotalQuestionsByChapter(currentChapter)) * 100;
+            progressBar.style.width = progress + '%';
+            // 随机位置
+            const randomPositionX = Math.floor(Math.random() * (gameContainer.clientWidth - 100)) + 50;
+            const randomPositionY = Math.floor(Math.random() * (gameContainer.clientHeight - 200)) + 100;
+            ball.style.left = randomPositionX + 'px';
+            ball.style.bottom = randomPositionY + 'px';
+            // 添加动画效果
+            ball.style.transition = 'left 1s, bottom 1s';
+            setTimeout(triggerQuestion, 1000);
+        }
+
+        function triggerQuestion() {
+            questionBox.style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            if (!q) {
+                endGame();
+                return;
+            }
+            questionText.innerHTML = `<strong>${q.question}</strong><br><em>${q.questionCN}</em>`;
+            answersDiv.innerHTML = '';
+            q.answers.forEach((ans, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = ans;
+                btn.classList.add('answer-btn');
+                btn.addEventListener('click', () => checkAnswer(index));
+                answersDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            questionBox.style.display = 'none';
+            if (selected === q.correct) {
+                score++;
+                consecutiveCorrect++;
+                feedbackText.innerHTML = `<strong>回答正确！👏</strong><br>Chris助攻破门！<br><em>${q.explanation}</em>`;
+                triggerPositiveEvent();
+            } else {
+                consecutiveCorrect = 0;
+                feedbackText.innerHTML = `<strong>回答错误！😅</strong><br>Chris爆射自家球门造成乌龙！<br><em>${q.explanation}</em>`;
+                triggerNegativeEvent();
+            }
+            updateAchievements();
+            feedback.style.display = 'block';
+        }
+
+        function triggerPositiveEvent() {
+            // 移动Chris向右
+            const newLeft = Math.min(gameContainer.clientWidth - 100, parseInt(chris.style.left) + 100);
+            chris.style.left = newLeft + 'px';
+            // 添加庆祝动画
+            chris.classList.add('celebrate');
+            setTimeout(() => {
+                chris.classList.remove('celebrate');
+            }, 500);
+        }
+
+        function triggerNegativeEvent() {
+            // 移动Chris向左
+            const newLeft = Math.max(50, parseInt(chris.style.left) - 50);
+            chris.style.left = newLeft + 'px';
+            // 添加失误动画
+            chris.classList.add('shake');
+            setTimeout(() => {
+                chris.classList.remove('shake');
+            }, 500);
+        }
+
+        function endGame() {
+            feedbackText.innerHTML = `<strong>游戏结束！🎉</strong><br>你的得分是 ${score} / ${questions.filter(q => q.chapter === currentChapter).length}`;
+            nextBtn.style.display = 'none';
+            feedback.style.display = 'block';
+            // 保存到排行榜
+            let playerName = prompt("请输入你的名字:", "玩家");
+            if (playerName) {
+                saveLeaderboard(playerName, score);
+            }
+        }
+
+        nextBtn.addEventListener('click', () => {
+            feedback.style.display = 'none';
+            currentQuestionIndex++;
+            moveBall();
+        });
+
+        // 生成词汇卡
+        generateVocabCards();
+
+        // 生成成就列表
+        generateAchievements();
+
+        // 生成排行榜
+        generateLeaderboard();
+    </script>
+
+</body>
+</html>
