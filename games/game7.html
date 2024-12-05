@@ -66,12 +66,21 @@
             font-size: 1.2em;
             margin: 10px 0;
             width: 220px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             transition: background-color 0.3s, transform 0.2s;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .chapter-btn:hover {
             background-color: #3CB371;
             transform: scale(1.05);
+        }
+        .difficulty-label {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.8em;
         }
         .back-btn {
             background-color: #FF6347;
@@ -404,9 +413,26 @@
     <!-- 章节选择界面 -->
     <div id="chapter-select">
         <div class="container-title">选择章节</div>
-        <button class="chapter-btn" data-chapter="1">第一章：化学的基本概念</button>
-        <button class="chapter-btn" data-chapter="2">第二章：化学反应与平衡</button>
-        <!-- 可以继续添加更多章节按钮 -->
+        <button class="chapter-btn" data-chapter="1">
+            <span>第一章：化学的基本概念</span>
+            <span class="difficulty-label">难度: 中</span>
+        </button>
+        <button class="chapter-btn" data-chapter="2">
+            <span>第二章：化学反应与平衡</span>
+            <span class="difficulty-label">难度: 中</span>
+        </button>
+        <button class="chapter-btn" data-chapter="3">
+            <span>第三章：有机化学基础</span>
+            <span class="difficulty-label">难度: 高</span>
+        </button>
+        <button class="chapter-btn" data-chapter="4">
+            <span>第四章：电化学与化学动力学</span>
+            <span class="difficulty-label">难度: 高</span>
+        </button>
+        <button class="chapter-btn" data-chapter="5">
+            <span>第五章：化学热力学与溶液化学</span>
+            <span class="difficulty-label">难度: 高</span>
+        </button>
         <button class="back-btn" id="back-from-chapter-btn">返回主菜单</button>
     </div>
 
@@ -421,7 +447,7 @@
         </div>
         <!-- 足球 -->
         <div id="ball"></div>
-
+        
         <!-- 问题框 -->
         <div id="question-box">
             <h3 id="question">问题文本</h3>
@@ -476,7 +502,7 @@
                 answers: ["Molecule", "Atom", "Ion", "Electron"],
                 correct: 1,
                 explanation: "An atom is the smallest unit of an element that retains the properties of that element.",
-                difficulty: "easy"
+                difficulty: "medium"
             },
             {
                 chapter: 1,
@@ -486,7 +512,7 @@
                 answers: ["Gold", "Oxygen", "Osmium", "Oganesson"],
                 correct: 1,
                 explanation: "Oxygen has the chemical symbol 'O'.",
-                difficulty: "easy"
+                difficulty: "medium"
             },
             {
                 chapter: 1,
@@ -496,7 +522,7 @@
                 answers: ["True", "False"],
                 correct: 1,
                 explanation: "False. Ionic bonds are formed by the transfer of electrons, not sharing.",
-                difficulty: "easy"
+                difficulty: "medium"
             },
             {
                 chapter: 1,
@@ -577,7 +603,7 @@
                 answers: ["Charles's Law", "Boyle's Law", "Avogadro's Law", "Gay-Lussac's Law"],
                 correct: 1,
                 explanation: "Boyle's Law states that pressure and volume are inversely proportional at constant temperature.",
-                difficulty: "easy"
+                difficulty: "medium"
             },
             {
                 chapter: 2,
@@ -587,7 +613,7 @@
                 answers: ["0", "7", "14", "1"],
                 correct: 1,
                 explanation: "At 25°C, a neutral solution has a pH of 7.",
-                difficulty: "easy"
+                difficulty: "medium"
             },
             {
                 chapter: 2,
@@ -659,6 +685,279 @@
                 explanation: "Increasing pressure shifts the equilibrium toward the side with fewer gas molecules, which is the right side.",
                 difficulty: "hard"
             },
+            // 第三章
+            {
+                chapter: 3,
+                story: "第三章：Chris深入有机化学，探索碳的多样性。",
+                question: "What is the general formula for alkanes?",
+                questionCN: "烷烃的一般公式是什么？",
+                answers: ["CₙH₂ₙ₋₂", "CₙH₂ₙ₊₂", "CₙH₂ₙ", "CₙH₂ₙ₋₁OH"],
+                correct: 1,
+                explanation: "Alkanes have the general formula CₙH₂ₙ₊₂.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 3,
+                story: "Chris学习有机官能团，理解不同官能团的性质。",
+                question: "Which of the following is an alcohol functional group?",
+                questionCN: "以下哪项是醇的官能团？",
+                answers: ["-COOH", "-OH", "-NH₂", "-CHO"],
+                correct: 1,
+                explanation: "The alcohol functional group is characterized by -OH.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 3,
+                story: "Chris探索有机反应机制，理解反应路径。",
+                question: "What type of reaction is the conversion of an alkene to an alkane using hydrogen gas and a catalyst?",
+                questionCN: "使用氢气和催化剂将烯烃转化为烷烃的反应属于哪种类型？",
+                answers: ["Hydration", "Hydrogenation", "Halogenation", "Oxidation"],
+                correct: 1,
+                explanation: "This is a hydrogenation reaction, where hydrogen is added to an unsaturated bond.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 3,
+                story: "Chris研究有机化学的命名规则，掌握IUPAC命名法。",
+                question: "What is the IUPAC name for CH₃CH₂CH₂OH?",
+                questionCN: "CH₃CH₂CH₂OH 的IUPAC命名是什么？",
+                answers: ["Methanol", "Ethanol", "Propanol", "Butanol"],
+                correct: 2,
+                explanation: "CH₃CH₂CH₂OH is 1-Propanol.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 3,
+                story: "Chris了解芳香族化合物，探索苯环的特性。",
+                question: "Which of the following compounds is an aromatic hydrocarbon?",
+                questionCN: "以下哪种化合物是芳香族烃？",
+                answers: ["Cyclohexane", "Benzene", "Hexane", "Methanol"],
+                correct: 1,
+                explanation: "Benzene is an aromatic hydrocarbon characterized by a stable ring of six carbon atoms with alternating double bonds.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 3,
+                story: "Chris学习有机合成，理解合成路径。",
+                question: "What reagent is commonly used to convert a carboxylic acid into an acid chloride?",
+                questionCN: "通常使用什么试剂将羧酸转化为酸氯化物？",
+                answers: ["Thionyl chloride (SOCl₂)", "Hydrogen chloride (HCl)", "Sodium hydroxide (NaOH)", "Potassium permanganate (KMnO₄)"],
+                correct: 0,
+                explanation: "Thionyl chloride (SOCl₂) is commonly used to convert carboxylic acids into acid chlorides.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 3,
+                story: "Chris探索有机反应中的立体化学，理解分子的空间排列。",
+                question: "What term describes molecules that are mirror images of each other but cannot be superimposed?",
+                questionCN: "描述彼此是镜像但无法重叠的分子的术语是什么？",
+                answers: ["Isomers", "Enantiomers", "Diastereomers", "Conformers"],
+                correct: 1,
+                explanation: "Enantiomers are molecules that are mirror images of each other but cannot be superimposed.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 3,
+                story: "Chris研究有机化学中的反应类型，理解不同反应机制。",
+                question: "Which reaction involves the addition of water across a double bond?",
+                questionCN: "哪种反应涉及在双键上加水？",
+                answers: ["Hydration", "Hydrogenation", "Halogenation", "Oxidation"],
+                correct: 0,
+                explanation: "Hydration is the addition of water across a double bond.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 3,
+                story: "Chris学习有机化学中的取代反应，理解官能团的变化。",
+                question: "In a nucleophilic substitution reaction, what is the role of the nucleophile?",
+                questionCN: "在亲核取代反应中，亲核试剂的作用是什么？",
+                answers: ["Electron pair acceptor", "Electron pair donor", "Leaving group", "Solvent"],
+                correct: 1,
+                explanation: "A nucleophile is an electron pair donor that attacks the electrophilic carbon.",
+                difficulty: "hard"
+            },
+            // 第四章
+            {
+                chapter: 4,
+                story: "第四章：Chris探索电化学与化学动力学的奥秘。",
+                question: "What is the primary function of the anode in an electrochemical cell?",
+                questionCN: "电化学电池中阳极的主要功能是什么？",
+                answers: ["Oxidation occurs here", "Reduction occurs here", "Electron flow originates here", "Electron flow terminates here"],
+                correct: 0,
+                explanation: "Oxidation occurs at the anode.",
+                difficulty: "high"
+            },
+            {
+                chapter: 4,
+                story: "Chris学习电池的种类，理解不同电池的工作原理。",
+                question: "Which type of battery uses zinc and manganese dioxide as primary materials?",
+                questionCN: "哪种类型的电池使用锌和二氧化锰作为主要材料？",
+                answers: ["Lithium-ion battery", "Alkaline battery", "Lead-acid battery", "Nickel-cadmium battery"],
+                correct: 1,
+                explanation: "Alkaline batteries typically use zinc and manganese dioxide as primary materials.",
+                difficulty: "high"
+            },
+            {
+                chapter: 4,
+                story: "Chris研究化学动力学，理解反应速率的决定因素。",
+                question: "According to the Arrhenius equation, what happens to the reaction rate when temperature increases?",
+                questionCN: "根据阿仑尼乌斯方程，温度升高时反应速率会发生什么？",
+                answers: ["Decreases", "Increases", "Remains the same", "Depends on the reaction"],
+                correct: 1,
+                explanation: "According to the Arrhenius equation, increasing temperature increases the reaction rate.",
+                difficulty: "high"
+            },
+            {
+                chapter: 4,
+                story: "Chris了解催化剂的作用，探索其在化学反应中的应用。",
+                question: "How does a catalyst affect the activation energy of a reaction?",
+                questionCN: "催化剂如何影响反应的活化能？",
+                answers: ["Increases activation energy", "Decreases activation energy", "Does not affect activation energy", "Completely eliminates activation energy"],
+                correct: 1,
+                explanation: "A catalyst decreases the activation energy of a reaction, increasing the reaction rate.",
+                difficulty: "high"
+            },
+            {
+                chapter: 4,
+                story: "Chris探索化学反应的机制，理解分子的运动。",
+                question: "What type of reaction mechanism involves the formation of a carbocation intermediate?",
+                questionCN: "哪种反应机制涉及碳正离子中间体的形成？",
+                answers: ["SN1", "SN2", "E1", "E2"],
+                correct: 0,
+                explanation: "SN1 mechanisms involve the formation of a carbocation intermediate.",
+                difficulty: "high"
+            },
+            {
+                chapter: 4,
+                story: "Chris学习反应级数，理解反应速率与浓度的关系。",
+                question: "In a second-order reaction, how does the rate depend on the concentration of reactants?",
+                questionCN: "在二级反应中，反应速率如何依赖于反应物的浓度？",
+                answers: ["Linearly", "Quadratically", "Exponentially", "Logarithmically"],
+                correct: 1,
+                explanation: "In a second-order reaction, the rate depends quadratically on the concentration of reactants.",
+                difficulty: "high"
+            },
+            {
+                chapter: 4,
+                story: "Chris研究电极过程，理解氧化还原反应的电极电位。",
+                question: "What does a more positive standard electrode potential indicate about a species?",
+                questionCN: "更正的标准电极电位表示物质的什么？",
+                answers: ["More easily oxidized", "More easily reduced", "More reactive", "Less stable"],
+                correct: 1,
+                explanation: "A more positive standard electrode potential indicates that a species is more easily reduced.",
+                difficulty: "high"
+            },
+            {
+                chapter: 4,
+                story: "Chris探索电解过程，理解电化学应用。",
+                question: "What is produced at the cathode during the electrolysis of water?",
+                questionCN: "在水的电解过程中，阴极会产生什么？",
+                answers: ["Oxygen gas", "Hydrogen gas", "Hydroxide ions", "Protons"],
+                correct: 1,
+                explanation: "Hydrogen gas is produced at the cathode during the electrolysis of water.",
+                difficulty: "high"
+            },
+            {
+                chapter: 4,
+                story: "Chris了解化学动力学中的反应路径，探索不同反应机制。",
+                question: "Which of the following factors does NOT affect the rate of a reaction?",
+                questionCN: "以下哪项因素不会影响反应速率？",
+                answers: ["Surface area", "Concentration", "Temperature", "Color of the reactants"],
+                correct: 3,
+                explanation: "The color of the reactants does not affect the reaction rate.",
+                difficulty: "high"
+            },
+            // 第五章
+            {
+                chapter: 5,
+                story: "第五章：Chris深入研究化学热力学与溶液化学。",
+                question: "What does ΔG represent in thermodynamics?",
+                questionCN: "热力学中ΔG代表什么？",
+                answers: ["Change in enthalpy", "Change in entropy", "Change in free energy", "Change in temperature"],
+                correct: 2,
+                explanation: "ΔG represents the change in Gibbs free energy.",
+                difficulty: "high"
+            },
+            {
+                chapter: 5,
+                story: "Chris学习溶液的性质，理解溶解度与温度的关系。",
+                question: "How does the solubility of most solid solutes in water change with increasing temperature?",
+                questionCN: "随着温度升高，大多数固体溶质在水中的溶解度如何变化？",
+                answers: ["Decreases", "Increases", "Remains the same", "First increases then decreases"],
+                correct: 1,
+                explanation: "The solubility of most solid solutes in water increases with increasing temperature.",
+                difficulty: "high"
+            },
+            {
+                chapter: 5,
+                story: "Chris探索溶液浓度，理解摩尔浓度的计算。",
+                question: "What is the molarity of a solution prepared by dissolving 58.44 grams of NaCl in enough water to make 2 liters of solution? (Molar mass of NaCl = 58.44 g/mol)",
+                questionCN: "将58.44克NaCl溶解在足够的水中制成2升溶液，溶液的摩尔浓度是多少？（NaCl的摩尔质量=58.44 g/mol）",
+                answers: ["0.5 M", "1.0 M", "1.5 M", "2.0 M"],
+                correct: 1,
+                explanation: "Moles of NaCl = 58.44 g / 58.44 g/mol = 1 mol. Molarity = 1 mol / 2 L = 0.5 M.",
+                difficulty: "high"
+            },
+            {
+                chapter: 5,
+                story: "Chris研究热力学，理解反应的自发性与平衡。",
+                question: "If a reaction has ΔH < 0 and ΔS > 0, what can be said about its spontaneity at all temperatures?",
+                questionCN: "如果一个反应的ΔH < 0且ΔS > 0，那么可以说它在所有温度下都是自发的吗？",
+                answers: ["Spontaneous at all temperatures", "Non-spontaneous at all temperatures", "Spontaneous only at high temperatures", "Spontaneous only at low temperatures"],
+                correct: 0,
+                explanation: "When ΔH < 0 and ΔS > 0, ΔG will always be negative, making the reaction spontaneous at all temperatures.",
+                difficulty: "high"
+            },
+            {
+                chapter: 5,
+                story: "Chris探索溶液的热力学性质，理解熵的变化。",
+                question: "Which process typically results in an increase in entropy?",
+                questionCN: "以下哪种过程通常会导致熵增加？",
+                answers: ["Freezing of water", "Dissolving salt in water", "Formation of a solid crystal", "Condensation of vapor"],
+                correct: 1,
+                explanation: "Dissolving salt in water increases the disorder, resulting in an increase in entropy.",
+                difficulty: "high"
+            },
+            {
+                chapter: 5,
+                story: "Chris学习溶液化学，理解酸碱中和反应。",
+                question: "What is the pH of a 0.01 M HCl solution?",
+                questionCN: "0.01 M HCl溶液的pH值是多少？",
+                answers: ["1", "2", "7", "14"],
+                correct: 1,
+                explanation: "pH = -log[H⁺] = -log(0.01) = 2.",
+                difficulty: "high"
+            },
+            {
+                chapter: 5,
+                story: "Chris研究溶液的电导率，理解电解质的性质。",
+                question: "Which of the following is a strong electrolyte?",
+                questionCN: "以下哪项是强电解质？",
+                answers: ["CH₃COOH", "NaCl", "H₂O", "C₆H₆"],
+                correct: 1,
+                explanation: "NaCl is a strong electrolyte as it completely dissociates in water.",
+                difficulty: "high"
+            },
+            {
+                chapter: 5,
+                story: "Chris探索溶液平衡，理解溶解度积。",
+                question: "What is the solubility product (Ksp) expression for AgCl?",
+                questionCN: "AgCl的溶解度积（Ksp）表达式是什么？",
+                answers: ["[Ag⁺][Cl⁻]", "[AgCl]", "[AgCl]²", "[Ag⁺] + [Cl⁻]"],
+                correct: 0,
+                explanation: "The Ksp expression for AgCl is [Ag⁺][Cl⁻].",
+                difficulty: "high"
+            },
+            {
+                chapter: 5,
+                story: "Chris学习溶液的酸碱中和反应，理解中和点。",
+                question: "In a titration of a weak base with a strong acid, where is the equivalence point?",
+                questionCN: "在弱碱与强酸的滴定中，等效点位于哪里？",
+                answers: ["pH < 7", "pH = 7", "pH > 7", "Depends on the base"],
+                correct: 0,
+                explanation: "The equivalence point in the titration of a weak base with a strong acid is typically below pH 7.",
+                difficulty: "high"
+            },
             // 可以继续添加更多问题
         ];
 
@@ -684,6 +983,15 @@
             { term: "Exothermic Reaction", definition: "放热反应，释放能量的化学反应。" },
             { term: "Endothermic Reaction", definition: "吸热反应，吸收能量的化学反应。" },
             { term: "Solubility", definition: "溶解度，物质在溶剂中的溶解能力。" },
+            { term: "Arrhenius Equation", definition: "阿仑尼乌斯方程，描述反应速率与温度关系的方程。" },
+            { term: "Boyle's Law", definition: "玻意耳定律，描述在恒温下气体压力与体积的关系。" },
+            { term: "Alkanes", definition: "烷烃，饱和烃，只有单键的碳氢化合物。" },
+            { term: "Alkenes", definition: "烯烃，不饱和烃，至少含有一个碳碳双键的碳氢化合物。" },
+            { term: "Alkynes", definition: "炔烃，不饱和烃，至少含有一个碳碳三键的碳氢化合物。" },
+            { term: "Hydrogenation", definition: "加氢反应，向不饱和分子添加氢气。" },
+            { term: "Hydration", definition: "加水反应，向双键添加水分子。" },
+            { term: "SN1 Reaction", definition: "一级亲核取代反应，涉及碳正离子中间体。" },
+            { term: "SN2 Reaction", definition: "二级亲核取代反应，直接取代反应，不涉及中间体。" },
             // 更多词汇
         ];
 
@@ -703,7 +1011,7 @@
         let score = 0;
         let currentChapter = null;
         let consecutiveCorrect = 0;
-        const totalChapters = 2; // 根据问题级别调整
+        const totalChapters = 5; // 更新为5个章节
         let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
         // 获取DOM元素
@@ -819,7 +1127,7 @@
         function updateAchievements() {
             achievements.forEach(achv => {
                 if (!achv.achieved) {
-                    if (achv.name === "初级化学师" && currentChapter > 1) {
+                    if (achv.name === "初级化学师" && currentChapter >= 1) {
                         achv.achieved = true;
                     }
                     if (achv.name === "优秀回答" && consecutiveCorrect >= 5) {
@@ -831,7 +1139,7 @@
                     if (achv.name === "词汇达人" && vocabulary.length >= 10) {
                         achv.achieved = true;
                     }
-                    if (achv.name === "知识渊博" && currentChapter > totalChapters) {
+                    if (achv.name === "知识渊博" && currentChapter >= totalChapters) {
                         achv.achieved = true;
                     }
                     // 更多成就条件
