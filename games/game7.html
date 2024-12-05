@@ -98,7 +98,7 @@
             transform: scale(1.05);
         }
         /* 游戏容器样式 */
-        #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+        #game-container, #vocab-container, #achievements-container, #leaderboard-container, #competitive-container {
             display: none;
             position: relative;
             width: 90%;
@@ -313,6 +313,75 @@
             transition: width 0.5s;
             z-index: 6;
         }
+        /* 竞技模式容器样式 */
+        #competitive-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #2F4F4F;
+            width: 90%;
+            max-width: 1000px;
+            height: 600px;
+            border: 5px solid #000080;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .matching-animation {
+            width: 100px;
+            height: 100px;
+            border: 10px solid #fff;
+            border-top: 10px solid #000080;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        #match-result {
+            display: none;
+            text-align: center;
+        }
+        #match-result p {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        #match-result button {
+            background-color: #1E90FF;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            transition: background-color 0.3s;
+        }
+        #match-result button:hover {
+            background-color: #1C86EE;
+        }
+        /* 实时得分显示 */
+        .score-board {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 7;
+        }
+        /* 计时器样式 */
+        .timer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 7;
+        }
         /* 添加动画关键帧 */
         @keyframes celebrate {
             0% { transform: rotate(0deg); }
@@ -338,6 +407,10 @@
             50% { transform: translateY(30px); }
             100% { transform: translateY(0); }
         }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         .celebrate {
             animation: celebrate 0.5s ease-in-out;
         }
@@ -356,7 +429,7 @@
                 font-size: 1.5em;
                 padding: 15px;
             }
-            #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+            #game-container, #vocab-container, #achievements-container, #leaderboard-container, #competitive-container {
                 height: 500px;
             }
             #chris {
@@ -395,6 +468,10 @@
             .list-item {
                 width: 90%;
             }
+            .score-board, .timer {
+                font-size: 1em;
+                padding: 8px 16px;
+            }
         }
     </style>
 </head>
@@ -405,6 +482,7 @@
     <!-- 主菜单 -->
     <div id="main-menu">
         <button class="menu-btn" id="start-game-btn">开始游戏</button>
+        <button class="menu-btn" id="competitive-mode-btn">竞技模式</button>
         <button class="menu-btn" id="vocab-btn">词汇卡</button>
         <button class="menu-btn" id="achievements-btn">成就</button>
         <button class="menu-btn" id="leaderboard-btn">排行榜</button>
@@ -460,6 +538,44 @@
         <div id="feedback">
             <p id="feedback-text">反馈信息</p>
             <button id="next-btn">继续</button>
+            <button id="return-main-btn" style="display:none; margin-top: 10px;">返回主菜单</button>
+        </div>
+    </div>
+
+    <!-- 竞技模式容器 -->
+    <div id="competitive-container">
+        <div class="container-title">竞技模式</div>
+        <div class="score-board" id="score-board">
+            你: 0 | 化学波波老师: 0
+        </div>
+        <div class="timer" id="timer">
+            时间: 15s
+        </div>
+        <div id="matching">
+            <div class="matching-animation"></div>
+            <p>正在匹配对手...</p>
+        </div>
+        <div id="matched" style="display:none; text-align:center;">
+            <p>您匹配到了化学波波老师！</p>
+            <button class="menu-btn" id="start-competition-btn">开始竞赛</button>
+        </div>
+        <div id="competition" style="display:none; width: 100%; height: 100%;">
+            <!-- 竞赛中的问题和分数 -->
+            <div id="comp-progress-bar" style="position:absolute; top:0; left:0; height:10px; background-color:#FF8C00; width:0%; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; transition: width 0.5s;"></div>
+            <div id="comp-question-box" style="position:absolute; top:20px; left:50%; transform: translateX(-50%); background-color: rgba(0, 0, 128, 0.9); padding:20px; border-radius:15px; display:none; width:90%; max-width:600px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index:4;">
+                <h3 id="comp-question">问题文本</h3>
+                <div id="comp-answers">
+                    <!-- 答案按钮 -->
+                </div>
+            </div>
+            <div id="comp-feedback" style="position:absolute; top:50%; left:50%; transform: translate(-50%, -50%); background-color: rgba(255, 255, 255, 0.95); color:#000; padding:30px; border-radius:15px; display:none; text-align:center; width:80%; max-width:500px; box-shadow:0 8px 16px rgba(0,0,0,0.3); z-index:5;">
+                <p id="comp-feedback-text">反馈信息</p>
+                <button id="comp-next-btn">继续</button>
+            </div>
+        </div>
+        <div id="match-result" style="display:none;">
+            <p id="match-result-text">比赛结果</p>
+            <button id="return-main-from-match-btn">返回主菜单</button>
         </div>
     </div>
 
@@ -758,7 +874,7 @@
             },
             {
                 chapter: 3,
-                story: "Chris研究有机化学中的反应类型，理解不同反应机制。",
+                story: "Chris研究有机反应类型，理解不同反应机制。",
                 question: "Which reaction involves the addition of water across a double bond?",
                 questionCN: "哪种反应涉及在双键上加水？",
                 answers: ["Hydration", "Hydrogenation", "Halogenation", "Oxidation"],
@@ -768,7 +884,7 @@
             },
             {
                 chapter: 3,
-                story: "Chris学习有机化学中的取代反应，理解官能团的变化。",
+                story: "Chris学习有机反应中的取代反应，理解官能团的变化。",
                 question: "In a nucleophilic substitution reaction, what is the role of the nucleophile?",
                 questionCN: "在亲核取代反应中，亲核试剂的作用是什么？",
                 answers: ["Electron pair acceptor", "Electron pair donor", "Leaving group", "Solvent"],
@@ -894,7 +1010,7 @@
                 question: "What is the molarity of a solution prepared by dissolving 58.44 grams of NaCl in enough water to make 2 liters of solution? (Molar mass of NaCl = 58.44 g/mol)",
                 questionCN: "将58.44克NaCl溶解在足够的水中制成2升溶液，溶液的摩尔浓度是多少？（NaCl的摩尔质量=58.44 g/mol）",
                 answers: ["0.5 M", "1.0 M", "1.5 M", "2.0 M"],
-                correct: 1,
+                correct: 0,
                 explanation: "Moles of NaCl = 58.44 g / 58.44 g/mol = 1 mol. Molarity = 1 mol / 2 L = 0.5 M.",
                 difficulty: "high"
             },
@@ -950,12 +1066,22 @@
             },
             {
                 chapter: 5,
-                story: "Chris学习溶液的酸碱中和反应，理解中和点。",
+                story: "Chris学习溶液化学，理解酸碱中和反应。",
                 question: "In a titration of a weak base with a strong acid, where is the equivalence point?",
                 questionCN: "在弱碱与强酸的滴定中，等效点位于哪里？",
                 answers: ["pH < 7", "pH = 7", "pH > 7", "Depends on the base"],
                 correct: 0,
                 explanation: "The equivalence point in the titration of a weak base with a strong acid is typically below pH 7.",
+                difficulty: "high"
+            },
+            {
+                chapter: 5,
+                story: "第五章：Chris学习溶液的浓度与电导率。",
+                question: "What is the molarity of a solution prepared by dissolving 58.44 grams of NaCl in enough water to make 2 liters of solution? (Molar mass of NaCl = 58.44 g/mol)",
+                questionCN: "将58.44克NaCl溶解在足够的水中制成2升溶液，溶液的摩尔浓度是多少？（NaCl的摩尔质量=58.44 g/mol）",
+                answers: ["0.5 M", "1.0 M", "1.5 M", "2.0 M"],
+                correct: 0,
+                explanation: "Moles of NaCl = 58.44 g / 58.44 g/mol = 1 mol. Molarity = 1 mol / 2 L = 0.5 M.",
                 difficulty: "high"
             },
             // 可以继续添加更多问题
@@ -1017,6 +1143,7 @@
         // 获取DOM元素
         const mainMenu = document.getElementById('main-menu');
         const startGameBtn = document.getElementById('start-game-btn');
+        const competitiveModeBtn = document.getElementById('competitive-mode-btn');
         const vocabBtn = document.getElementById('vocab-btn');
         const achievementsBtn = document.getElementById('achievements-btn');
         const leaderboardBtn = document.getElementById('leaderboard-btn');
@@ -1034,6 +1161,7 @@
         const feedback = document.getElementById('feedback');
         const feedbackText = document.getElementById('feedback-text');
         const nextBtn = document.getElementById('next-btn');
+        const returnMainBtn = document.getElementById('return-main-btn');
         const progressBar = document.getElementById('progress-bar');
 
         const vocabContainer = document.getElementById('vocab-container');
@@ -1048,7 +1176,26 @@
         const leaderboardList = document.getElementById('leaderboard-list');
         const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
 
-        // 添加动画关键帧
+        const competitiveContainer = document.getElementById('competitive-container');
+        const matchingDiv = document.getElementById('matching');
+        const matchedDiv = document.getElementById('matched');
+        const startCompetitionBtn = document.getElementById('start-competition-btn');
+        const competitionDiv = document.getElementById('competition');
+        const compProgressBar = document.getElementById('comp-progress-bar');
+        const compQuestionBox = document.getElementById('comp-question-box');
+        const compQuestionText = document.getElementById('comp-question');
+        const compAnswersDiv = document.getElementById('comp-answers');
+        const compFeedbackDiv = document.getElementById('comp-feedback');
+        const compFeedbackText = document.getElementById('comp-feedback-text');
+        const compNextBtn = document.getElementById('comp-next-btn');
+        const matchResultDiv = document.getElementById('match-result');
+        const matchResultText = document.getElementById('match-result-text');
+        const returnMainFromMatchBtn = document.getElementById('return-main-from-match-btn');
+
+        const scoreBoard = document.getElementById('score-board');
+        const timerDisplay = document.getElementById('timer');
+
+        // 添加动画关键帧（保持不变）
         const styleSheet = document.createElement("style");
         styleSheet.type = "text/css";
         styleSheet.innerText = `
@@ -1076,6 +1223,10 @@
                 50% { transform: translateY(30px); }
                 100% { transform: translateY(0); }
             }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
             .celebrate {
                 animation: celebrate 0.5s ease-in-out;
             }
@@ -1087,6 +1238,15 @@
             }
             .shoot-own-goal {
                 animation: shoot-own-goal 0.5s ease-in-out;
+            }
+            .matching-animation {
+                width: 100px;
+                height: 100px;
+                border: 10px solid #fff;
+                border-top: 10px solid #000080;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-bottom: 20px;
             }
         `;
         document.head.appendChild(styleSheet);
@@ -1185,6 +1345,12 @@
             chapterSelect.style.display = 'flex';
         });
 
+        competitiveModeBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            competitiveContainer.style.display = 'flex';
+            startMatching();
+        });
+
         vocabBtn.addEventListener('click', () => {
             mainMenu.style.display = 'none';
             vocabContainer.style.display = 'block';
@@ -1229,6 +1395,17 @@
 
         closeLeaderboardBtn.addEventListener('click', () => {
             leaderboardContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        returnMainBtn.addEventListener('click', () => {
+            gameContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        returnMainFromMatchBtn.addEventListener('click', () => {
+            matchResultDiv.style.display = 'none';
+            competitiveContainer.style.display = 'none';
             mainMenu.style.display = 'flex';
         });
 
@@ -1302,6 +1479,11 @@
             }
             updateAchievements();
             feedback.style.display = 'block';
+            if (currentQuestionIndex === getTotalQuestionsByChapter(currentChapter) - 1) {
+                // 最后一题后隐藏“继续”按钮，显示“返回主菜单”按钮
+                nextBtn.style.display = 'none';
+                returnMainBtn.style.display = 'inline-block';
+            }
         }
 
         function triggerPositiveEvent() {
@@ -1329,6 +1511,7 @@
         function endGame() {
             feedbackText.innerHTML = `<strong>游戏结束！🎉</strong><br>你的得分是 ${score} / ${questions.filter(q => q.chapter === currentChapter).length}`;
             nextBtn.style.display = 'none';
+            returnMainBtn.style.display = 'inline-block';
             feedback.style.display = 'block';
             // 保存到排行榜
             let playerName = prompt("请输入你的名字:", "玩家");
@@ -1343,6 +1526,143 @@
             moveBall();
         });
 
+        // 竞技模式逻辑
+        let competitionQuestions = [];
+        let compCurrentQuestionIndex = 0;
+        let playerScoreComp = 0;
+        let opponentScoreComp = 0;
+        let timer;
+        let timeLeft = 15; // 每题15秒
+
+        function startMatching() {
+            matchingDiv.style.display = 'block';
+            matchedDiv.style.display = 'none';
+            competitionDiv.style.display = 'none';
+            matchResultDiv.style.display = 'none';
+            // 模拟匹配时间
+            setTimeout(() => {
+                matchingDiv.style.display = 'none';
+                matchedDiv.style.display = 'block';
+            }, 3000); // 3秒匹配动画
+        }
+
+        startCompetitionBtn.addEventListener('click', () => {
+            matchedDiv.style.display = 'none';
+            competitionDiv.style.display = 'block';
+            // 从问题库中随机抽取10个“hard”难度的问题
+            competitionQuestions = shuffle(questions.filter(q => q.difficulty === 'hard')).slice(0, 10);
+            compCurrentQuestionIndex = 0;
+            playerScoreComp = 0;
+            opponentScoreComp = 0;
+            compProgressBar.style.width = '0%';
+            updateScoreBoard();
+            loadCompQuestion();
+        });
+
+        function loadCompQuestion() {
+            if (compCurrentQuestionIndex >= competitionQuestions.length) {
+                endCompetition();
+                return;
+            }
+            const q = competitionQuestions[compCurrentQuestionIndex];
+            compQuestionText.innerHTML = `<strong>${q.question}</strong><br><em>${q.questionCN}</em>`;
+            compAnswersDiv.innerHTML = '';
+            q.answers.forEach((ans, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = ans;
+                btn.classList.add('answer-btn');
+                btn.addEventListener('click', () => checkCompAnswer(index));
+                compAnswersDiv.appendChild(btn);
+            });
+            competitionDiv.scrollTop = 0;
+            compQuestionBox.style.display = 'block';
+            startTimer();
+        }
+
+        function checkCompAnswer(selected) {
+            clearInterval(timer);
+            const q = competitionQuestions[compCurrentQuestionIndex];
+            compQuestionBox.style.display = 'none';
+            // 玩家回答
+            if (selected === q.correct) {
+                playerScoreComp++;
+                compFeedbackText.innerHTML = `<strong>你回答正确！👏</strong><br>${q.explanation}`;
+                triggerCompPositiveEvent();
+            } else {
+                compFeedbackText.innerHTML = `<strong>你回答错误！😅</strong><br>${q.explanation}`;
+                triggerCompNegativeEvent();
+            }
+            // 对手回答（模拟）
+            setTimeout(() => {
+                const opponentAnswer = getOpponentAnswer(q);
+                if (opponentAnswer === q.correct) {
+                    opponentScoreComp++;
+                    compFeedbackText.innerHTML += `<br><strong>化学波波老师回答正确！👍</strong>`;
+                } else {
+                    compFeedbackText.innerHTML += `<br><strong>化学波波老师回答错误！😞</strong>`;
+                }
+                updateScoreBoard();
+                compFeedbackDiv.style.display = 'block';
+                // 更新进度条
+                const progress = ((compCurrentQuestionIndex + 1) / competitionQuestions.length) * 100;
+                compProgressBar.style.width = progress + '%';
+                compCurrentQuestionIndex++;
+            }, 500); // 模拟对手回答时间
+        }
+
+        function getOpponentAnswer(q) {
+            // 简单模拟对手的回答
+            // 70% 机会答对
+            if (Math.random() < 0.7) {
+                return q.correct;
+            } else {
+                return getRandomIncorrectAnswer(q.correct);
+            }
+        }
+
+        function getRandomIncorrectAnswer(correctIndex) {
+            const incorrect = [];
+            const q = competitionQuestions[compCurrentQuestionIndex];
+            q.answers.forEach((ans, index) => {
+                if (index !== correctIndex) incorrect.push(index);
+            });
+            return incorrect[Math.floor(Math.random() * incorrect.length)];
+        }
+
+        function triggerCompPositiveEvent() {
+            // 对玩家添加积极动画
+            chris.classList.add('celebrate');
+            setTimeout(() => {
+                chris.classList.remove('celebrate');
+            }, 500);
+        }
+
+        function triggerCompNegativeEvent() {
+            // 对玩家添加消极动画
+            chris.classList.add('shake');
+            setTimeout(() => {
+                chris.classList.remove('shake');
+            }, 500);
+        }
+
+        function endCompetition() {
+            competitionDiv.style.display = 'none';
+            matchResultDiv.style.display = 'block';
+            if (playerScoreComp > opponentScoreComp) {
+                matchResultText.innerHTML = `<strong>恭喜！你赢了化学波波老师！🏆</strong><br>你的得分: ${playerScoreComp} <br>对手得分: ${opponentScoreComp}`;
+            } else if (playerScoreComp < opponentScoreComp) {
+                matchResultText.innerHTML = `<strong>遗憾！你输了给化学波波老师。😢</strong><br>你的得分: ${playerScoreComp} <br>对手得分: ${opponentScoreComp}`;
+            } else {
+                matchResultText.innerHTML = `<strong>平局！🤝</strong><br>你的得分: ${playerScoreComp} <br>对手得分: ${opponentScoreComp}`;
+            }
+            // 可能奖励成就或其他
+        }
+
+        compNextBtn.addEventListener('click', () => {
+            compFeedbackDiv.style.display = 'none';
+            loadCompQuestion();
+        });
+
         // 生成词汇卡
         generateVocabCards();
 
@@ -1351,6 +1671,65 @@
 
         // 生成排行榜
         generateLeaderboard();
+
+        // 竞争模式工具函数
+        function shuffle(array) {
+            let currentIndex = array.length, temporaryValue, randomIndex;
+
+            // While there remain elements to shuffle...
+            while (0 !== currentIndex) {
+
+                // Pick a remaining element...
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex -= 1;
+
+                // And swap it with the current element.
+                temporaryValue = array[currentIndex];
+                array[currentIndex] = array[randomIndex];
+                array[randomIndex] = temporaryValue;
+            }
+
+            return array;
+        }
+
+        // 竞技模式计时器
+        function startTimer() {
+            timeLeft = 15; // 每题15秒
+            timerDisplay.textContent = `时间: ${timeLeft}s`;
+            timer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `时间: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    // 自动判定为错误
+                    const q = competitionQuestions[compCurrentQuestionIndex];
+                    compQuestionBox.style.display = 'none';
+                    compFeedbackText.innerHTML = `<strong>时间到！😰</strong><br>Chris没有及时回答。<br><em>${q.explanation}</em>`;
+                    triggerCompNegativeEvent();
+                    // 对手回答（模拟）
+                    setTimeout(() => {
+                        const opponentAnswer = getOpponentAnswer(q);
+                        if (opponentAnswer === q.correct) {
+                            opponentScoreComp++;
+                            compFeedbackText.innerHTML += `<br><strong>化学波波老师回答正确！👍</strong>`;
+                        } else {
+                            compFeedbackText.innerHTML += `<br><strong>化学波波老师回答错误！😞</strong>`;
+                        }
+                        updateScoreBoard();
+                        compFeedbackDiv.style.display = 'block';
+                        // 更新进度条
+                        const progress = ((compCurrentQuestionIndex + 1) / competitionQuestions.length) * 100;
+                        compProgressBar.style.width = progress + '%';
+                        compCurrentQuestionIndex++;
+                    }, 500); // 模拟对手回答时间
+                }
+            }, 1000);
+        }
+
+        // 更新实时得分板
+        function updateScoreBoard() {
+            scoreBoard.textContent = `你: ${playerScoreComp} | 化学波波老师: ${opponentScoreComp}`;
+        }
     </script>
 
 </body>
