@@ -19,19 +19,21 @@
             overflow: hidden;
         }
 
-        /* 主菜单、游戏说明、排行榜、游戏结束界面、成就界面 */
+        /* 主菜单、游戏说明、排行榜、游戏结束界面、成就界面、暂停界面 */
         .screen {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
-            max-width: 700px;
+            max-width: 800px;
             background: rgba(30, 39, 46, 0.95);
-            padding: 30px;
-            border-radius: 15px;
+            padding: 40px;
+            border-radius: 20px;
             display: none;
             z-index: 2;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.5s;
         }
 
         .active {
@@ -41,12 +43,14 @@
         h1, h2 {
             margin-bottom: 20px;
             color: #ffa801;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         p {
             margin: 10px 0;
             text-align: left;
             line-height: 1.6;
+            font-size: 18px;
         }
 
         button {
@@ -58,11 +62,12 @@
             color: #d2dae2;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.2s;
         }
 
         button:hover {
             background-color: #0097e6;
+            transform: scale(1.05);
         }
 
         /* HUD样式 */
@@ -72,15 +77,34 @@
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 30px;
+            gap: 40px;
             font-size: 20px;
             z-index: 1;
-        }
-
-        #hud div {
             background: rgba(26, 188, 156, 0.8);
             padding: 10px 20px;
             border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #hud div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #hud .bar-container {
+            width: 150px;
+            background-color: #555;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        #hud .bar {
+            height: 20px;
+            background-color: #00a8ff;
+            width: 100%;
+            transition: width 0.3s;
         }
 
         /* Canvas样式 */
@@ -91,6 +115,7 @@
             border: 2px solid #d2dae2;
             border-radius: 10px;
             z-index: 1;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
         /* 游戏结束界面 */
@@ -136,6 +161,28 @@
             border-radius: 50%;
             margin-right: 10px;
         }
+
+        /* 暂停提示 */
+        #pause-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 15px;
+            display: none;
+            z-index: 4;
+            color: #fff;
+            font-size: 24px;
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
     </style>
 </head>
 <body>
@@ -180,16 +227,33 @@
     <!-- 设置界面 -->
     <div id="settings" class="screen">
         <h2>设置</h2>
-        <p>（当前无设置项）</p>
+        <p>背景音乐:</p>
+        <button id="toggle-music-btn">开启/关闭</button>
+        <p>音效:</p>
+        <button id="toggle-sound-btn">开启/关闭</button>
         <button id="back-from-settings">返回主菜单</button>
     </div>
 
     <!-- HUD -->
     <div id="hud" style="display: none;">
-        <div>得分: <span id="score">0</span></div>
-        <div>生命: <span id="lives">3</span></div>
-        <div>时间: <span id="time">60</span>秒</div>
-        <div>关卡: <span id="level">1</span></div>
+        <div>
+            得分: <span id="score">0</span>
+        </div>
+        <div>
+            生命: <span id="lives">3</span>
+            <div class="bar-container">
+                <div class="bar" id="lives-bar"></div>
+            </div>
+        </div>
+        <div>
+            时间: <span id="time">60</span>秒
+            <div class="bar-container">
+                <div class="bar" id="time-bar"></div>
+            </div>
+        </div>
+        <div>
+            关卡: <span id="level">1</span>
+        </div>
     </div>
 
     <!-- 游戏画布 -->
@@ -203,6 +267,9 @@
         <button id="back-to-menu-btn">返回主菜单</button>
     </div>
 
+    <!-- 暂停提示 -->
+    <div id="pause-overlay">游戏已暂停</div>
+
     <script>
         // 获取元素
         const mainMenu = document.getElementById('main-menu');
@@ -211,6 +278,7 @@
         const achievements = document.getElementById('achievements');
         const settings = document.getElementById('settings');
         const gameOver = document.getElementById('game-over');
+        const pauseOverlay = document.getElementById('pause-overlay');
         const startGameBtn = document.getElementById('start-game-btn');
         const instructionsBtn = document.getElementById('instructions-btn');
         const leaderboardBtn = document.getElementById('leaderboard-btn');
@@ -230,8 +298,14 @@
         const gameOverMessage = document.getElementById('game-over-message');
         const leaderboardList = document.getElementById('leaderboard-list');
         const achievementsList = document.getElementById('achievements-list');
+        const toggleMusicBtn = document.getElementById('toggle-music-btn');
+        const toggleSoundBtn = document.getElementById('toggle-sound-btn');
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
+
+        // HUD Bars
+        const livesBar = document.getElementById('lives-bar');
+        const timeBar = document.getElementById('time-bar');
 
         // 游戏状态
         let gameState = 'menu'; // menu, instructions, leaderboard, achievements, settings, playing, gameover, paused
@@ -241,6 +315,27 @@
         let level = 1;
         let gameTimer;
         let animationId;
+        let isMusicOn = true;
+        let isSoundOn = true;
+
+        // 音效生成器
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playSound(frequency, type, duration) {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.type = type;
+            oscillator.frequency.value = frequency;
+            gainNode.gain.value = 0.1;
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration / 1000);
+        }
 
         // 玩家对象
         const player = {
@@ -251,7 +346,10 @@
             speed: 5,
             dx: 0,
             dy: 0,
-            color: '#2ecc71'
+            color: '#2ecc71',
+            shield: false,
+            speedBoost: false,
+            magnet: false
         };
 
         // 敌人和障碍物
@@ -259,6 +357,10 @@
         const obstacles = [];
         const items = [];
         const powerUps = [];
+        const bosses = [];
+
+        // 粒子效果
+        const particles = [];
 
         // 控制键
         const keys = {
@@ -293,6 +395,8 @@
             backFromSettings.addEventListener('click', () => switchScreen('menu'));
             restartGameBtn.addEventListener('click', startGame);
             backToMenuBtn.addEventListener('click', () => switchScreen('menu'));
+            toggleMusicBtn.addEventListener('click', toggleMusic);
+            toggleSoundBtn.addEventListener('click', toggleSound);
 
             // 绑定键盘事件
             document.addEventListener('keydown', keyDown);
@@ -309,8 +413,6 @@
             achievements.classList.remove('active');
             settings.classList.remove('active');
             gameOver.classList.remove('active');
-            canvas.style.display = 'none';
-            document.getElementById('hud').style.display = 'none';
 
             if (screen === 'menu') {
                 mainMenu.classList.add('active');
@@ -343,16 +445,27 @@
             levelElement.textContent = level;
             player.x = canvas.width / 2 - player.width / 2;
             player.y = canvas.height - 80;
+            player.speed = 5;
+            player.shield = false;
+            player.speedBoost = false;
+            player.magnet = false;
             enemies.length = 0;
             obstacles.length = 0;
             items.length = 0;
             powerUps.length = 0;
+            bosses.length = 0;
+            particles.length = 0;
 
             // 生成初始敌人、障碍物和物品
             generateEnemies(5);
             generateObstacles(5);
             generateItems(10);
             generatePowerUps(3);
+
+            // 生成Boss敌人
+            if (level % 5 === 0) {
+                generateBoss();
+            }
 
             // 切换到游戏界面
             switchScreen('playing');
@@ -367,6 +480,9 @@
         function updateTimer() {
             timeLeft--;
             timeElement.textContent = timeLeft;
+            const timePercentage = (timeLeft / 60) * 100;
+            timeBar.style.width = `${timePercentage}%`;
+            timeBar.style.backgroundColor = timePercentage > 50 ? '#00a8ff' : timePercentage > 20 ? '#f39c12' : '#e74c3c';
             if (timeLeft <= 0) {
                 endGame(false);
             }
@@ -408,13 +524,20 @@
                 }
                 // 碰撞检测
                 if (isColliding(player, enemy)) {
-                    lives--;
-                    livesElement.textContent = lives;
-                    // 移动敌人到随机位置
-                    enemy.y = Math.random() * -canvas.height;
-                    enemy.x = Math.random() * (canvas.width - enemy.width);
-                    if (lives <= 0) {
-                        endGame(false);
+                    if (!player.shield) {
+                        lives--;
+                        livesElement.textContent = lives;
+                        updateLivesBar();
+                        playSound(200, 'sine', 100);
+                        if (isSoundOn) playSound(200, 'sine', 100);
+                        // 粒子效果
+                        generateParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 'red');
+                        // 移动敌人到随机位置
+                        enemy.y = Math.random() * -canvas.height;
+                        enemy.x = Math.random() * (canvas.width - enemy.width);
+                        if (lives <= 0) {
+                            endGame(false);
+                        }
                     }
                 }
             });
@@ -428,13 +551,19 @@
                 }
                 // 碰撞检测
                 if (isColliding(player, obstacle)) {
-                    lives--;
-                    livesElement.textContent = lives;
-                    // 移动障碍物到随机位置
-                    obstacle.y = Math.random() * -canvas.height;
-                    obstacle.x = Math.random() * (canvas.width - obstacle.width);
-                    if (lives <= 0) {
-                        endGame(false);
+                    if (!player.shield) {
+                        lives--;
+                        livesElement.textContent = lives;
+                        updateLivesBar();
+                        if (isSoundOn) playSound(200, 'sine', 100);
+                        // 粒子效果
+                        generateParticles(obstacle.x + obstacle.width / 2, obstacle.y + obstacle.height / 2, 'yellow');
+                        // 移动障碍物到随机位置
+                        obstacle.y = Math.random() * -canvas.height;
+                        obstacle.x = Math.random() * (canvas.width - obstacle.width);
+                        if (lives <= 0) {
+                            endGame(false);
+                        }
                     }
                 }
             });
@@ -450,6 +579,10 @@
                 if (isCollidingCircleRect(item, player)) {
                     score += 10;
                     scoreElement.textContent = score;
+                    updateScoreBar();
+                    if (isSoundOn) playSound(400, 'square', 100);
+                    // 粒子效果
+                    generateParticles(item.x + item.radius, item.y + item.radius, 'green');
                     items.splice(index, 1);
                     generateItems(1);
                     checkAchievements();
@@ -468,39 +601,44 @@
                     activatePowerUp(powerUp.type);
                     powerUps.splice(index, 1);
                     generatePowerUps(1);
+                    checkAchievements();
                 }
             });
 
-            // 检查是否到达医院
-            if (player.y <= 50) { // 假设医院在顶部
-                score += 50; // 到达医院奖励
-                checkAchievements();
-                level++;
-                levelElement.textContent = level;
-                timeLeft += 10; // 完成关卡奖励时间
-                timeElement.textContent = timeLeft;
-                // 生成下一关的敌人、障碍物和物品
-                generateEnemies(3 + level);
-                generateObstacles(2 + level);
-                generateItems(5 + level);
-                generatePowerUps(1 + Math.floor(level / 2));
-                // 重置玩家位置
-                player.x = canvas.width / 2 - player.width / 2;
-                player.y = canvas.height - 80;
-            }
+            // 更新Boss敌人位置
+            bosses.forEach((boss, index) => {
+                boss.y += boss.speed;
+                if (boss.y > canvas.height) {
+                    bosses.splice(index, 1);
+                    generateBoss();
+                }
+                // 碰撞检测
+                if (isColliding(player, boss)) {
+                    if (!player.shield) {
+                        lives--;
+                        livesElement.textContent = lives;
+                        updateLivesBar();
+                        if (isSoundOn) playSound(200, 'sine', 100);
+                        // 粒子效果
+                        generateParticles(boss.x + boss.width / 2, boss.y + boss.height / 2, 'purple');
+                        // 移动Boss到随机位置
+                        boss.y = Math.random() * -canvas.height;
+                        boss.x = Math.random() * (canvas.width - boss.width);
+                        if (lives <= 0) {
+                            endGame(false);
+                        }
+                    }
+                }
+            });
 
-            // 动态难度调整（根据关卡调整敌人速度）
-            enemies.forEach(enemy => {
-                enemy.speed = 2 + level * 0.5;
-            });
-            obstacles.forEach(obstacle => {
-                obstacle.speed = 1 + level * 0.3;
-            });
-            items.forEach(item => {
-                item.speed = 3 + level * 0.2;
-            });
-            powerUps.forEach(powerUp => {
-                powerUp.speed = 4 + level * 0.2;
+            // 粒子效果更新
+            particles.forEach((particle, index) => {
+                particle.x += particle.dx;
+                particle.y += particle.dy;
+                particle.alpha -= 0.01;
+                if (particle.alpha <= 0) {
+                    particles.splice(index, 1);
+                }
             });
         }
 
@@ -509,12 +647,16 @@
             // 清除画布
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // 绘制动态背景
+            drawBackground();
+
             // 绘制医院
             ctx.fillStyle = '#e74c3c';
             ctx.fillRect(canvas.width / 2 - 50, 20, 100, 30);
             ctx.fillStyle = '#ecf0f1';
             ctx.font = '16px Arial';
-            ctx.fillText('医院', canvas.width / 2 - 15, 40);
+            ctx.textAlign = 'center';
+            ctx.fillText('医院', canvas.width / 2, 40);
 
             // 绘制玩家（Chris）
             ctx.fillStyle = player.color;
@@ -552,19 +694,63 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(powerUp.symbol, powerUp.x + powerUp.radius, powerUp.y + powerUp.radius);
             });
+
+            // 绘制Boss敌人
+            bosses.forEach(boss => {
+                ctx.fillStyle = boss.color;
+                ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
+                // 绘制Boss生命条
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '12px Arial';
+                ctx.fillText(`HP: ${boss.hp}`, boss.x + boss.width / 2, boss.y - 10);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(boss.x, boss.y - 20, boss.width, 5);
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(boss.x, boss.y - 20, (boss.hp / boss.maxHp) * boss.width, 5);
+            });
+
+            // 绘制粒子效果
+            particles.forEach(particle => {
+                ctx.fillStyle = `rgba(${particle.color}, ${particle.alpha})`;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        // 绘制动态背景
+        function drawBackground() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#283048');
+            gradient.addColorStop(1, '#485460');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         // 生成敌人
         function generateEnemies(count) {
             for (let i = 0; i < count; i++) {
+                const typeRand = Math.random();
+                let type = 'basic';
+                let color = '#e74c3c';
+                let speed = 2 + level * 0.5;
+                if (typeRand > 0.7) {
+                    type = 'fast';
+                    color = '#f1c40f';
+                    speed += 2;
+                } else if (typeRand > 0.4) {
+                    type = 'smart';
+                    color = '#9b59b6';
+                    speed += 1;
+                }
                 enemies.push({
                     x: Math.random() * (canvas.width - 40),
                     y: Math.random() * -canvas.height,
                     width: 40,
                     height: 40,
-                    speed: 2 + level * 0.5,
-                    color: '#e74c3c',
-                    type: 'basic'
+                    speed: speed,
+                    color: color,
+                    type: type
                 });
             }
         }
@@ -599,19 +785,34 @@
 
         // 生成道具
         function generatePowerUps(count) {
-            const types = ['shield', 'speed', 'health'];
+            const types = ['shield', 'speed', 'magnet', 'time', 'extraLife'];
             for (let i = 0; i < count; i++) {
                 const type = types[Math.floor(Math.random() * types.length)];
                 let color, symbol;
-                if (type === 'shield') {
-                    color = '#9b59b6';
-                    symbol = 'S';
-                } else if (type === 'speed') {
-                    color = '#f39c12';
-                    symbol = 'F';
-                } else if (type === 'health') {
-                    color = '#e67e22';
-                    symbol = 'H';
+                switch(type) {
+                    case 'shield':
+                        color = '#9b59b6';
+                        symbol = 'S';
+                        break;
+                    case 'speed':
+                        color = '#f39c12';
+                        symbol = 'F';
+                        break;
+                    case 'magnet':
+                        color = '#2980b9';
+                        symbol = 'M';
+                        break;
+                    case 'time':
+                        color = '#27ae60';
+                        symbol = 'T';
+                        break;
+                    case 'extraLife':
+                        color = '#e74c3c';
+                        symbol = 'L';
+                        break;
+                    default:
+                        color = '#ffffff';
+                        symbol = '';
                 }
                 powerUps.push({
                     x: Math.random() * (canvas.width - 24),
@@ -625,21 +826,58 @@
             }
         }
 
+        // 生成Boss敌人
+        function generateBoss() {
+            bosses.push({
+                x: canvas.width / 2 - 50,
+                y: -100,
+                width: 100,
+                height: 100,
+                speed: 1,
+                color: '#8e44ad',
+                hp: 100,
+                maxHp: 100
+            });
+        }
+
         // 激活道具
         function activatePowerUp(type) {
-            if (type === 'shield') {
-                player.color = '#ffffff';
-                setTimeout(() => {
-                    player.color = '#2ecc71';
-                }, 5000);
-            } else if (type === 'speed') {
-                player.speed = 10;
-                setTimeout(() => {
-                    player.speed = 5;
-                }, 5000);
-            } else if (type === 'health') {
-                lives++;
-                livesElement.textContent = lives;
+            switch(type) {
+                case 'shield':
+                    player.shield = true;
+                    playSound(500, 'triangle', 300);
+                    setTimeout(() => {
+                        player.shield = false;
+                    }, 5000);
+                    break;
+                case 'speed':
+                    player.speed = 10;
+                    playSound(600, 'triangle', 300);
+                    setTimeout(() => {
+                        player.speed = 5;
+                    }, 5000);
+                    break;
+                case 'magnet':
+                    player.magnet = true;
+                    playSound(700, 'triangle', 300);
+                    setTimeout(() => {
+                        player.magnet = false;
+                    }, 5000);
+                    break;
+                case 'time':
+                    timeLeft += 15;
+                    timeElement.textContent = timeLeft;
+                    updateTimeBar();
+                    playSound(800, 'triangle', 300);
+                    break;
+                case 'extraLife':
+                    lives++;
+                    livesElement.textContent = lives;
+                    updateLivesBar();
+                    playSound(900, 'triangle', 300);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -680,8 +918,10 @@
             finalScoreElement.textContent = score;
             if (victory) {
                 gameOverMessage.textContent = '恭喜你，成功将Chris送到医院！';
+                playSound(1000, 'sawtooth', 500);
             } else {
                 gameOverMessage.textContent = '游戏结束，你失败了！';
+                playSound(300, 'sine', 500);
             }
             saveScore(score);
             checkAchievements();
@@ -718,8 +958,9 @@
             let achievementsData = JSON.parse(localStorage.getItem('chrisAchievements')) || {
                 firstLevel: false,
                 collect100: false,
-                noDamage: false
-                // 更多成就
+                noDamage: false,
+                bossDefeated: false,
+                collector: false
             };
             if (achievementsData.firstLevel) {
                 addAchievementToList('首次完成关卡');
@@ -729,6 +970,12 @@
             }
             if (achievementsData.noDamage) {
                 addAchievementToList('无损通关');
+            }
+            if (achievementsData.bossDefeated) {
+                addAchievementToList('击败Boss敌人');
+            }
+            if (achievementsData.collector) {
+                addAchievementToList('连续收集50个急救包');
             }
             // 更多成就检查
         }
@@ -744,25 +991,40 @@
             let achievementsData = JSON.parse(localStorage.getItem('chrisAchievements')) || {
                 firstLevel: false,
                 collect100: false,
-                noDamage: false
-                // 更多成就
+                noDamage: false,
+                bossDefeated: false,
+                collector: false
             };
+
             // 首次完成关卡
             if (level > 1 && !achievementsData.firstLevel) {
                 achievementsData.firstLevel = true;
                 showAchievement('首次完成关卡');
             }
+
             // 收集100个急救包
             if (score >= 100 && !achievementsData.collect100) {
                 achievementsData.collect100 = true;
                 showAchievement('收集100个急救包');
             }
+
             // 无损通关
             if (lives > 0 && gameState === 'gameover' && !achievementsData.noDamage) {
                 achievementsData.noDamage = true;
                 showAchievement('无损通关');
             }
-            // 更多成就条件
+
+            // 击败Boss敌人
+            if (level % 5 === 0 && !achievementsData.bossDefeated) {
+                achievementsData.bossDefeated = true;
+                showAchievement('击败Boss敌人');
+            }
+
+            // 连续收集50个急救包
+            if (score >= 50 && !achievementsData.collector) {
+                achievementsData.collector = true;
+                showAchievement('连续收集50个急救包');
+            }
 
             // 保存成就
             localStorage.setItem('chrisAchievements', JSON.stringify(achievementsData));
@@ -802,33 +1064,399 @@
             }
         }
 
+        // 切换音乐
+        function toggleMusic() {
+            isMusicOn = !isMusicOn;
+            if (isMusicOn) {
+                playBackgroundMusic();
+            } else {
+                stopBackgroundMusic();
+            }
+        }
+
+        // 切换音效
+        function toggleSound() {
+            isSoundOn = !isSoundOn;
+        }
+
+        // 播放背景音乐
+        let backgroundMusicOscillator;
+        function playBackgroundMusic() {
+            backgroundMusicOscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            backgroundMusicOscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            backgroundMusicOscillator.type = 'sine';
+            backgroundMusicOscillator.frequency.value = 220; // A3
+            gainNode.gain.value = 0.05;
+
+            backgroundMusicOscillator.start();
+        }
+
+        // 停止背景音乐
+        function stopBackgroundMusic() {
+            if (backgroundMusicOscillator) {
+                backgroundMusicOscillator.stop();
+                backgroundMusicOscillator.disconnect();
+            }
+        }
+
         // 暂停与继续
         function togglePause() {
             if (gameState === 'playing') {
                 gameState = 'paused';
                 clearInterval(gameTimer);
                 cancelAnimationFrame(animationId);
+                stopBackgroundMusic();
                 // 显示暂停提示
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                ctx.fillRect(0, canvas.height / 2 - 30, canvas.width, 60);
-                ctx.fillStyle = '#fff';
-                ctx.font = '30px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('游戏已暂停', canvas.width / 2, canvas.height / 2);
+                pauseOverlay.style.display = 'block';
             } else if (gameState === 'paused') {
                 gameState = 'playing';
+                playBackgroundMusic();
                 gameTimer = setInterval(updateTimer, 1000);
+                pauseOverlay.style.display = 'none';
                 animationId = requestAnimationFrame(gameLoop);
             }
         }
 
-        // 监听P键进行暂停与继续
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'p' || e.key === 'P') {
-                togglePause();
+        // 生成粒子效果
+        function generateParticles(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    radius: Math.random() * 3 + 2,
+                    dx: (Math.random() - 0.5) * 4,
+                    dy: (Math.random() - 0.5) * 4,
+                    color: color,
+                    alpha: 1
+                });
             }
-        });
+        }
+
+        // 生成Boss敌人（简化版本）
+        function generateBossEnemy() {
+            bosses.push({
+                x: canvas.width / 2 - 50,
+                y: -150,
+                width: 100,
+                height: 100,
+                speed: 1,
+                color: '#8e44ad',
+                hp: 100,
+                maxHp: 100
+            });
+        }
+
+        // 检查Boss敌人是否被击败
+        function checkBossDefeat() {
+            bosses.forEach((boss, index) => {
+                if (boss.hp <= 0) {
+                    generateParticles(boss.x + boss.width / 2, boss.y + boss.height / 2, 'purple');
+                    bosses.splice(index, 1);
+                    playSound(1000, 'sawtooth', 500);
+                }
+            });
+        }
+
+        // 游戏结束
+        function endGame(victory) {
+            clearInterval(gameTimer);
+            cancelAnimationFrame(animationId);
+            stopBackgroundMusic();
+            gameState = 'gameover';
+            canvas.style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+            finalScoreElement.textContent = score;
+            if (victory) {
+                gameOverMessage.textContent = '恭喜你，成功将Chris送到医院！';
+                playSound(1000, 'sawtooth', 500);
+            } else {
+                gameOverMessage.textContent = '游戏结束，你失败了！';
+                playSound(300, 'sine', 500);
+            }
+            saveScore(score);
+            checkAchievements();
+            switchScreen('gameover');
+        }
+
+        // 保存分数到排行榜
+        function saveScore(newScore) {
+            let scores = JSON.parse(localStorage.getItem('chrisScores')) || [];
+            scores.push(newScore);
+            scores.sort((a, b) => b - a);
+            scores = scores.slice(0, 10); // 只保留前10名
+            localStorage.setItem('chrisScores', JSON.stringify(scores));
+        }
+
+        // 加载排行榜
+        function loadLeaderboard() {
+            leaderboardList.innerHTML = '';
+            let scores = JSON.parse(localStorage.getItem('chrisScores')) || [];
+            if (scores.length === 0) {
+                leaderboardList.innerHTML = '<li>暂无高分记录</li>';
+                return;
+            }
+            scores.forEach((score, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${score} 分`;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        // 加载成就
+        function loadAchievements() {
+            achievementsList.innerHTML = '';
+            let achievementsData = JSON.parse(localStorage.getItem('chrisAchievements')) || {
+                firstLevel: false,
+                collect100: false,
+                noDamage: false,
+                bossDefeated: false,
+                collector: false
+            };
+            if (achievementsData.firstLevel) {
+                addAchievementToList('首次完成关卡');
+            }
+            if (achievementsData.collect100) {
+                addAchievementToList('收集100个急救包');
+            }
+            if (achievementsData.noDamage) {
+                addAchievementToList('无损通关');
+            }
+            if (achievementsData.bossDefeated) {
+                addAchievementToList('击败Boss敌人');
+            }
+            if (achievementsData.collector) {
+                addAchievementToList('连续收集50个急救包');
+            }
+            // 更多成就检查
+        }
+
+        function addAchievementToList(name) {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="achievement-badge"></span>${name}`;
+            achievementsList.appendChild(li);
+        }
+
+        // 检查成就
+        function checkAchievements() {
+            let achievementsData = JSON.parse(localStorage.getItem('chrisAchievements')) || {
+                firstLevel: false,
+                collect100: false,
+                noDamage: false,
+                bossDefeated: false,
+                collector: false
+            };
+
+            // 首次完成关卡
+            if (level > 1 && !achievementsData.firstLevel) {
+                achievementsData.firstLevel = true;
+                showAchievement('首次完成关卡');
+            }
+
+            // 收集100个急救包
+            if (score >= 100 && !achievementsData.collect100) {
+                achievementsData.collect100 = true;
+                showAchievement('收集100个急救包');
+            }
+
+            // 无损通关
+            if (lives > 0 && gameState === 'gameover' && !achievementsData.noDamage) {
+                achievementsData.noDamage = true;
+                showAchievement('无损通关');
+            }
+
+            // 击败Boss敌人
+            if (level % 5 === 0 && !achievementsData.bossDefeated) {
+                achievementsData.bossDefeated = true;
+                showAchievement('击败Boss敌人');
+            }
+
+            // 连续收集50个急救包
+            if (score >= 50 && !achievementsData.collector) {
+                achievementsData.collector = true;
+                showAchievement('连续收集50个急救包');
+            }
+
+            // 保存成就
+            localStorage.setItem('chrisAchievements', JSON.stringify(achievementsData));
+        }
+
+        // 成就解锁提示
+        function showAchievement(name) {
+            // 简单的提示（可扩展为更复杂的动画）
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(canvas.width / 2 - 150, canvas.height / 2 - 40, 300, 80);
+            ctx.fillStyle = '#ffa801';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`成就解锁: ${name}`, canvas.width / 2, canvas.height / 2);
+            setTimeout(() => {
+                // 清除提示
+                ctx.clearRect(canvas.width / 2 - 150, canvas.height / 2 - 40, 300, 80);
+            }, 3000);
+        }
+
+        // 键盘按下事件
+        function keyDown(e) {
+            if (e.key in keys) {
+                keys[e.key] = true;
+            }
+            // 防止按P键触发其他操作
+            if (e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+            }
+        }
+
+        // 键盘松开事件
+        function keyUp(e) {
+            if (e.key in keys) {
+                keys[e.key] = false;
+            }
+        }
+
+        // 生成粒子效果
+        function generateParticles(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    radius: Math.random() * 3 + 2,
+                    dx: (Math.random() - 0.5) * 4,
+                    dy: (Math.random() - 0.5) * 4,
+                    color: color,
+                    alpha: 1
+                });
+            }
+        }
+
+        // 生成Boss敌人
+        function generateBoss() {
+            bosses.push({
+                x: canvas.width / 2 - 50,
+                y: -150,
+                width: 100,
+                height: 100,
+                speed: 1,
+                color: '#8e44ad',
+                hp: 100,
+                maxHp: 100
+            });
+        }
+
+        // 检查Boss敌人是否被击败
+        function checkBossDefeat() {
+            bosses.forEach((boss, index) => {
+                if (boss.hp <= 0) {
+                    generateParticles(boss.x + boss.width / 2, boss.y + boss.height / 2, 'purple');
+                    bosses.splice(index, 1);
+                    playSound(1000, 'sawtooth', 500);
+                }
+            });
+        }
+
+        // 激活Boss攻击（简化为Boss移动和定时发射子弹）
+        function bossAttack(boss) {
+            // 示例：Boss发射简单子弹
+            setInterval(() => {
+                if (gameState !== 'playing') return;
+                bossBullets.push({
+                    x: boss.x + boss.width / 2 - 5,
+                    y: boss.y + boss.height,
+                    width: 10,
+                    height: 20,
+                    speed: 4,
+                    color: '#ffffff'
+                });
+            }, 2000);
+        }
+
+        // Boss子弹
+        const bossBullets = [];
+
+        // 更新Boss子弹
+        function updateBossBullets() {
+            bossBullets.forEach((bullet, index) => {
+                bullet.y += bullet.speed;
+                if (bullet.y > canvas.height) {
+                    bossBullets.splice(index, 1);
+                }
+                // 碰撞检测
+                if (isColliding(bullet, player)) {
+                    if (!player.shield) {
+                        lives--;
+                        livesElement.textContent = lives;
+                        updateLivesBar();
+                        if (isSoundOn) playSound(200, 'sine', 100);
+                        // 粒子效果
+                        generateParticles(bullet.x + bullet.width / 2, bullet.y + bullet.height / 2, 'white');
+                        bossBullets.splice(index, 1);
+                        if (lives <= 0) {
+                            endGame(false);
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新游戏状态（包含Boss子弹）
+        function updateWithBoss() {
+            update();
+            updateBossBullets();
+            checkBossDefeat();
+        }
+
+        // 更新HUD的生命值进度条
+        function updateLivesBar() {
+            const livesPercentage = (lives / 5) * 100; // 假设最大生命为5
+            livesBar.style.width = `${livesPercentage}%`;
+            livesBar.style.backgroundColor = livesPercentage > 60 ? '#2ecc71' : livesPercentage > 30 ? '#f1c40f' : '#e74c3c';
+        }
+
+        // 更新HUD的得分进度条
+        function updateScoreBar() {
+            // 例如，最多收集200分
+            const scorePercentage = (score / 200) * 100;
+            // 这里可以添加进度条的变化，如颜色变化
+        }
+
+        // 绘制HUD
+        function drawHUD() {
+            livesBar.style.width = `${(lives / 5) * 100}%`;
+            livesBar.style.backgroundColor = (lives / 5) * 100 > 60 ? '#2ecc71' : (lives / 5) * 100 > 30 ? '#f1c40f' : '#e74c3c';
+            timeBar.style.width = `${(timeLeft / 60) * 100}%`;
+            timeBar.style.backgroundColor = (timeLeft / 60) * 100 > 50 ? '#00a8ff' : (timeLeft / 60) * 100 > 20 ? '#f39c12' : '#e74c3c';
+        }
+
+        // 游戏循环
+        function gameLoop() {
+            if (gameState !== 'playing') return;
+
+            updateWithBoss();
+            draw();
+            drawHUD();
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // 播放简单音效
+        function playSound(frequency, type, duration) {
+            if (!isSoundOn) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.type = type;
+            oscillator.frequency.value = frequency;
+            gainNode.gain.value = 0.1;
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration / 1000);
+        }
 
         // 初始化
         init();
