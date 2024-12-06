@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>跟着江思宇学足球物理学</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 全局样式 */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2E8B57;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+        header {
+            background-color: #006400;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        /* 主菜单样式 */
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .menu-btn {
+            background-color: #1E90FF;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 200px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .menu-btn:hover {
+            background-color: #1C86EE;
+            transform: scale(1.05);
+        }
+        /* 章节选择界面样式 */
+        #chapter-select {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .chapter-btn {
+            background-color: #32CD32;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 220px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .chapter-btn:hover {
+            background-color: #3CB371;
+            transform: scale(1.05);
+        }
+        .back-btn {
+            background-color: #FF6347;
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .back-btn:hover {
+            background-color: #FF4500;
+            transform: scale(1.05);
+        }
+        /* 游戏容器样式 */
+        #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+            display: none;
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            height: 600px;
+            background: #228B22; /* 足球场绿色 */
+            border: 5px solid #006400;
+            margin: 20px 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        /* 使用CSS绘制江思宇 */
+        #jiang {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            width: 80px;
+            height: 120px;
+            background-color: #FFD700;
+            border: 2px solid #000;
+            border-radius: 10px;
+            transition: left 0.5s, bottom 0.5s, transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            z-index: 2;
+        }
+        /* 江思宇的身体部分 */
+        .jiang-body {
+            width: 60%;
+            height: 60%;
+            background-color: #1E90FF;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        /* 江思宇的头部 */
+        .jiang-head {
+            width: 40px;
+            height: 40px;
+            background-color: #FFE4C4;
+            border: 2px solid #000;
+            border-radius: 50%;
+            margin-top: -20px;
+        }
+        /* 使用CSS绘制足球 */
+        #ball {
+            position: absolute;
+            bottom: 100px;
+            left: 400px;
+            width: 40px;
+            height: 40px;
+            background-color: #FFFFFF;
+            border: 2px solid #000;
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 4px #000;
+            transition: left 1s, bottom 1s;
+            z-index: 1;
+        }
+        /* 问题框样式 */
+        #question-box {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 100, 0, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 4;
+        }
+        #question-box h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        #answers {
+            display: flex;
+            flex-direction: column;
+            margin-top: 15px;
+        }
+        .answer-btn {
+            background-color: #32CD32;
+            border: none;
+            padding: 12px;
+            margin: 8px 0;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .answer-btn:hover {
+            background-color: #3CB371;
+        }
+        /* 反馈框样式 */
+        #feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #000;
+            padding: 30px;
+            border-radius: 15px;
+            display: none;
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            z-index: 5;
+        }
+        #feedback p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        #feedback button {
+            background-color: #1E90FF;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            transition: background-color 0.3s;
+        }
+        #feedback button:hover {
+            background-color: #1C86EE;
+        }
+        /* 成就和排行榜样式 */
+        .container-title {
+            text-align: center;
+            font-size: 2em;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .list {
+            list-style: none;
+            padding: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .list-item {
+            background-color: #006400;
+            margin: 10px auto;
+            padding: 15px;
+            border-radius: 10px;
+            width: 80%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            font-size: 1.2em;
+        }
+        /* 词汇卡样式 */
+        #vocab-container {
+            padding: 20px;
+            position: relative;
+            height: 600px;
+            overflow-y: auto;
+        }
+        .vocab-card {
+            background-color: #1E90FF;
+            border: none;
+            padding: 20px;
+            margin: 10px auto;
+            color: #fff;
+            border-radius: 10px;
+            width: 80%;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            perspective: 1000px;
+        }
+        .vocab-card:hover {
+            background-color: #1C86EE;
+            transform: scale(1.02);
+        }
+        .vocab-term {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .vocab-definition {
+            display: none;
+            margin-top: 10px;
+            font-size: 1.2em;
+        }
+        .vocab-card.flipped .vocab-definition {
+            display: block;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        /* 进度条样式 */
+        #progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 10px;
+            background-color: #32CD32;
+            width: 0%;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            transition: width 0.5s;
+            z-index: 6;
+        }
+        /* 添加动画关键帧 */
+        @keyframes celebrate {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            50% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-10px, -10px); }
+            50% { transform: translate(10px, -10px); }
+            75% { transform: translate(-10px, 10px); }
+            100% { transform: translate(10px, 10px); }
+        }
+        @keyframes kick {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes shoot-own-goal {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(30px); }
+            100% { transform: translateY(0); }
+        }
+        .celebrate {
+            animation: celebrate 0.5s ease-in-out;
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        .kick {
+            animation: kick 0.5s ease-in-out;
+        }
+        .shoot-own-goal {
+            animation: shoot-own-goal 0.5s ease-in-out;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            header {
+                font-size: 1.5em;
+                padding: 15px;
+            }
+            #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+                height: 500px;
+            }
+            #chris {
+                width: 60px;
+                height: 90px;
+            }
+            .chris-body {
+                width: 50%;
+                height: 50%;
+            }
+            .chris-head {
+                width: 30px;
+                height: 30px;
+            }
+            #ball {
+                width: 30px;
+                height: 30px;
+            }
+            #question-box h3 {
+                font-size: 1.2em;
+            }
+            .answer-btn {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            #feedback p {
+                font-size: 1em;
+            }
+            #start-btn, #restart-btn, .back-btn {
+                padding: 15px 30px;
+                font-size: 1.2em;
+            }
+            .vocab-card {
+                width: 90%;
+            }
+            .list-item {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>跟着江思宇学足球物理学</header>
+
+    <!-- 主菜单 -->
+    <div id="main-menu">
+        <button class="menu-btn" id="start-game-btn">开始游戏</button>
+        <button class="menu-btn" id="vocab-btn">词汇卡</button>
+        <button class="menu-btn" id="achievements-btn">成就</button>
+        <button class="menu-btn" id="leaderboard-btn">排行榜</button>
+    </div>
+
+    <!-- 章节选择界面 -->
+    <div id="chapter-select">
+        <div class="container-title">选择章节</div>
+        <button class="chapter-btn" data-chapter="1">第一章：新手训练</button>
+        <button class="chapter-btn" data-chapter="2">第二章：实战挑战</button>
+        <!-- 可以继续添加更多章节按钮 -->
+        <button class="back-btn" id="back-from-chapter-btn">返回主菜单</button>
+    </div>
+
+    <!-- 游戏容器 -->
+    <div id="game-container">
+        <!-- 进度条 -->
+        <div id="progress-bar"></div>
+        <!-- 江思宇角色 -->
+        <div id="jiang">
+            <div class="jiang-head"></div>
+            <div class="jiang-body"></div>
+        </div>
+        <!-- 足球 -->
+        <div id="ball"></div>
+        
+        <!-- 问题框 -->
+        <div id="question-box">
+            <h3 id="question">问题文本</h3>
+            <div id="answers">
+                <!-- 答案按钮 -->
+            </div>
+        </div>
+
+        <!-- 反馈框 -->
+        <div id="feedback">
+            <p id="feedback-text">反馈信息</p>
+            <button id="next-btn">继续</button>
+        </div>
+    </div>
+
+    <!-- 词汇卡容器 -->
+    <div id="vocab-container">
+        <button class="close-btn" id="close-vocab-btn">&times;</button>
+        <div class="container-title">足球物理学词汇卡</div>
+        <div id="vocab-cards">
+            <!-- 词汇卡 -->
+        </div>
+    </div>
+
+    <!-- 成就容器 -->
+    <div id="achievements-container">
+        <button class="close-btn" id="close-achievements-btn">&times;</button>
+        <div class="container-title">成就</div>
+        <ul class="list" id="achievements-list">
+            <!-- 成就列表 -->
+        </ul>
+    </div>
+
+    <!-- 排行榜容器 -->
+    <div id="leaderboard-container">
+        <button class="close-btn" id="close-leaderboard-btn">&times;</button>
+        <div class="container-title">排行榜</div>
+        <ul class="list" id="leaderboard-list">
+            <!-- 排行榜列表 -->
+        </ul>
+    </div>
+
+    <script>
+        // 问题库
+        const questions = [
+            // 第一章
+            {
+                chapter: 1,
+                story: "第一章：江思宇参加了严格的新手守门员训练。",
+                question: "What is the primary force that causes a soccer ball to slow down after being kicked?",
+                questionCN: "足球被踢出后，主要使足球减速的力是什么？",
+                answers: ["Gravity", "Air resistance", "Magnetic force", "None of the above"],
+                correct: 1,
+                explanation: "Air resistance is the primary force that causes a soccer ball to slow down after being kicked.",
+                difficulty: "easy"
+            },
+            {
+                chapter: 1,
+                story: "训练中，江思宇学习了如何正确扑救飞来的足球。",
+                question: "Which of the following best describes the trajectory of a soccer ball kicked at an angle?",
+                questionCN: "以下哪一项最能描述以一定角度踢出的足球的轨迹？",
+                answers: ["Straight line", "Parabolic path", "Circular motion", "Random direction"],
+                correct: 1,
+                explanation: "A soccer ball kicked at an angle follows a parabolic path due to gravity and initial velocity.",
+                difficulty: "easy"
+            },
+            {
+                chapter: 1,
+                story: "江思宇掌握了基本的扑球技术。",
+                question: "True or False: The Magnus effect influences the movement of a spinning soccer ball.",
+                questionCN: "真或假：马格努斯效应影响旋转足球的运动。",
+                answers: ["True", "False"],
+                correct: 0,
+                explanation: "The Magnus effect causes a spinning soccer ball to curve in flight.",
+                difficulty: "easy"
+            },
+            {
+                chapter: 1,
+                story: "江思宇学习了使用不同类型的守门员手套。",
+                question: "What property of goalkeeper gloves helps in absorbing the impact of high-speed shots?",
+                questionCN: "守门员手套的哪种特性有助于吸收高速射门的冲击？",
+                answers: ["Elasticity", "Durability", "Color", "Size"],
+                correct: 0,
+                explanation: "Elasticity helps in absorbing the impact of high-speed shots.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 1,
+                story: "江思宇参加了反应速度训练，提升扑救效率。",
+                question: "Which physical principle best explains why a goalkeeper can catch a ball without it bouncing back?",
+                questionCN: "哪个物理原理最好地解释了为什么守门员可以在不让球反弹的情况下接住球？",
+                answers: ["Newton's First Law", "Conservation of Momentum", "Impulse-Momentum Theorem", "Archimedes' Principle"],
+                correct: 2,
+                explanation: "The Impulse-Momentum Theorem explains how the force applied over a short time can change the ball's momentum to stop it.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 1,
+                story: "江思宇学习了定位守门员的重要性。",
+                question: "What biomechanical factor primarily affects the reach of a goalkeeper?",
+                questionCN: "哪个生物力学因素主要影响守门员的扑救范围？",
+                answers: ["Muscle strength", "Flexibility", "Reaction time", "Arm length"],
+                correct: 3,
+                explanation: "Arm length primarily affects the reach of a goalkeeper.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 1,
+                story: "江思宇熟悉了各种射门技巧，准备应对不同类型的射门。",
+                question: "What type of shot applies side spin to curve the ball around the goalkeeper?",
+                questionCN: "哪种射门类型应用侧旋使球绕过守门员弯曲？",
+                answers: ["Topspin shot", "Backspin shot", "Side spin shot", "No spin shot"],
+                correct: 2,
+                explanation: "A side spin shot applies side spin to curve the ball around the goalkeeper.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 1,
+                story: "江思宇参加了高强度体能训练，提高扑救耐力。",
+                question: "Which energy system is primarily used during short, explosive movements like diving to save a ball?",
+                questionCN: "在像扑救球这样短暂、爆发性的动作中，主要使用哪种能量系统？",
+                answers: ["Aerobic", "Anaerobic glycolysis", "ATP-CP system", "Lactic acid system"],
+                correct: 2,
+                explanation: "The ATP-CP system is primarily used during short, explosive movements.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 1,
+                story: "江思宇通过视频分析学习对手的射门习惯。",
+                question: "What type of analysis involves studying video footage to improve performance?",
+                questionCN: "哪种类型的分析涉及研究视频录像以提高表现？",
+                answers: ["Statistical analysis", "Qualitative analysis", "Video analysis", "Predictive analysis"],
+                correct: 2,
+                explanation: "Video analysis involves studying video footage to improve performance.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 1,
+                story: "江思宇在训练中展示了卓越的扑救能力。",
+                question: "True or False: Proper hydration does not significantly affect a goalkeeper's performance.",
+                questionCN: "真或假：适当的水分补充对守门员的表现没有显著影响。",
+                answers: ["True", "False"],
+                correct: 1,
+                explanation: "Proper hydration significantly affects a goalkeeper's performance by maintaining energy levels and focus.",
+                difficulty: "hard"
+            },
+            // 第二章
+            {
+                chapter: 2,
+                story: "第二章：江思宇在实战中遇到了强劲的对手。",
+                question: "What physical phenomenon causes a spinning soccer ball to change its path mid-flight?",
+                questionCN: "什么物理现象导致旋转的足球在飞行中改变其路径？",
+                answers: ["Coriolis effect", "Magnus effect", "Bernoulli's principle", "Archimedes' principle"],
+                correct: 1,
+                explanation: "The Magnus effect causes a spinning soccer ball to change its path mid-flight.",
+                difficulty: "easy"
+            },
+            {
+                chapter: 2,
+                story: "实战中，江思宇需要快速反应扑救低射球。",
+                question: "Which joint's flexibility is crucial for a goalkeeper to dive effectively?",
+                questionCN: "哪个关节的柔韧性对守门员有效扑救至关重要？",
+                answers: ["Knee joint", "Elbow joint", "Ankle joint", "Shoulder joint"],
+                correct: 0,
+                explanation: "Knee joint flexibility is crucial for a goalkeeper to dive effectively.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 2,
+                story: "比赛进行到下半场，江思宇需要集中精力保持专注。",
+                question: "What mental skill helps a goalkeeper maintain focus throughout the match?",
+                questionCN: "什么心理技能帮助守门员在整场比赛中保持专注？",
+                answers: ["Visualization", "Mindfulness", "Positive thinking", "All of the above"],
+                correct: 3,
+                explanation: "All of the above mental skills help a goalkeeper maintain focus throughout the match.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 2,
+                story: "江思宇在比赛中遭遇了一次快速射门。",
+                question: "What is the effect called when the air pressure around a moving object varies due to its speed?",
+                questionCN: "当一个移动物体周围的气压因其速度而变化时，这种效应叫什么？",
+                answers: ["Bernoulli's effect", "Newton's effect", "Pressure differential", "Venturi effect"],
+                correct: 0,
+                explanation: "Bernoulli's effect occurs when the air pressure around a moving object varies due to its speed.",
+                difficulty: "medium"
+            },
+            {
+                chapter: 2,
+                story: "比赛中，江思宇需要判断射门的力量和方向。",
+                question: "What term describes the rate of change of velocity of the ball?",
+                questionCN: "描述足球速度变化率的术语是什么？",
+                answers: ["Acceleration", "Velocity", "Momentum", "Force"],
+                correct: 0,
+                explanation: "Acceleration describes the rate of change of velocity of the ball.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 2,
+                story: "江思宇在比赛中失误，导致对方进球。",
+                question: "What is the conservation law that states momentum in a closed system remains constant?",
+                questionCN: "哪项守恒定律声明在封闭系统中动量保持不变？",
+                answers: ["Conservation of Energy", "Conservation of Momentum", "Conservation of Mass", "Conservation of Angular Momentum"],
+                correct: 1,
+                explanation: "Conservation of Momentum states that momentum in a closed system remains constant.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 2,
+                story: "比赛进行到关键时刻，江思宇需要冷静应对。",
+                question: "What psychological technique can help a goalkeeper reduce anxiety before making a save?",
+                questionCN: "什么心理技巧可以帮助守门员在扑救前减少焦虑？",
+                answers: ["Deep breathing", "Positive visualization", "Progressive muscle relaxation", "All of the above"],
+                correct: 3,
+                explanation: "All of the above psychological techniques can help reduce anxiety.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 2,
+                story: "江思宇在比赛中调整姿势，准备下一次扑救。",
+                question: "Which biomechanical concept explains the efficient transfer of energy from muscles to movement?",
+                questionCN: "哪个生物力学概念解释了从肌肉到运动的高效能量转移？",
+                answers: ["Lever systems", "Torque", "Force vectors", "Energy conservation"],
+                correct: 0,
+                explanation: "Lever systems explain the efficient transfer of energy from muscles to movement.",
+                difficulty: "hard"
+            },
+            {
+                chapter: 2,
+                story: "比赛即将结束，江思宇需要做最后的扑救。",
+                question: "True or False: Aerobic respiration is the primary energy source during high-intensity, short-duration activities like diving to save a ball.",
+                questionCN: "真或假：在高强度、短时间的活动中，如扑救球，需氧呼吸是主要的能量来源。",
+                answers: ["True", "False"],
+                correct: 1,
+                explanation: "Anaerobic systems are primarily used during high-intensity, short-duration activities.",
+                difficulty: "hard"
+            },
+            // 可以继续添加更多问题
+        ];
+
+        // 词汇库
+        const vocabulary = [
+            { term: "Aerodynamics", definition: "空气动力学，研究物体在空气中运动的科学。" },
+            { term: "Impulse-Momentum Theorem", definition: "冲量-动量定理，描述力与时间的积如何影响动量。" },
+            { term: "Bernoulli's Principle", definition: "伯努利原理，描述流体速度与压力的关系。" },
+            { term: "Magnus Effect", definition: "马格努斯效应，旋转物体在流体中运动时产生的侧向力。" },
+            { term: "Momentum", definition: "动量，物体运动的量度，与质量和速度相关。" },
+            { term: "Impulse", definition: "冲量，力与作用时间的积，影响物体的动量变化。" },
+            { term: "Conservation of Momentum", definition: "动量守恒定律，封闭系统中总动量保持不变。" },
+            { term: "Acceleration", definition: "加速度，速度变化的速率。" },
+            { term: "Projectile Motion", definition: "抛体运动，物体在重力作用下的运动轨迹。" },
+            { term: "Friction", definition: "摩擦力，阻碍物体相对运动的力。" },
+            { term: "Energy Transfer", definition: "能量转移，能量从一个系统或形式转移到另一个。" },
+            { term: "Reaction Time", definition: "反应时间，从刺激到反应的时间间隔。" },
+            { term: "Flexibility", definition: "柔韧性，关节和肌肉的伸展能力。" },
+            { term: "Impulse", definition: "冲量，力作用在物体上的时间积分，改变动量。" },
+            { term: "Kinematics", definition: "运动学，研究物体运动而不涉及力的科学。" },
+            { term: "Torque", definition: "扭矩，力使物体旋转的倾向。" },
+            { term: "Center of Mass", definition: "质心，物体质量分布的平均位置。" },
+            { term: "Angular Momentum", definition: "角动量，物体绕某轴旋转时的动量。" },
+            { term: "Biomechanics", definition: "生物力学，应用力学原理研究生物系统的运动。" },
+            { term: "Force Vector", definition: "力矢量，表示力的大小和方向的矢量。" },
+            // 更多词汇
+        ];
+
+        // 成就库
+        const achievements = [
+            { name: "初级守门员", description: "完成第一章游戏。", achieved: false },
+            { name: "快速反应", description: "连续回答5个问题正确。", achieved: false },
+            { name: "完美扑救者", description: "回答所有问题正确。", achieved: false },
+            { name: "词汇达人", description: "学习10个词汇卡。", achieved: false },
+            { name: "高分达人", description: "在排行榜中进入前5名。", achieved: false },
+            { name: "物理大师", description: "完成所有章节。", achieved: false },
+            // 更多成就
+        ];
+
+        // 初始化变量
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let currentChapter = null;
+        let consecutiveCorrect = 0;
+        const totalChapters = 2; // 根据问题级别调整
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+        // 获取DOM元素
+        const mainMenu = document.getElementById('main-menu');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const vocabBtn = document.getElementById('vocab-btn');
+        const achievementsBtn = document.getElementById('achievements-btn');
+        const leaderboardBtn = document.getElementById('leaderboard-btn');
+
+        const chapterSelect = document.getElementById('chapter-select');
+        const chapterButtons = document.querySelectorAll('.chapter-btn');
+        const backFromChapterBtn = document.getElementById('back-from-chapter-btn');
+
+        const gameContainer = document.getElementById('game-container');
+        const jiang = document.getElementById('jiang');
+        const ball = document.getElementById('ball');
+        const questionBox = document.getElementById('question-box');
+        const questionText = document.getElementById('question');
+        const answersDiv = document.getElementById('answers');
+        const feedback = document.getElementById('feedback');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+
+        const vocabContainer = document.getElementById('vocab-container');
+        const vocabCards = document.getElementById('vocab-cards');
+        const closeVocabBtn = document.getElementById('close-vocab-btn');
+
+        const achievementsContainer = document.getElementById('achievements-container');
+        const achievementsList = document.getElementById('achievements-list');
+        const closeAchievementsBtn = document.getElementById('close-achievements-btn');
+
+        const leaderboardContainer = document.getElementById('leaderboard-container');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
+
+        // 添加动画关键帧
+        const styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText = `
+            @keyframes celebrate {
+                0% { transform: rotate(0deg); }
+                25% { transform: rotate(10deg); }
+                50% { transform: rotate(-10deg); }
+                75% { transform: rotate(10deg); }
+                100% { transform: rotate(0deg); }
+            }
+            @keyframes shake {
+                0% { transform: translate(0, 0); }
+                25% { transform: translate(-10px, -10px); }
+                50% { transform: translate(10px, -10px); }
+                75% { transform: translate(-10px, 10px); }
+                100% { transform: translate(10px, 10px); }
+            }
+            @keyframes kick {
+                0% { transform: translateX(0); }
+                50% { transform: translateX(20px); }
+                100% { transform: translateX(0); }
+            }
+            @keyframes shoot-own-goal {
+                0% { transform: translateY(0); }
+                50% { transform: translateY(30px); }
+                100% { transform: translateY(0); }
+            }
+            .celebrate {
+                animation: celebrate 0.5s ease-in-out;
+            }
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+            .kick {
+                animation: kick 0.5s ease-in-out;
+            }
+            .shoot-own-goal {
+                animation: shoot-own-goal 0.5s ease-in-out;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // 生成词汇卡
+        function generateVocabCards() {
+            vocabCards.innerHTML = '';
+            vocabulary.forEach((vocab, index) => {
+                const card = document.createElement('div');
+                card.classList.add('vocab-card');
+                card.innerHTML = `
+                    <div class="vocab-term">${vocab.term}</div>
+                    <div class="vocab-definition">${vocab.definition}</div>
+                `;
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
+                });
+                vocabCards.appendChild(card);
+            });
+        }
+
+        // 生成成就列表
+        function generateAchievements() {
+            achievementsList.innerHTML = '';
+            achievements.forEach((achv, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.innerHTML = `
+                    <strong>${achv.name}</strong><br>
+                    ${achv.description} <br>
+                    ${achv.achieved ? '✅ 已达成' : '❌ 未达成'}
+                `;
+                achievementsList.appendChild(li);
+            });
+        }
+
+        // 更新成就
+        function updateAchievements() {
+            achievements.forEach(achv => {
+                if (!achv.achieved) {
+                    if (achv.name === "初级学者" && currentChapter > 1) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "优秀回答" && consecutiveCorrect >= 5) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "超级回答者" && score >= getTotalQuestionsByChapter(currentChapter)) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "词汇达人" && vocabulary.length >= 10) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "知识渊博" && currentChapter > totalChapters) {
+                        achv.achieved = true;
+                    }
+                    // 更多成就条件
+                }
+            });
+            generateAchievements();
+        }
+
+        // 生成排行榜
+        function generateLeaderboard() {
+            leaderboardList.innerHTML = '';
+            // 排序并取前10名
+            const sortedLeaderboard = leaderboard.sort((a, b) => b.score - a.score).slice(0, 10);
+            sortedLeaderboard.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.textContent = `${index + 1}. ${entry.name} - ${entry.score}`;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        // 保存排行榜
+        function saveLeaderboard(name, score) {
+            leaderboard.push({ name, score });
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            generateLeaderboard();
+            updateAchievements();
+        }
+
+        // 获取当前章节的总问题数
+        function getTotalQuestionsByChapter(chapter) {
+            return questions.filter(q => q.chapter === chapter).length;
+        }
+
+        // 初始化词汇卡和成就
+        generateVocabCards();
+        generateAchievements();
+        generateLeaderboard();
+
+        // 导航按钮事件
+        startGameBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            chapterSelect.style.display = 'flex';
+        });
+
+        vocabBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            vocabContainer.style.display = 'block';
+        });
+
+        achievementsBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            achievementsContainer.style.display = 'block';
+        });
+
+        leaderboardBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            leaderboardContainer.style.display = 'block';
+        });
+
+        backFromChapterBtn.addEventListener('click', () => {
+            chapterSelect.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 章节选择按钮事件
+        chapterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const selectedChapter = parseInt(button.getAttribute('data-chapter'));
+                currentChapter = selectedChapter;
+                mainMenu.style.display = 'none';
+                chapterSelect.style.display = 'none';
+                gameContainer.style.display = 'block';
+                startChapter();
+            });
+        });
+
+        closeVocabBtn.addEventListener('click', () => {
+            vocabContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeAchievementsBtn.addEventListener('click', () => {
+            achievementsContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeLeaderboardBtn.addEventListener('click', () => {
+            leaderboardContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 游戏逻辑
+        function startChapter() {
+            currentQuestionIndex = 0;
+            score = 0;
+            consecutiveCorrect = 0;
+            progressBar.style.width = '0%';
+            jiang.style.left = '50px'; // 重置江思宇的位置
+            moveBall();
+        }
+
+        function moveBall() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            if (currentQuestionIndex >= currentChapterQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const q = currentChapterQuestions[currentQuestionIndex];
+            // 设置进度条
+            const progress = ((currentQuestionIndex) / getTotalQuestionsByChapter(currentChapter)) * 100;
+            progressBar.style.width = progress + '%';
+            // 随机位置
+            const randomPositionX = Math.floor(Math.random() * (gameContainer.clientWidth - 100)) + 50;
+            const randomPositionY = Math.floor(Math.random() * (gameContainer.clientHeight - 200)) + 100;
+            ball.style.left = randomPositionX + 'px';
+            ball.style.bottom = randomPositionY + 'px';
+            // 添加动画效果
+            ball.style.transition = 'left 1s, bottom 1s';
+            setTimeout(triggerQuestion, 1000);
+        }
+
+        function triggerQuestion() {
+            questionBox.style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            if (!q) {
+                endGame();
+                return;
+            }
+            questionText.innerHTML = `<strong>${q.question}</strong><br><em>${q.questionCN}</em>`;
+            answersDiv.innerHTML = '';
+            q.answers.forEach((ans, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = ans;
+                btn.classList.add('answer-btn');
+                btn.addEventListener('click', () => checkAnswer(index));
+                answersDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            questionBox.style.display = 'none';
+            if (selected === q.correct) {
+                score++;
+                consecutiveCorrect++;
+                feedbackText.innerHTML = `<strong>回答正确！👏</strong><br>江思宇成功扑救！<br><em>${q.explanation}</em>`;
+                triggerPositiveEvent();
+            } else {
+                consecutiveCorrect = 0;
+                feedbackText.innerHTML = `<strong>回答错误！😅</strong><br>江思宇失误，导致失球！<br><em>${q.explanation}</em>`;
+                triggerNegativeEvent();
+            }
+            updateAchievements();
+            feedback.style.display = 'block';
+        }
+
+        function triggerPositiveEvent() {
+            // 移动江思宇向右
+            const newLeft = Math.min(gameContainer.clientWidth - 100, parseInt(jiang.style.left) + 100);
+            jiang.style.left = newLeft + 'px';
+            // 添加庆祝动画
+            jiang.classList.add('celebrate');
+            setTimeout(() => {
+                jiang.classList.remove('celebrate');
+            }, 500);
+        }
+
+        function triggerNegativeEvent() {
+            // 移动江思宇向左
+            const newLeft = Math.max(50, parseInt(jiang.style.left) - 50);
+            jiang.style.left = newLeft + 'px';
+            // 添加失误动画
+            jiang.classList.add('shake');
+            setTimeout(() => {
+                jiang.classList.remove('shake');
+            }, 500);
+        }
+
+        function endGame() {
+            feedbackText.innerHTML = `<strong>游戏结束！🎉</strong><br>你的得分是 ${score} / ${questions.filter(q => q.chapter === currentChapter).length}`;
+            nextBtn.style.display = 'none';
+            feedback.style.display = 'block';
+            // 保存到排行榜
+            let playerName = prompt("请输入你的名字:", "玩家");
+            if (playerName) {
+                saveLeaderboard(playerName, score);
+            }
+        }
+
+        nextBtn.addEventListener('click', () => {
+            feedback.style.display = 'none';
+            currentQuestionIndex++;
+            moveBall();
+        });
+
+        // 生成词汇卡
+        generateVocabCards();
+
+        // 生成成就列表
+        generateAchievements();
+
+        // 生成排行榜
+        generateLeaderboard();
+    </script>
+
+</body>
+</html>
