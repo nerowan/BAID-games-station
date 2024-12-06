@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>跟着张宸阳学下楼梯</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 全局样式 */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #4682B4;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+        header {
+            background-color: #2F4F4F;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        /* 主菜单样式 */
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .menu-btn {
+            background-color: #20B2AA;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 200px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .menu-btn:hover {
+            background-color: #3CB371;
+            transform: scale(1.05);
+        }
+        /* 章节选择界面样式 */
+        #chapter-select {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .chapter-btn {
+            background-color: #1E90FF;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 220px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .chapter-btn:hover {
+            background-color: #1C86EE;
+            transform: scale(1.05);
+        }
+        .back-btn {
+            background-color: #FF6347;
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .back-btn:hover {
+            background-color: #FF4500;
+            transform: scale(1.05);
+        }
+        /* 游戏容器样式 */
+        #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+            display: none;
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            height: 600px;
+            background: #6B8E23; /* 下楼梯环境绿色 */
+            border: 5px solid #2F4F4F;
+            margin: 20px 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        /* 使用CSS绘制张宸阳 */
+        #zhang {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            width: 80px;
+            height: 120px;
+            background-color: #FFD700;
+            border: 2px solid #000;
+            border-radius: 10px;
+            transition: left 0.5s, bottom 0.5s, transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            z-index: 2;
+        }
+        /* 张宸阳的身体部分 */
+        .zhang-body {
+            width: 60%;
+            height: 60%;
+            background-color: #20B2AA;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        /* 张宸阳的头部 */
+        .zhang-head {
+            width: 40px;
+            height: 40px;
+            background-color: #FFE4C4;
+            border: 2px solid #000;
+            border-radius: 50%;
+            margin-top: -20px;
+        }
+        /* 使用CSS绘制楼梯 */
+        #stairs {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: repeating-linear-gradient(
+                45deg,
+                #8B4513,
+                #8B4513 20px,
+                #A0522D 20px,
+                #A0522D 40px
+            );
+            z-index: 1;
+        }
+        /* 问题框样式 */
+        #question-box {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(34, 139, 34, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 4;
+        }
+        #question-box h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        #answers {
+            display: flex;
+            flex-direction: column;
+            margin-top: 15px;
+        }
+        .answer-btn {
+            background-color: #32CD32;
+            border: none;
+            padding: 12px;
+            margin: 8px 0;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .answer-btn:hover {
+            background-color: #3CB371;
+        }
+        /* 反馈框样式 */
+        #feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #000;
+            padding: 30px;
+            border-radius: 15px;
+            display: none;
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            z-index: 5;
+        }
+        #feedback p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        #feedback button {
+            background-color: #1E90FF;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            transition: background-color 0.3s;
+        }
+        #feedback button:hover {
+            background-color: #1C86EE;
+        }
+        /* 成就和排行榜样式 */
+        .container-title {
+            text-align: center;
+            font-size: 2em;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .list {
+            list-style: none;
+            padding: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .list-item {
+            background-color: #006400;
+            margin: 10px auto;
+            padding: 15px;
+            border-radius: 10px;
+            width: 80%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            font-size: 1.2em;
+        }
+        /* 词汇卡样式 */
+        #vocab-container {
+            padding: 20px;
+            position: relative;
+            height: 600px;
+            overflow-y: auto;
+        }
+        .vocab-card {
+            background-color: #1E90FF;
+            border: none;
+            padding: 20px;
+            margin: 10px auto;
+            color: #fff;
+            border-radius: 10px;
+            width: 80%;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            perspective: 1000px;
+        }
+        .vocab-card:hover {
+            background-color: #1C86EE;
+            transform: scale(1.02);
+        }
+        .vocab-term {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .vocab-definition {
+            display: none;
+            margin-top: 10px;
+            font-size: 1.2em;
+        }
+        .vocab-card.flipped .vocab-definition {
+            display: block;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        /* 进度条样式 */
+        #progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 10px;
+            background-color: #32CD32;
+            width: 0%;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            transition: width 0.5s;
+            z-index: 6;
+        }
+        /* 添加动画关键帧 */
+        @keyframes celebrate {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            50% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-10px, -10px); }
+            50% { transform: translate(10px, -10px); }
+            75% { transform: translate(-10px, 10px); }
+            100% { transform: translate(10px, 10px); }
+        }
+        @keyframes trip {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(30px); }
+            100% { transform: translateY(0); }
+        }
+        @keyframes steady {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(0); }
+        }
+        .celebrate {
+            animation: celebrate 0.5s ease-in-out;
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        .trip {
+            animation: trip 0.5s ease-in-out;
+        }
+        .steady {
+            animation: steady 0.5s ease-in-out;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            header {
+                font-size: 1.5em;
+                padding: 15px;
+            }
+            #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+                height: 500px;
+            }
+            #zhang {
+                width: 60px;
+                height: 90px;
+            }
+            .zhang-body {
+                width: 50%;
+                height: 50%;
+            }
+            .zhang-head {
+                width: 30px;
+                height: 30px;
+            }
+            #question-box h3 {
+                font-size: 1.2em;
+            }
+            .answer-btn {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            #feedback p {
+                font-size: 1em;
+            }
+            #start-btn, #restart-btn, .back-btn {
+                padding: 15px 30px;
+                font-size: 1.2em;
+            }
+            .vocab-card {
+                width: 90%;
+            }
+            .list-item {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>跟着张宸阳学下楼梯</header>
+
+    <!-- 主菜单 -->
+    <div id="main-menu">
+        <button class="menu-btn" id="start-game-btn">开始游戏</button>
+        <button class="menu-btn" id="vocab-btn">词汇卡</button>
+        <button class="menu-btn" id="achievements-btn">成就</button>
+        <button class="menu-btn" id="leaderboard-btn">排行榜</button>
+    </div>
+
+    <!-- 章节选择界面 -->
+    <div id="chapter-select">
+        <div class="container-title">选择章节</div>
+        <button class="chapter-btn" data-chapter="1">第一章：初识下楼梯</button>
+        <button class="chapter-btn" data-chapter="2">第二章：安全技巧</button>
+        <!-- 可以继续添加更多章节按钮 -->
+        <button class="back-btn" id="back-from-chapter-btn">返回主菜单</button>
+    </div>
+
+    <!-- 游戏容器 -->
+    <div id="game-container">
+        <!-- 进度条 -->
+        <div id="progress-bar"></div>
+        <!-- 张宸阳角色 -->
+        <div id="zhang">
+            <div class="zhang-head"></div>
+            <div class="zhang-body"></div>
+        </div>
+        <!-- 楼梯 -->
+        <div id="stairs"></div>
+        
+        <!-- 问题框 -->
+        <div id="question-box">
+            <h3 id="question">问题文本</h3>
+            <div id="answers">
+                <!-- 答案按钮 -->
+            </div>
+        </div>
+
+        <!-- 反馈框 -->
+        <div id="feedback">
+            <p id="feedback-text">反馈信息</p>
+            <button id="next-btn">继续</button>
+        </div>
+    </div>
+
+    <!-- 词汇卡容器 -->
+    <div id="vocab-container">
+        <button class="close-btn" id="close-vocab-btn">&times;</button>
+        <div class="container-title">下楼梯词汇卡</div>
+        <div id="vocab-cards">
+            <!-- 词汇卡 -->
+        </div>
+    </div>
+
+    <!-- 成就容器 -->
+    <div id="achievements-container">
+        <button class="close-btn" id="close-achievements-btn">&times;</button>
+        <div class="container-title">成就</div>
+        <ul class="list" id="achievements-list">
+            <!-- 成就列表 -->
+        </ul>
+    </div>
+
+    <!-- 排行榜容器 -->
+    <div id="leaderboard-container">
+        <button class="close-btn" id="close-leaderboard-btn">&times;</button>
+        <div class="container-title">排行榜</div>
+        <ul class="list" id="leaderboard-list">
+            <!-- 排行榜列表 -->
+        </ul>
+    </div>
+
+    <script>
+        // 问题库
+        const questions = [
+            // 第一章
+            {
+                chapter: 1,
+                story: "第一章：张宸阳初次尝试下楼梯，感到有些紧张。",
+                question: "What is the recommended way to hold onto a handrail while descending stairs?",
+                questionCN: "下楼梯时，握住扶手的推荐方法是什么？",
+                answers: [
+                    "Hold it with one hand while carrying something with the other",
+                    "Use both hands to firmly grip the handrail",
+                    "Only hold with one hand if necessary",
+                    "Do not hold the handrail"
+                ],
+                correct: 1,
+                explanation: "使用双手牢固地握住扶手可以确保下楼时的稳定和平衡。",
+                difficulty: "easy"
+            },
+            {
+                chapter:1,
+                story: "张宸阳注意到楼梯的台阶有些滑。",
+                question: "What should you wear to reduce the risk of slipping on stairs?",
+                questionCN: "你应该穿什么来降低在楼梯上滑倒的风险？",
+                answers: [
+                    "High-heeled shoes",
+                    "Loose sandals",
+                    "Non-slip shoes",
+                    "Flip-flops"
+                ],
+                correct:2,
+                explanation: "防滑鞋可以有效减少在楼梯上滑倒的风险。",
+                difficulty: "easy"
+            },
+            {
+                chapter:1,
+                story: "张宸阳在下楼时感到脚有些不适。",
+                question: "True or False: If you feel discomfort in your foot while going downstairs, you should stop immediately.",
+                questionCN: "真或假：如果下楼时脚感到不适，应该立即停下。",
+                answers: ["True", "False"],
+                correct: 0,
+                explanation: "如果感到脚不适，应该立即停下，以避免进一步受伤。",
+                difficulty: "easy"
+            },
+            {
+                chapter:1,
+                story: "张宸阳正在学习如何正确下楼梯以避免受伤。",
+                question: "What is the proper posture to maintain while descending stairs?",
+                questionCN: "下楼梯时应保持什么正确的姿势？",
+                answers: [
+                    "Lean forward with your weight on the toes",
+                    "Keep your back straight and your weight on the heels",
+                    "Hunch over to move faster",
+                    "Look down at your feet continuously"
+                ],
+                correct:1,
+                explanation: "保持背部挺直，重心放在脚跟上，可以提高稳定性并减少受伤风险。",
+                difficulty: "medium"
+            },
+            {
+                chapter:1,
+                story: "张宸阳需要快速反应以避免滑倒。",
+                question: "What should you do if you start to slip on the stairs?",
+                questionCN: "如果你开始在楼梯上滑倒，应该怎么做？",
+                answers: [
+                    "Try to catch yourself with your hands",
+                    "Keep moving without using the handrail",
+                    "Stop, hold onto the handrail, and stabilize yourself",
+                    "Jump to the next step"
+                ],
+                correct:2,
+                explanation: "停下来，握住扶手，稳定自己可以有效防止摔倒。",
+                difficulty: "medium"
+            },
+            {
+                chapter:1,
+                story: "张宸阳需要了解楼梯的照明情况。",
+                question: "Why is proper lighting important when using stairs?",
+                questionCN: "使用楼梯时，适当的照明为什么很重要？",
+                answers: [
+                    "To make the stairs look better",
+                    "To see each step clearly and avoid missteps",
+                    "To reduce energy consumption",
+                    "To allow others to see you"
+                ],
+                correct:1,
+                explanation: "适当的照明可以清晰地看到每个台阶，避免踩空或绊倒。",
+                difficulty: "medium"
+            },
+            {
+                chapter:1,
+                story: "张宸阳在下楼时发现扶手有些松动。",
+                question: "What should you do if you notice the handrail is loose?",
+                questionCN: "如果你发现扶手有些松动，应该怎么办？",
+                answers: [
+                    "Ignore it and continue",
+                    "Use it cautiously",
+                    "Report it to maintenance immediately",
+                    "Try to tighten it yourself"
+                ],
+                correct:2,
+                explanation: "应立即向维修部门报告，以确保楼梯的安全性。",
+                difficulty: "hard"
+            },
+            {
+                chapter:1,
+                story: "张宸阳准备进行下楼梯的安全测试。",
+                question: "What is a common sign that you need to rest while going downstairs?",
+                questionCN: "下楼梯时，常见的需要休息的迹象是什么？",
+                answers: [
+                    "Feeling dizzy or lightheaded",
+                    "Feeling full of energy",
+                    "Noticing the handrail",
+                    "Looking around frequently"
+                ],
+                correct:0,
+                explanation: "感到头晕或头昏是需要休息的常见迹象，以防止跌倒。",
+                difficulty: "hard"
+            },
+            {
+                chapter:1,
+                story: "张宸阳完成了第一章的下楼梯训练。",
+                question: "What should you do after descending stairs to ensure your safety?",
+                questionCN: "下楼梯后，你应该做什么以确保自己的安全？",
+                answers: [
+                    "Turn around and go back",
+                    "Keep walking without checking",
+                    "Ensure you are fully balanced before moving on",
+                    "Run to your destination"
+                ],
+                correct:2,
+                explanation: "确保完全平衡后再继续前进，可以避免摔倒。",
+                difficulty: "hard"
+            },
+            // 第二章
+            {
+                chapter:2,
+                story: "第二章：张宸阳的下楼梯技巧逐渐提升。",
+                question: "What is the recommended speed for descending stairs?",
+                questionCN: "下楼梯的推荐速度是多少？",
+                answers: [
+                    "As fast as possible",
+                    "At a controlled and steady pace",
+                    "Very slowly",
+                    "Speed varies based on mood"
+                ],
+                correct:1,
+                explanation: "以受控且稳定的速度下楼可以减少跌倒的风险。",
+                difficulty: "easy"
+            },
+            {
+                chapter:2,
+                story: "张宸阳需要了解如何处理下楼时的扭伤。",
+                question: "What is the first step you should take if you twist your ankle while descending stairs?",
+                questionCN: "如果你在下楼梯时扭伤了脚踝，应该采取的第一步是什么？",
+                answers: [
+                    "Continue walking",
+                    "Apply heat immediately",
+                    "Stop and assess the injury",
+                    "Massage the area vigorously"
+                ],
+                correct:2,
+                explanation: "应立即停下并评估受伤情况，以决定下一步行动。",
+                difficulty: "medium"
+            },
+            {
+                chapter:2,
+                story: "张宸阳学习如何正确使用辅助设备下楼。",
+                question: "Which of the following can assist individuals with mobility issues when descending stairs?",
+                questionCN: "以下哪项可以帮助行动不便的人士下楼梯？",
+                answers: [
+                    "Handrails",
+                    "Stair lifts",
+                    "Non-slip mats",
+                    "All of the above"
+                ],
+                correct:3,
+                explanation: "扶手、楼梯升降机和防滑垫都可以帮助行动不便的人士安全下楼。",
+                difficulty: "medium"
+            },
+            {
+                chapter:2,
+                story: "张宸阳需要加强下楼梯的平衡能力。",
+                question: "What exercise can help improve balance for safer stair descent?",
+                questionCN: "什么锻炼可以帮助改善平衡，以便更安全地下楼梯？",
+                answers: [
+                    "Running",
+                    "Yoga",
+                    "Weightlifting",
+                    "Swimming"
+                ],
+                correct:1,
+                explanation: "瑜伽可以有效改善平衡能力，有助于更安全地下楼梯。",
+                difficulty: "medium"
+            },
+            {
+                chapter:2,
+                story: "张宸阳在下楼时感到膝盖有些疼痛。",
+                question: "True or False: Ignoring knee pain while descending stairs can lead to more serious injuries.",
+                questionCN: "真或假：在下楼梯时忽视膝盖疼痛可能导致更严重的伤害。",
+                answers: ["True", "False"],
+                correct:0,
+                explanation: "忽视膝盖疼痛可能导致进一步受伤，应及时休息和治疗。",
+                difficulty: "hard"
+            },
+            {
+                chapter:2,
+                story: "张宸阳学习如何在夜间安全下楼梯。",
+                question: "What should you do to ensure safety when descending stairs at night?",
+                questionCN: "在夜间下楼梯时，你应该做什么以确保安全？",
+                answers: [
+                    "Turn off all lights",
+                    "Use a flashlight or ensure proper lighting",
+                    "Descend quickly",
+                    "Close your eyes while walking"
+                ],
+                correct:1,
+                explanation: "使用手电筒或确保有适当的照明可以帮助清晰地看到每个台阶，防止跌倒。",
+                difficulty: "hard"
+            },
+            {
+                chapter:2,
+                story: "张宸阳需要处理下楼时的紧急情况。",
+                question: "What should you do if someone else trips and falls while you are descending stairs?",
+                questionCN: "如果在下楼梯时其他人绊倒摔倒，你应该怎么做？",
+                answers: [
+                    "Ignore them and continue",
+                    "Help them up immediately without assessing injuries",
+                    "Assess their condition and provide assistance if needed",
+                    "Laugh and walk away"
+                ],
+                correct:2,
+                explanation: "应先评估他们的状况，如果需要，提供适当的帮助。",
+                difficulty: "hard"
+            },
+            {
+                chapter:2,
+                story: "张宸阳完成了第二章的下楼梯训练。",
+                question: "What should you do after descending stairs to ensure your safety?",
+                questionCN: "下楼梯后，你应该做什么以确保自己的安全？",
+                answers: [
+                    "Turn around and go back",
+                    "Keep walking without checking",
+                    "Ensure you are fully balanced before moving on",
+                    "Run to your destination"
+                ],
+                correct:2,
+                explanation: "确保完全平衡后再继续前进，可以避免摔倒。",
+                difficulty: "hard"
+            },
+            // 可以继续添加更多问题
+        ];
+
+        // 词汇库
+        const vocabulary = [
+            { term: "Handrail", definition: "扶手，下楼时用于保持平衡的装置。" },
+            { term: "Non-slip Mat", definition: "防滑垫，放在台阶上以防止滑倒。" },
+            { term: "Balance", definition: "平衡，保持身体稳定的能力。" },
+            { term: "Ankle Sprain", definition: "脚踝扭伤，因过度伸展或扭曲导致的脚踝伤害。" },
+            { term: "Stair Lift", definition: "楼梯升降机，帮助行动不便的人士上下楼梯的设备。" },
+            { term: "Proper Posture", definition: "正确的姿势，保持身体直立以提高稳定性。" },
+            { term: "Flashlight", definition: "手电筒，提供照明的便携设备。" },
+            { term: "Safety First", definition: "安全第一，任何情况下都应优先考虑安全。" },
+            { term: "Spotting", definition: "观察，密切注意周围环境以预防跌倒。" },
+            { term: "Emergency Response", definition: "紧急应对，处理突发情况的措施。" },
+            { term: "Footwear", definition: "鞋类，选择适合的鞋子可以减少滑倒风险。" },
+            { term: "Dizziness", definition: "头晕，可能导致失去平衡和跌倒的感觉。" },
+            { term: "Lighting", definition: "照明，确保楼梯区域明亮以提高可见度。" },
+            { term: "Controlled Pace", definition: "受控的速度，以确保安全下楼。" },
+            { term: "Injury Assessment", definition: "伤害评估，确定伤势严重程度的过程。" },
+            { term: "Achilles Tendon", definition: "跟腱，连接小腿肌肉与脚跟骨的强韧组织。" },
+            { term: "Proprioception", definition: "本体感觉，身体对位置和运动的感知能力。" },
+            { term: "Synapse", definition: "突触，神经元之间传递信号的接点。" },
+            { term: "Homeostasis", definition: "体内平衡，维持内部环境稳定的过程。" },
+            { term: "Physiotherapy", definition: "物理治疗，利用物理方法帮助恢复身体功能的治疗方式。" },
+            { term: "Baluster", definition: "栏杆柱，楼梯扶手旁的装饰性柱子。" },
+            { term: "Cantilever", definition: "悬臂梁，只在一端固定的结构梁。" },
+            { term: "Tango Twist", definition: "探戈扭转，一种幽默的描述脚踝扭伤的术语。" },
+            { term: "Banana Peel", definition: "香蕉皮，常见的滑倒隐喻。" },
+            { term: "Physiology", definition: "生理学，研究生物体功能的科学。" },
+            { term: "Rehabilitation", definition: "康复，恢复身体功能的过程。" },
+            { term: "Orthosis", definition: "矫形器，辅助或限制身体部位的装置。" },
+            { term: "Biomechanics", definition: "生物力学，研究生物体运动和力学的学科。" },
+            { term: "Chiropractic", definition: "脊椎按摩疗法，通过手法调整脊椎来改善健康。" },
+            { term: "Kinesiology", definition: "运动学，研究人体运动的科学。" },
+            { term: "Gait Analysis", definition: "步态分析，评估行走方式以诊断问题的技术。" },
+            { term: "Reversible Injury", definition: "可逆伤害，经过适当治疗后可完全恢复的伤害。" },
+            { term: "Axon", definition: "轴突，神经元传递信号的长纤维部分。" },
+            { term: "Neuron", definition: "神经元，神经系统的基本功能单位。" },
+            { term: "Homeostatic Mechanism", definition: "体内平衡机制，维持身体内部环境稳定的系统。" },
+            { term: "Proprioceptive Training", definition: "本体感觉训练，增强身体对自身位置和运动的感知能力的训练。" },
+            // 更多词汇
+        ];
+
+        // 成就库
+        const achievements = [
+            { name: "下楼梯达人", description: "完成第一章游戏。", achieved: false },
+            { name: "超级张宸阳", description: "连续回答5个问题正确。", achieved: false },
+            { name: "超级下楼梯专家", description: "回答所有问题正确。", achieved: false },
+            { name: "词汇达人", description: "学习10个词汇卡。", achieved: false },
+            { name: "高分达人", description: "在排行榜中进入前5名。", achieved: false },
+            { name: "安全达人", description: "完成所有章节。", achieved: false },
+            // 更多成就
+        ];
+
+        // 初始化变量
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let currentChapter = null;
+        let consecutiveCorrect = 0;
+        const totalChapters = 2; // 根据问题级别调整
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+        // 获取DOM元素
+        const mainMenu = document.getElementById('main-menu');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const vocabBtn = document.getElementById('vocab-btn');
+        const achievementsBtn = document.getElementById('achievements-btn');
+        const leaderboardBtn = document.getElementById('leaderboard-btn');
+
+        const chapterSelect = document.getElementById('chapter-select');
+        const chapterButtons = document.querySelectorAll('.chapter-btn');
+        const backFromChapterBtn = document.getElementById('back-from-chapter-btn');
+
+        const gameContainer = document.getElementById('game-container');
+        const zhang = document.getElementById('zhang');
+        const stairs = document.getElementById('stairs');
+        const questionBox = document.getElementById('question-box');
+        const questionText = document.getElementById('question');
+        const answersDiv = document.getElementById('answers');
+        const feedback = document.getElementById('feedback');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+
+        const vocabContainer = document.getElementById('vocab-container');
+        const vocabCards = document.getElementById('vocab-cards');
+        const closeVocabBtn = document.getElementById('close-vocab-btn');
+
+        const achievementsContainer = document.getElementById('achievements-container');
+        const achievementsList = document.getElementById('achievements-list');
+        const closeAchievementsBtn = document.getElementById('close-achievements-btn');
+
+        const leaderboardContainer = document.getElementById('leaderboard-container');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
+
+        // 添加动画关键帧
+        const styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText = `
+            @keyframes celebrate {
+                0% { transform: rotate(0deg); }
+                25% { transform: rotate(10deg); }
+                50% { transform: rotate(-10deg); }
+                75% { transform: rotate(10deg); }
+                100% { transform: rotate(0deg); }
+            }
+            @keyframes shake {
+                0% { transform: translate(0, 0); }
+                25% { transform: translate(-10px, -10px); }
+                50% { transform: translate(10px, -10px); }
+                75% { transform: translate(-10px, 10px); }
+                100% { transform: translate(10px, 10px); }
+            }
+            @keyframes trip {
+                0% { transform: translateY(0); }
+                50% { transform: translateY(30px); }
+                100% { transform: translateY(0); }
+            }
+            @keyframes steady {
+                0% { transform: translateX(0); }
+                50% { transform: translateX(20px); }
+                100% { transform: translateX(0); }
+            }
+            .celebrate {
+                animation: celebrate 0.5s ease-in-out;
+            }
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+            .trip {
+                animation: trip 0.5s ease-in-out;
+            }
+            .steady {
+                animation: steady 0.5s ease-in-out;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // 生成词汇卡
+        function generateVocabCards() {
+            vocabCards.innerHTML = '';
+            vocabulary.forEach((vocab, index) => {
+                const card = document.createElement('div');
+                card.classList.add('vocab-card');
+                card.innerHTML = `
+                    <div class="vocab-term">${vocab.term}</div>
+                    <div class="vocab-definition">${vocab.definition}</div>
+                `;
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
+                });
+                vocabCards.appendChild(card);
+            });
+        }
+
+        // 生成成就列表
+        function generateAchievements() {
+            achievementsList.innerHTML = '';
+            achievements.forEach((achv, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.innerHTML = `
+                    <strong>${achv.name}</strong><br>
+                    ${achv.description} <br>
+                    ${achv.achieved ? '✅ 已达成' : '❌ 未达成'}
+                `;
+                achievementsList.appendChild(li);
+            });
+        }
+
+        // 更新成就
+        function updateAchievements() {
+            achievements.forEach(achv => {
+                if (!achv.achieved) {
+                    if (achv.name === "初级学者" && currentChapter > 1) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "精准回答" && consecutiveCorrect >= 5) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "超级回答者" && score >= getTotalQuestionsByChapter(currentChapter)) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "词汇达人" && vocabulary.length >= 10) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "安全达人" && currentChapter > totalChapters) {
+                        achv.achieved = true;
+                    }
+                    // 更多成就条件
+                }
+            });
+            generateAchievements();
+        }
+
+        // 生成排行榜
+        function generateLeaderboard() {
+            leaderboardList.innerHTML = '';
+            // 排序并取前10名
+            const sortedLeaderboard = leaderboard.sort((a, b) => b.score - a.score).slice(0, 10);
+            sortedLeaderboard.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.textContent = `${index + 1}. ${entry.name} - ${entry.score}`;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        // 保存排行榜
+        function saveLeaderboard(name, score) {
+            leaderboard.push({ name, score });
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            generateLeaderboard();
+            updateAchievements();
+        }
+
+        // 获取当前章节的总问题数
+        function getTotalQuestionsByChapter(chapter) {
+            return questions.filter(q => q.chapter === chapter).length;
+        }
+
+        // 初始化词汇卡和成就
+        generateVocabCards();
+        generateAchievements();
+        generateLeaderboard();
+
+        // 导航按钮事件
+        startGameBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            chapterSelect.style.display = 'flex';
+        });
+
+        vocabBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            vocabContainer.style.display = 'block';
+        });
+
+        achievementsBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            achievementsContainer.style.display = 'block';
+        });
+
+        leaderboardBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            leaderboardContainer.style.display = 'block';
+        });
+
+        backFromChapterBtn.addEventListener('click', () => {
+            chapterSelect.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 章节选择按钮事件
+        chapterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const selectedChapter = parseInt(button.getAttribute('data-chapter'));
+                currentChapter = selectedChapter;
+                mainMenu.style.display = 'none';
+                chapterSelect.style.display = 'none';
+                gameContainer.style.display = 'block';
+                startChapter();
+            });
+        });
+
+        closeVocabBtn.addEventListener('click', () => {
+            vocabContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeAchievementsBtn.addEventListener('click', () => {
+            achievementsContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeLeaderboardBtn.addEventListener('click', () => {
+            leaderboardContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 游戏逻辑
+        function startChapter() {
+            currentQuestionIndex = 0;
+            score = 0;
+            consecutiveCorrect = 0;
+            progressBar.style.width = '0%';
+            zhang.style.left = '50px'; // 重置张宸阳的位置
+            moveZhang();
+        }
+
+        function moveZhang() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            if (currentQuestionIndex >= currentChapterQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const q = currentChapterQuestions[currentQuestionIndex];
+            // 设置进度条
+            const progress = ((currentQuestionIndex) / getTotalQuestionsByChapter(currentChapter)) * 100;
+            progressBar.style.width = progress + '%';
+            // 随机位置
+            const randomPositionX = Math.floor(Math.random() * (gameContainer.clientWidth - 100)) + 50;
+            const randomPositionY = Math.floor(Math.random() * (gameContainer.clientHeight - 200)) + 100;
+            zhang.style.left = randomPositionX + 'px';
+            zhang.style.bottom = randomPositionY + 'px';
+            // 添加动画效果
+            zhang.style.transition = 'left 1s, bottom 1s';
+            setTimeout(triggerQuestion, 1000);
+        }
+
+        function triggerQuestion() {
+            questionBox.style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            if (!q) {
+                endGame();
+                return;
+            }
+            questionText.innerHTML = `<strong>${q.question}</strong><br><em>${q.questionCN}</em>`;
+            answersDiv.innerHTML = '';
+            q.answers.forEach((ans, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = ans;
+                btn.classList.add('answer-btn');
+                btn.addEventListener('click', () => checkAnswer(index));
+                answersDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            questionBox.style.display = 'none';
+            if (selected === q.correct) {
+                score++;
+                consecutiveCorrect++;
+                feedbackText.innerHTML = `<strong>回答正确！👏</strong><br>张宸阳安全下楼！<br><em>${q.explanation}</em>`;
+                triggerPositiveEvent();
+            } else {
+                consecutiveCorrect = 0;
+                feedbackText.innerHTML = `<strong>回答错误！😅</strong><br>张宸阳在下楼时崴脚了！<br><em>${q.explanation}</em>`;
+                triggerNegativeEvent();
+            }
+            updateAchievements();
+            feedback.style.display = 'block';
+        }
+
+        function triggerPositiveEvent() {
+            // 移动张宸阳向右并添加庆祝动画
+            const newLeft = Math.min(gameContainer.clientWidth - 100, parseInt(zhang.style.left) + 100);
+            zhang.style.left = newLeft + 'px';
+            // 添加庆祝动画
+            zhang.classList.add('celebrate');
+            setTimeout(() => {
+                zhang.classList.remove('celebrate');
+            }, 500);
+        }
+
+        function triggerNegativeEvent() {
+            // 移动张宸阳向左并添加失误动画
+            const newLeft = Math.max(50, parseInt(zhang.style.left) - 50);
+            zhang.style.left = newLeft + 'px';
+            // 添加失误动画
+            zhang.classList.add('shake');
+            setTimeout(() => {
+                zhang.classList.remove('shake');
+            }, 500);
+        }
+
+        function endGame() {
+            feedbackText.innerHTML = `<strong>游戏结束！🎉</strong><br>你的得分是 ${score} / ${questions.filter(q => q.chapter === currentChapter).length}`;
+            nextBtn.style.display = 'none';
+            feedback.style.display = 'block';
+            // 保存到排行榜
+            let playerName = prompt("请输入你的名字:", "玩家");
+            if (playerName) {
+                saveLeaderboard(playerName, score);
+            }
+        }
+
+        nextBtn.addEventListener('click', () => {
+            feedback.style.display = 'none';
+            currentQuestionIndex++;
+            moveZhang();
+        });
+
+        // 生成词汇卡
+        generateVocabCards();
+
+        // 生成成就列表
+        generateAchievements();
+
+        // 生成排行榜
+        generateLeaderboard();
+    </script>
+
+</body>
+</html>
