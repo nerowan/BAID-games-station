@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>跟着Chris学拖拉机驾驶</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 全局样式 */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #8B4513;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+        header {
+            background-color: #4B5320;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        /* 主菜单样式 */
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .menu-btn {
+            background-color: #FFD700;
+            border: none;
+            padding: 15px 30px;
+            color: #000;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 200px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .menu-btn:hover {
+            background-color: #FFA500;
+            transform: scale(1.05);
+        }
+        /* 章节选择界面样式 */
+        #chapter-select {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .chapter-btn {
+            background-color: #20B2AA;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 220px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .chapter-btn:hover {
+            background-color: #3CB371;
+            transform: scale(1.05);
+        }
+        .back-btn {
+            background-color: #FF6347;
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .back-btn:hover {
+            background-color: #FF4500;
+            transform: scale(1.05);
+        }
+        /* 游戏容器样式 */
+        #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+            display: none;
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            height: 600px;
+            background: #556B2F; /* 拖拉机场地绿色 */
+            border: 5px solid #4B5320;
+            margin: 20px 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        /* 使用CSS绘制Chris */
+        #chris {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            width: 80px;
+            height: 120px;
+            background-color: #FFD700;
+            border: 2px solid #000;
+            border-radius: 10px;
+            transition: left 0.5s, bottom 0.5s, transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            z-index: 2;
+        }
+        /* Chris的身体部分 */
+        .chris-body {
+            width: 60%;
+            height: 60%;
+            background-color: #20B2AA;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        /* Chris的头部 */
+        .chris-head {
+            width: 40px;
+            height: 40px;
+            background-color: #FFE4C4;
+            border: 2px solid #000;
+            border-radius: 50%;
+            margin-top: -20px;
+        }
+        /* 使用CSS绘制拖拉机 */
+        #tractor {
+            position: absolute;
+            bottom: 100px;
+            left: 400px;
+            width: 60px;
+            height: 40px;
+            background-color: #8B4513;
+            border: 2px solid #000;
+            border-radius: 5px;
+            box-shadow: inset 0 0 0 4px #000;
+            transition: left 1s, bottom 1s;
+            z-index: 1;
+        }
+        /* 问题框样式 */
+        #question-box {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(34, 139, 34, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 4;
+        }
+        #question-box h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        #answers {
+            display: flex;
+            flex-direction: column;
+            margin-top: 15px;
+        }
+        .answer-btn {
+            background-color: #32CD32;
+            border: none;
+            padding: 12px;
+            margin: 8px 0;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .answer-btn:hover {
+            background-color: #3CB371;
+        }
+        /* 反馈框样式 */
+        #feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #000;
+            padding: 30px;
+            border-radius: 15px;
+            display: none;
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            z-index: 5;
+        }
+        #feedback p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        #feedback button {
+            background-color: #1E90FF;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            transition: background-color 0.3s;
+        }
+        #feedback button:hover {
+            background-color: #1C86EE;
+        }
+        /* 成就和排行榜样式 */
+        .container-title {
+            text-align: center;
+            font-size: 2em;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .list {
+            list-style: none;
+            padding: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .list-item {
+            background-color: #006400;
+            margin: 10px auto;
+            padding: 15px;
+            border-radius: 10px;
+            width: 80%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            font-size: 1.2em;
+        }
+        /* 词汇卡样式 */
+        #vocab-container {
+            padding: 20px;
+            position: relative;
+            height: 600px;
+            overflow-y: auto;
+        }
+        .vocab-card {
+            background-color: #1E90FF;
+            border: none;
+            padding: 20px;
+            margin: 10px auto;
+            color: #fff;
+            border-radius: 10px;
+            width: 80%;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            perspective: 1000px;
+        }
+        .vocab-card:hover {
+            background-color: #1C86EE;
+            transform: scale(1.02);
+        }
+        .vocab-term {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .vocab-definition {
+            display: none;
+            margin-top: 10px;
+            font-size: 1.2em;
+        }
+        .vocab-card.flipped .vocab-definition {
+            display: block;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        /* 进度条样式 */
+        #progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 10px;
+            background-color: #32CD32;
+            width: 0%;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            transition: width 0.5s;
+            z-index: 6;
+        }
+        /* 添加动画关键帧 */
+        @keyframes celebrate {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            50% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-10px, -10px); }
+            50% { transform: translate(10px, -10px); }
+            75% { transform: translate(-10px, 10px); }
+            100% { transform: translate(10px, 10px); }
+        }
+        @keyframes drive-forward {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes breakdown {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(30px); }
+            100% { transform: translateY(0); }
+        }
+        .celebrate {
+            animation: celebrate 0.5s ease-in-out;
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        .drive-forward {
+            animation: drive-forward 0.5s ease-in-out;
+        }
+        .breakdown {
+            animation: breakdown 0.5s ease-in-out;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            header {
+                font-size: 1.5em;
+                padding: 15px;
+            }
+            #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+                height: 500px;
+            }
+            #chris {
+                width: 60px;
+                height: 90px;
+            }
+            .chris-body {
+                width: 50%;
+                height: 50%;
+            }
+            .chris-head {
+                width: 30px;
+                height: 30px;
+            }
+            #tractor {
+                width: 30px;
+                height: 20px;
+            }
+            #question-box h3 {
+                font-size: 1.2em;
+            }
+            .answer-btn {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            #feedback p {
+                font-size: 1em;
+            }
+            #start-btn, #restart-btn, .back-btn {
+                padding: 15px 30px;
+                font-size: 1.2em;
+            }
+            .vocab-card {
+                width: 90%;
+            }
+            .list-item {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>跟着Chris学拖拉机驾驶</header>
+
+    <!-- 主菜单 -->
+    <div id="main-menu">
+        <button class="menu-btn" id="start-game-btn">开始游戏</button>
+        <button class="menu-btn" id="vocab-btn">词汇卡</button>
+        <button class="menu-btn" id="achievements-btn">成就</button>
+        <button class="menu-btn" id="leaderboard-btn">排行榜</button>
+    </div>
+
+    <!-- 章节选择界面 -->
+    <div id="chapter-select">
+        <div class="container-title">选择章节</div>
+        <button class="chapter-btn" data-chapter="1">第一章：初识拖拉机</button>
+        <button class="chapter-btn" data-chapter="2">第二章：深入驾驶</button>
+        <!-- 可以继续添加更多章节按钮 -->
+        <button class="back-btn" id="back-from-chapter-btn">返回主菜单</button>
+    </div>
+
+    <!-- 游戏容器 -->
+    <div id="game-container">
+        <!-- 进度条 -->
+        <div id="progress-bar"></div>
+        <!-- Chris角色 -->
+        <div id="chris">
+            <div class="chris-head"></div>
+            <div class="chris-body"></div>
+        </div>
+        <!-- 拖拉机 -->
+        <div id="tractor"></div>
+        
+        <!-- 问题框 -->
+        <div id="question-box">
+            <h3 id="question">问题文本</h3>
+            <div id="answers">
+                <!-- 答案按钮 -->
+            </div>
+        </div>
+
+        <!-- 反馈框 -->
+        <div id="feedback">
+            <p id="feedback-text">反馈信息</p>
+            <button id="next-btn">继续</button>
+        </div>
+    </div>
+
+    <!-- 词汇卡容器 -->
+    <div id="vocab-container">
+        <button class="close-btn" id="close-vocab-btn">&times;</button>
+        <div class="container-title">拖拉机驾驶词汇卡</div>
+        <div id="vocab-cards">
+            <!-- 词汇卡 -->
+        </div>
+    </div>
+
+    <!-- 成就容器 -->
+    <div id="achievements-container">
+        <button class="close-btn" id="close-achievements-btn">&times;</button>
+        <div class="container-title">成就</div>
+        <ul class="list" id="achievements-list">
+            <!-- 成就列表 -->
+        </ul>
+    </div>
+
+    <!-- 排行榜容器 -->
+    <div id="leaderboard-container">
+        <button class="close-btn" id="close-leaderboard-btn">&times;</button>
+        <div class="container-title">排行榜</div>
+        <ul class="list" id="leaderboard-list">
+            <!-- 排行榜列表 -->
+        </ul>
+    </div>
+
+    <script>
+        // 问题库
+        const questions = [
+            // 第一章
+            {
+                chapter: 1,
+                story: "第一章：Chris初识拖拉机，准备进行第一次驾驶。",
+                question: "What is the primary purpose of a tractor's PTO (Power Take-Off)?",
+                questionCN: "拖拉机的动力输出装置（PTO）的主要用途是什么？",
+                answers: [
+                    "控制拖拉机的速度",
+                    "为附属设备提供动力",
+                    "调节拖拉机的方向",
+                    "增加拖拉机的重量"
+                ],
+                correct: 1,
+                explanation: "PTO用于为拖拉机的附属设备（如割草机、铲土机等）提供动力。",
+                difficulty: "easy"
+            },
+            {
+                chapter:1,
+                story: "Chris需要检查拖拉机的油位。",
+                question: "Which type of oil is commonly used in tractor engines?",
+                questionCN: "拖拉机发动机通常使用哪种类型的油？",
+                answers: [
+                    "Vegetable Oil",
+                    "Motor Oil",
+                    "Hydraulic Oil",
+                    "Transmission Fluid"
+                ],
+                correct:1,
+                explanation: "拖拉机发动机通常使用机油（Motor Oil）来润滑发动机部件。",
+                difficulty: "easy"
+            },
+            {
+                chapter:1,
+                story: "Chris发现拖拉机运转不畅，开始进行故障诊断。",
+                question: "True or False: A clogged air filter can reduce the performance of a tractor engine.",
+                questionCN: "真或假：堵塞的空气过滤器会降低拖拉机发动机的性能。",
+                answers: ["True", "False"],
+                correct: 0,
+                explanation: "堵塞的空气过滤器会限制空气流入发动机，降低发动机性能。",
+                difficulty: "easy"
+            },
+            {
+                chapter:1,
+                story: "Chris需要调整拖拉机的离合器。",
+                question: "What component in a tractor is responsible for transferring engine power to the wheels?",
+                questionCN: "拖拉机中哪个部件负责将发动机动力传递到车轮？",
+                answers: [
+                    "Transmission",
+                    "Steering Wheel",
+                    "Brake System",
+                    "Fuel Injector"
+                ],
+                correct:0,
+                explanation: "变速器（Transmission）负责将发动机动力传递到车轮。",
+                difficulty: "medium"
+            },
+            {
+                chapter:1,
+                story: "Chris学习如何操作拖拉机的四驱系统。",
+                question: "What does 4WD stand for in tractor terminology?",
+                questionCN: "拖拉机术语中4WD代表什么？",
+                answers: [
+                    "Four-Wheeled Drive",
+                    "Four-Way Direction",
+                    "Four-Wheel Differential",
+                    "Four-Way Drive"
+                ],
+                correct:0,
+                explanation: "4WD代表四轮驱动（Four-Wheeled Drive），用于提高拖拉机的牵引力。",
+                difficulty: "medium"
+            },
+            {
+                chapter:1,
+                story: "Chris需要更换拖拉机的燃油滤清器。",
+                question: "Why is it important to regularly replace the fuel filter in a tractor?",
+                questionCN: "为什么定期更换拖拉机的燃油滤清器很重要？",
+                answers: [
+                    "提高燃油效率",
+                    "防止燃油系统堵塞",
+                    "减少发动机噪音",
+                    "增加发动机功率"
+                ],
+                correct:1,
+                explanation: "定期更换燃油滤清器可以防止杂质进入燃油系统，避免系统堵塞。",
+                difficulty: "medium"
+            },
+            {
+                chapter:1,
+                story: "Chris发现拖拉机启动困难，需要进行检查。",
+                question: "What could be a cause of a tractor failing to start?",
+                questionCN: "拖拉机无法启动的原因可能是什么？",
+                answers: [
+                    "Low Battery Voltage",
+                    "Empty Fuel Tank",
+                    "Faulty Starter Motor",
+                    "All of the above"
+                ],
+                correct:3,
+                explanation: "低电压电池、空燃油箱和故障的启动电机都可能导致拖拉机无法启动。",
+                difficulty: "hard"
+            },
+            {
+                chapter:1,
+                story: "Chris需要检查拖拉机的冷却系统。",
+                question: "What is the function of the radiator in a tractor?",
+                questionCN: "拖拉机中散热器的功能是什么？",
+                answers: [
+                    "Increase engine power",
+                    "Cool the engine by dissipating heat",
+                    "Filter the engine oil",
+                    "Control the tractor's speed"
+                ],
+                correct:1,
+                explanation: "散热器通过散发热量来冷却发动机，防止过热。",
+                difficulty: "hard"
+            },
+            {
+                chapter:1,
+                story: "Chris完成了第一章的驾驶任务。",
+                question: "What safety equipment should always be worn when operating a tractor?",
+                questionCN: "操作拖拉机时应始终佩戴哪些安全设备？",
+                answers: [
+                    "Safety Glasses",
+                    "Hard Hat",
+                    "Gloves",
+                    "All of the above"
+                ],
+                correct:3,
+                explanation: "操作拖拉机时，应佩戴安全眼镜、安全帽和手套等多种安全设备。",
+                difficulty: "hard"
+            },
+            // 第二章
+            {
+                chapter:2,
+                story: "第二章：Chris的客户要求拖拉机进行复杂的耕作任务。",
+                question: "What type of attachment would you use for a tractor to plow a field?",
+                questionCN: "拖拉机上使用什么类型的附件来犁地？",
+                answers: [
+                    "Mower",
+                    "Plow",
+                    "Loader",
+                    "Seeder"
+                ],
+                correct:1,
+                explanation: "犁地通常使用犁（Plow）附件。",
+                difficulty: "easy"
+            },
+            {
+                chapter:2,
+                story: "Chris需要调整拖拉机的液压系统。",
+                question: "Which component controls the flow and pressure of hydraulic fluid in a tractor?",
+                questionCN: "拖拉机中哪个部件控制液压油的流动和压力？",
+                answers: [
+                    "Hydraulic Pump",
+                    "Hydraulic Valve",
+                    "Hydraulic Cylinder",
+                    "Hydraulic Reservoir"
+                ],
+                correct:1,
+                explanation: "液压阀（Hydraulic Valve）控制液压油的流动和压力。",
+                difficulty: "medium"
+            },
+            {
+                chapter:2,
+                story: "比赛进入白热化阶段，Chris必须全力以赴。",
+                question: "What maintenance task is essential for ensuring the longevity of a tractor's engine?",
+                questionCN: "确保拖拉机发动机长寿命的基本维护任务是什么？",
+                answers: [
+                    "Regular Oil Changes",
+                    "Cleaning the Exterior",
+                    "Painting the Tractor",
+                    "Changing Tires Frequently"
+                ],
+                correct:0,
+                explanation: "定期更换机油（Regular Oil Changes）是确保发动机长寿命的关键维护任务。",
+                difficulty: "medium"
+            },
+            {
+                chapter:2,
+                story: "Chris需要确保拖拉机的传动系统正常运作。",
+                question: "What does the term 'gear ratio' refer to in a tractor's transmission?",
+                questionCN: "拖拉机变速器中的“齿轮比”指的是什么？",
+                answers: [
+                    "The number of gears in the transmission",
+                    "The ratio of input speed to output speed",
+                    "The size of the gears",
+                    "The type of materials used for gears"
+                ],
+                correct:1,
+                explanation: "齿轮比（Gear Ratio）指的是输入速度与输出速度的比率。",
+                difficulty: "medium"
+            },
+            {
+                chapter:2,
+                story: "Chris的拖拉机在进行深耕时遇到了困难。",
+                question: "Which attachment is best suited for deep tilling in heavy soil?",
+                questionCN: "在重土壤中进行深耕，哪种附件最合适？",
+                answers: [
+                    "Rotary Tiller",
+                    "Plow",
+                    "Harvester",
+                    "Mower"
+                ],
+                correct:1,
+                explanation: "犁（Plow）附件最适合在重土壤中进行深耕。",
+                difficulty: "hard"
+            },
+            {
+                chapter:2,
+                story: "Chris需要修复拖拉机的液压缸。",
+                question: "What is a common sign that a tractor's hydraulic cylinder is failing?",
+                questionCN: "拖拉机的液压缸故障的常见迹象是什么？",
+                answers: [
+                    "Slow or erratic movement of attachments",
+                    "Increased fuel efficiency",
+                    "Quieter engine sounds",
+                    "Improved steering response"
+                ],
+                correct:0,
+                explanation: "附件移动缓慢或不稳定通常是液压缸故障的迹象。",
+                difficulty: "hard"
+            },
+            {
+                chapter:2,
+                story: "Chris需要检查并更换拖拉机的空气滤清器。",
+                question: "How does a clean air filter benefit a tractor's engine?",
+                questionCN: "清洁的空气过滤器如何有益于拖拉机发动机？",
+                answers: [
+                    "Improves fuel efficiency",
+                    "Enhances engine performance",
+                    "Prevents engine wear",
+                    "All of the above"
+                ],
+                correct:3,
+                explanation: "清洁的空气过滤器可以提高燃油效率，增强发动机性能，并防止发动机磨损。",
+                difficulty: "hard"
+            },
+            {
+                chapter:2,
+                story: "Chris完成了第二章的驾驶任务。",
+                question: "What safety procedure should be followed before performing maintenance on a tractor?",
+                questionCN: "在对拖拉机进行维护之前应遵循什么安全程序？",
+                answers: [
+                    "Start the engine",
+                    "Engage the PTO",
+                    "Disconnect the battery and release pressure",
+                    "Operate the tractor at full speed"
+                ],
+                correct:2,
+                explanation: "在进行维护之前，应断开电池并释放系统压力，以确保安全。",
+                difficulty: "hard"
+            },
+            // 可以继续添加更多问题
+        ];
+
+        // 词汇库
+        const vocabulary = [
+            { term: "PTO (Power Take-Off)", definition: "动力输出装置，用于为附属设备提供动力。" },
+            { term: "Transmission", definition: "变速器，负责将发动机动力传递到车轮的装置。" },
+            { term: "Hydraulic System", definition: "液压系统，用于驱动拖拉机附件的系统。" },
+            { term: "Gear Ratio", definition: "齿轮比，指输入速度与输出速度的比率。" },
+            { term: "Clutch", definition: "离合器，用于连接和断开发动机与变速器的装置。" },
+            { term: "Air Filter", definition: "空气过滤器，过滤进入发动机的空气中的杂质。" },
+            { term: "Fuel Filter", definition: "燃油滤清器，过滤燃油中的杂质。" },
+            { term: "Radiator", definition: "散热器，用于冷却发动机的装置。" },
+            { term: "Hydraulic Cylinder", definition: "液压缸，驱动液压系统中附件的部件。" },
+            { term: "Plow", definition: "犁，拖拉机上的附件，用于耕地。" },
+            { term: "Mower", definition: "割草机，拖拉机上的附件，用于割草。" },
+            { term: "Loader", definition: "装载机，拖拉机上的附件，用于搬运物料。" },
+            { term: "Seeder", definition: "播种机，拖拉机上的附件，用于播种。" },
+            { term: "Rotary Tiller", definition: "旋转耕耘机，拖拉机上的附件，用于耕地。" },
+            { term: "Hydraulic Pump", definition: "液压泵，提供液压系统所需压力的装置。" },
+            { term: "Hydraulic Valve", definition: "液压阀，控制液压油流动和压力的装置。" },
+            { term: "Hydraulic Reservoir", definition: "液压油箱，储存液压油的容器。" },
+            { term: "Service Wrench", definition: "维修扳手，用于连接和拆卸系统部件的工具。" },
+            { term: "Leak Detector", definition: "泄漏检测器，用于检测系统中液压油或燃油泄漏的工具。" },
+            { term: "Smart Tractor", definition: "智能拖拉机，配备先进技术以提高效率和性能的拖拉机。" },
+            // 更多词汇
+        ];
+
+        // 成就库
+        const achievements = [
+            { name: "初级学者", description: "完成第一章游戏。", achieved: false },
+            { name: "精准回答", description: "连续回答5个问题正确。", achieved: false },
+            { name: "驾驶大师", description: "回答所有问题正确。", achieved: false },
+            { name: "词汇达人", description: "学习10个词汇卡。", achieved: false },
+            { name: "高分达人", description: "在排行榜中进入前5名。", achieved: false },
+            { name: "全能驾驶师", description: "完成所有章节。", achieved: false },
+            // 更多成就
+        ];
+
+        // 初始化变量
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let currentChapter = null;
+        let consecutiveCorrect = 0;
+        const totalChapters = 2; // 根据问题级别调整
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+        // 获取DOM元素
+        const mainMenu = document.getElementById('main-menu');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const vocabBtn = document.getElementById('vocab-btn');
+        const achievementsBtn = document.getElementById('achievements-btn');
+        const leaderboardBtn = document.getElementById('leaderboard-btn');
+
+        const chapterSelect = document.getElementById('chapter-select');
+        const chapterButtons = document.querySelectorAll('.chapter-btn');
+        const backFromChapterBtn = document.getElementById('back-from-chapter-btn');
+
+        const gameContainer = document.getElementById('game-container');
+        const chris = document.getElementById('chris');
+        const tractor = document.getElementById('tractor');
+        const questionBox = document.getElementById('question-box');
+        const questionText = document.getElementById('question');
+        const answersDiv = document.getElementById('answers');
+        const feedback = document.getElementById('feedback');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+
+        const vocabContainer = document.getElementById('vocab-container');
+        const vocabCards = document.getElementById('vocab-cards');
+        const closeVocabBtn = document.getElementById('close-vocab-btn');
+
+        const achievementsContainer = document.getElementById('achievements-container');
+        const achievementsList = document.getElementById('achievements-list');
+        const closeAchievementsBtn = document.getElementById('close-achievements-btn');
+
+        const leaderboardContainer = document.getElementById('leaderboard-container');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
+
+        // 添加动画关键帧
+        const styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText = `
+            @keyframes celebrate {
+                0% { transform: rotate(0deg); }
+                25% { transform: rotate(10deg); }
+                50% { transform: rotate(-10deg); }
+                75% { transform: rotate(10deg); }
+                100% { transform: rotate(0deg); }
+            }
+            @keyframes shake {
+                0% { transform: translate(0, 0); }
+                25% { transform: translate(-10px, -10px); }
+                50% { transform: translate(10px, -10px); }
+                75% { transform: translate(-10px, 10px); }
+                100% { transform: translate(10px, 10px); }
+            }
+            @keyframes drive-forward {
+                0% { transform: translateX(0); }
+                50% { transform: translateX(20px); }
+                100% { transform: translateX(0); }
+            }
+            @keyframes breakdown {
+                0% { transform: translateY(0); }
+                50% { transform: translateY(30px); }
+                100% { transform: translateY(0); }
+            }
+            .celebrate {
+                animation: celebrate 0.5s ease-in-out;
+            }
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+            .drive-forward {
+                animation: drive-forward 0.5s ease-in-out;
+            }
+            .breakdown {
+                animation: breakdown 0.5s ease-in-out;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // 生成词汇卡
+        function generateVocabCards() {
+            vocabCards.innerHTML = '';
+            vocabulary.forEach((vocab, index) => {
+                const card = document.createElement('div');
+                card.classList.add('vocab-card');
+                card.innerHTML = `
+                    <div class="vocab-term">${vocab.term}</div>
+                    <div class="vocab-definition">${vocab.definition}</div>
+                `;
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
+                });
+                vocabCards.appendChild(card);
+            });
+        }
+
+        // 生成成就列表
+        function generateAchievements() {
+            achievementsList.innerHTML = '';
+            achievements.forEach((achv, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.innerHTML = `
+                    <strong>${achv.name}</strong><br>
+                    ${achv.description} <br>
+                    ${achv.achieved ? '✅ 已达成' : '❌ 未达成'}
+                `;
+                achievementsList.appendChild(li);
+            });
+        }
+
+        // 更新成就
+        function updateAchievements() {
+            achievements.forEach(achv => {
+                if (!achv.achieved) {
+                    if (achv.name === "初级学者" && currentChapter > 1) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "精准回答" && consecutiveCorrect >= 5) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "驾驶大师" && score >= getTotalQuestionsByChapter(currentChapter)) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "词汇达人" && vocabulary.length >= 10) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "全能驾驶师" && currentChapter > totalChapters) {
+                        achv.achieved = true;
+                    }
+                    // 更多成就条件
+                }
+            });
+            generateAchievements();
+        }
+
+        // 生成排行榜
+        function generateLeaderboard() {
+            leaderboardList.innerHTML = '';
+            // 排序并取前10名
+            const sortedLeaderboard = leaderboard.sort((a, b) => b.score - a.score).slice(0, 10);
+            sortedLeaderboard.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.textContent = `${index + 1}. ${entry.name} - ${entry.score}`;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        // 保存排行榜
+        function saveLeaderboard(name, score) {
+            leaderboard.push({ name, score });
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            generateLeaderboard();
+            updateAchievements();
+        }
+
+        // 获取当前章节的总问题数
+        function getTotalQuestionsByChapter(chapter) {
+            return questions.filter(q => q.chapter === chapter).length;
+        }
+
+        // 初始化词汇卡和成就
+        generateVocabCards();
+        generateAchievements();
+        generateLeaderboard();
+
+        // 导航按钮事件
+        startGameBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            chapterSelect.style.display = 'flex';
+        });
+
+        vocabBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            vocabContainer.style.display = 'block';
+        });
+
+        achievementsBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            achievementsContainer.style.display = 'block';
+        });
+
+        leaderboardBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            leaderboardContainer.style.display = 'block';
+        });
+
+        backFromChapterBtn.addEventListener('click', () => {
+            chapterSelect.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 章节选择按钮事件
+        chapterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const selectedChapter = parseInt(button.getAttribute('data-chapter'));
+                currentChapter = selectedChapter;
+                mainMenu.style.display = 'none';
+                chapterSelect.style.display = 'none';
+                gameContainer.style.display = 'block';
+                startChapter();
+            });
+        });
+
+        closeVocabBtn.addEventListener('click', () => {
+            vocabContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeAchievementsBtn.addEventListener('click', () => {
+            achievementsContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeLeaderboardBtn.addEventListener('click', () => {
+            leaderboardContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 游戏逻辑
+        function startChapter() {
+            currentQuestionIndex = 0;
+            score = 0;
+            consecutiveCorrect = 0;
+            progressBar.style.width = '0%';
+            chris.style.left = '50px'; // 重置Chris的位置
+            moveTractor();
+        }
+
+        function moveTractor() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            if (currentQuestionIndex >= currentChapterQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const q = currentChapterQuestions[currentQuestionIndex];
+            // 设置进度条
+            const progress = ((currentQuestionIndex) / getTotalQuestionsByChapter(currentChapter)) * 100;
+            progressBar.style.width = progress + '%';
+            // 随机位置
+            const randomPositionX = Math.floor(Math.random() * (gameContainer.clientWidth - 150)) + 50;
+            const randomPositionY = Math.floor(Math.random() * (gameContainer.clientHeight - 200)) + 100;
+            tractor.style.left = randomPositionX + 'px';
+            tractor.style.bottom = randomPositionY + 'px';
+            // 添加动画效果
+            tractor.style.transition = 'left 1s, bottom 1s';
+            setTimeout(triggerQuestion, 1000);
+        }
+
+        function triggerQuestion() {
+            questionBox.style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            if (!q) {
+                endGame();
+                return;
+            }
+            questionText.innerHTML = `<strong>${q.question}</strong><br><em>${q.questionCN}</em>`;
+            answersDiv.innerHTML = '';
+            q.answers.forEach((ans, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = ans;
+                btn.classList.add('answer-btn');
+                btn.addEventListener('click', () => checkAnswer(index));
+                answersDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            questionBox.style.display = 'none';
+            if (selected === q.correct) {
+                score++;
+                consecutiveCorrect++;
+                feedbackText.innerHTML = `<strong>回答正确！👏</strong><br>Chris成功驾驶拖拉机！<br><em>${q.explanation}</em>`;
+                triggerPositiveEvent();
+            } else {
+                consecutiveCorrect = 0;
+                feedbackText.innerHTML = `<strong>回答错误！😅</strong><br>Chris的拖拉机出现故障！<br><em>${q.explanation}</em>`;
+                triggerNegativeEvent();
+            }
+            updateAchievements();
+            feedback.style.display = 'block';
+        }
+
+        function triggerPositiveEvent() {
+            // 移动Chris向右并驱动拖拉机
+            const newLeft = Math.min(gameContainer.clientWidth - 100, parseInt(chris.style.left) + 100);
+            chris.style.left = newLeft + 'px';
+            // 添加庆祝动画
+            chris.classList.add('celebrate');
+            tractor.classList.add('drive-forward');
+            setTimeout(() => {
+                chris.classList.remove('celebrate');
+                tractor.classList.remove('drive-forward');
+            }, 500);
+        }
+
+        function triggerNegativeEvent() {
+            // 移动Chris向左并拖拉机故障
+            const newLeft = Math.max(50, parseInt(chris.style.left) - 50);
+            chris.style.left = newLeft + 'px';
+            // 添加故障动画
+            chris.classList.add('shake');
+            tractor.classList.add('breakdown');
+            setTimeout(() => {
+                chris.classList.remove('shake');
+                tractor.classList.remove('breakdown');
+            }, 500);
+        }
+
+        function endGame() {
+            feedbackText.innerHTML = `<strong>游戏结束！🎉</strong><br>你的得分是 ${score} / ${questions.filter(q => q.chapter === currentChapter).length}`;
+            nextBtn.style.display = 'none';
+            feedback.style.display = 'block';
+            // 保存到排行榜
+            let playerName = prompt("请输入你的名字:", "玩家");
+            if (playerName) {
+                saveLeaderboard(playerName, score);
+            }
+        }
+
+        nextBtn.addEventListener('click', () => {
+            feedback.style.display = 'none';
+            currentQuestionIndex++;
+            moveTractor();
+        });
+
+        // 生成词汇卡
+        generateVocabCards();
+
+        // 生成成就列表
+        generateAchievements();
+
+        // 生成排行榜
+        generateLeaderboard();
+    </script>
+
+</body>
+</html>
