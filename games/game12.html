@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>跟着Chris学空调维修</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 全局样式 */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #4682B4;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+        header {
+            background-color: #1E90FF;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        /* 主菜单样式 */
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .menu-btn {
+            background-color: #20B2AA;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 200px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .menu-btn:hover {
+            background-color: #3CB371;
+            transform: scale(1.05);
+        }
+        /* 章节选择界面样式 */
+        #chapter-select {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .chapter-btn {
+            background-color: #FFA500;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            width: 220px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .chapter-btn:hover {
+            background-color: #FF8C00;
+            transform: scale(1.05);
+        }
+        .back-btn {
+            background-color: #FF6347;
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .back-btn:hover {
+            background-color: #FF4500;
+            transform: scale(1.05);
+        }
+        /* 游戏容器样式 */
+        #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+            display: none;
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            height: 600px;
+            background: #5F9EA0; /* 工具车蓝色 */
+            border: 5px solid #1E90FF;
+            margin: 20px 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        /* 使用CSS绘制Chris */
+        #chris {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            width: 80px;
+            height: 120px;
+            background-color: #FFD700;
+            border: 2px solid #000;
+            border-radius: 10px;
+            transition: left 0.5s, bottom 0.5s, transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            z-index: 2;
+        }
+        /* Chris的身体部分 */
+        .chris-body {
+            width: 60%;
+            height: 60%;
+            background-color: #1E90FF;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        /* Chris的头部 */
+        .chris-head {
+            width: 40px;
+            height: 40px;
+            background-color: #FFE4C4;
+            border: 2px solid #000;
+            border-radius: 50%;
+            margin-top: -20px;
+        }
+        /* 使用CSS绘制工具箱 */
+        #toolbox {
+            position: absolute;
+            bottom: 100px;
+            left: 400px;
+            width: 40px;
+            height: 40px;
+            background-color: #8B4513;
+            border: 2px solid #000;
+            border-radius: 5px;
+            box-shadow: inset 0 0 0 4px #000;
+            transition: left 1s, bottom 1s;
+            z-index: 1;
+        }
+        /* 问题框样式 */
+        #question-box {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(30, 144, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 4;
+        }
+        #question-box h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        #answers {
+            display: flex;
+            flex-direction: column;
+            margin-top: 15px;
+        }
+        .answer-btn {
+            background-color: #FF8C00;
+            border: none;
+            padding: 12px;
+            margin: 8px 0;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .answer-btn:hover {
+            background-color: #FFA500;
+        }
+        /* 反馈框样式 */
+        #feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #000;
+            padding: 30px;
+            border-radius: 15px;
+            display: none;
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            z-index: 5;
+        }
+        #feedback p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        #feedback button {
+            background-color: #1E90FF;
+            border: none;
+            padding: 15px 30px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.2em;
+            transition: background-color 0.3s;
+        }
+        #feedback button:hover {
+            background-color: #1C86EE;
+        }
+        /* 成就和排行榜样式 */
+        .container-title {
+            text-align: center;
+            font-size: 2em;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .list {
+            list-style: none;
+            padding: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .list-item {
+            background-color: #1E90FF;
+            margin: 10px auto;
+            padding: 15px;
+            border-radius: 10px;
+            width: 80%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            font-size: 1.2em;
+        }
+        /* 词汇卡样式 */
+        #vocab-container {
+            padding: 20px;
+            position: relative;
+            height: 600px;
+            overflow-y: auto;
+        }
+        .vocab-card {
+            background-color: #20B2AA;
+            border: none;
+            padding: 20px;
+            margin: 10px auto;
+            color: #fff;
+            border-radius: 10px;
+            width: 80%;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            perspective: 1000px;
+        }
+        .vocab-card:hover {
+            background-color: #3CB371;
+            transform: scale(1.02);
+        }
+        .vocab-term {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .vocab-definition {
+            display: none;
+            margin-top: 10px;
+            font-size: 1.2em;
+        }
+        .vocab-card.flipped .vocab-definition {
+            display: block;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        /* 进度条样式 */
+        #progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 10px;
+            background-color: #FFA500;
+            width: 0%;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            transition: width 0.5s;
+            z-index: 6;
+        }
+        /* 添加动画关键帧 */
+        @keyframes celebrate {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            50% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-10px, -10px); }
+            50% { transform: translate(10px, -10px); }
+            75% { transform: translate(-10px, 10px); }
+            100% { transform: translate(10px, 10px); }
+        }
+        @keyframes fix {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes malfunction {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(30px); }
+            100% { transform: translateY(0); }
+        }
+        .celebrate {
+            animation: celebrate 0.5s ease-in-out;
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        .fix {
+            animation: fix 0.5s ease-in-out;
+        }
+        .malfunction {
+            animation: malfunction 0.5s ease-in-out;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            header {
+                font-size: 1.5em;
+                padding: 15px;
+            }
+            #game-container, #vocab-container, #achievements-container, #leaderboard-container {
+                height: 500px;
+            }
+            #chris {
+                width: 60px;
+                height: 90px;
+            }
+            .chris-body {
+                width: 50%;
+                height: 50%;
+            }
+            .chris-head {
+                width: 30px;
+                height: 30px;
+            }
+            #toolbox {
+                width: 30px;
+                height: 30px;
+            }
+            #question-box h3 {
+                font-size: 1.2em;
+            }
+            .answer-btn {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            #feedback p {
+                font-size: 1em;
+            }
+            #start-btn, #restart-btn, .back-btn {
+                padding: 15px 30px;
+                font-size: 1.2em;
+            }
+            .vocab-card {
+                width: 90%;
+            }
+            .list-item {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>跟着Chris学空调维修</header>
+
+    <!-- 主菜单 -->
+    <div id="main-menu">
+        <button class="menu-btn" id="start-game-btn">开始游戏</button>
+        <button class="menu-btn" id="vocab-btn">词汇卡</button>
+        <button class="menu-btn" id="achievements-btn">成就</button>
+        <button class="menu-btn" id="leaderboard-btn">排行榜</button>
+    </div>
+
+    <!-- 章节选择界面 -->
+    <div id="chapter-select">
+        <div class="container-title">选择章节</div>
+        <button class="chapter-btn" data-chapter="1">第一章：初识空调</button>
+        <button class="chapter-btn" data-chapter="2">第二章：深入维修</button>
+        <!-- 可以继续添加更多章节按钮 -->
+        <button class="back-btn" id="back-from-chapter-btn">返回主菜单</button>
+    </div>
+
+    <!-- 游戏容器 -->
+    <div id="game-container">
+        <!-- 进度条 -->
+        <div id="progress-bar"></div>
+        <!-- Chris角色 -->
+        <div id="chris">
+            <div class="chris-head"></div>
+            <div class="chris-body"></div>
+        </div>
+        <!-- 工具箱 -->
+        <div id="toolbox"></div>
+        
+        <!-- 问题框 -->
+        <div id="question-box">
+            <h3 id="question">问题文本</h3>
+            <div id="answers">
+                <!-- 答案按钮 -->
+            </div>
+        </div>
+
+        <!-- 反馈框 -->
+        <div id="feedback">
+            <p id="feedback-text">反馈信息</p>
+            <button id="next-btn">继续</button>
+        </div>
+    </div>
+
+    <!-- 词汇卡容器 -->
+    <div id="vocab-container">
+        <button class="close-btn" id="close-vocab-btn">&times;</button>
+        <div class="container-title">空调维修词汇卡</div>
+        <div id="vocab-cards">
+            <!-- 词汇卡 -->
+        </div>
+    </div>
+
+    <!-- 成就容器 -->
+    <div id="achievements-container">
+        <button class="close-btn" id="close-achievements-btn">&times;</button>
+        <div class="container-title">成就</div>
+        <ul class="list" id="achievements-list">
+            <!-- 成就列表 -->
+        </ul>
+    </div>
+
+    <!-- 排行榜容器 -->
+    <div id="leaderboard-container">
+        <button class="close-btn" id="close-leaderboard-btn">&times;</button>
+        <div class="container-title">排行榜</div>
+        <ul class="list" id="leaderboard-list">
+            <!-- 排行榜列表 -->
+        </ul>
+    </div>
+
+    <script>
+        // 问题库
+        const questions = [
+            // 第一章
+            {
+                chapter: 1,
+                story: "第一章：Chris刚开始接触空调维修，面对第一台空调。",
+                question: "What is the primary function of a condenser in an air conditioning system?",
+                questionCN: "空调系统中冷凝器的主要功能是什么？",
+                answers: [
+                    "吸收室内空气中的热量",
+                    "将制冷剂从气态转换为液态",
+                    "压缩制冷剂",
+                    "调节室内温度"
+                ],
+                correct: 1,
+                explanation: "冷凝器的主要功能是将制冷剂从气态转换为液态，通过散热释放热量。",
+                difficulty: "easy"
+            },
+            {
+                chapter:1,
+                story: "Chris需要检查空调的制冷剂水平。",
+                question: "What tool is commonly used to measure the pressure of refrigerant in an AC system?",
+                questionCN: "在空调系统中，通常使用什么工具来测量制冷剂的压力？",
+                answers: [
+                    "Multimeter",
+                    "Manifold Gauge",
+                    "Thermometer",
+                    "Vacuum Pump"
+                ],
+                correct: 1,
+                explanation: "压力表集成仪（Manifold Gauge）通常用于测量空调系统中制冷剂的压力。",
+                difficulty: "easy"
+            },
+            {
+                chapter:1,
+                story: "Chris发现空调不制冷，开始进行故障诊断。",
+                question: "True or False: A clogged air filter can reduce the efficiency of an air conditioning system.",
+                questionCN: "真或假：堵塞的空气过滤器会降低空调系统的效率。",
+                answers: ["True", "False"],
+                correct: 0,
+                explanation: "堵塞的空气过滤器会限制空气流动，降低空调系统的效率。",
+                difficulty: "easy"
+            },
+            {
+                chapter:1,
+                story: "Chris需要更换空调的压缩机。",
+                question: "Which component in an air conditioning system compresses the refrigerant vapor?",
+                questionCN: "空调系统中哪个部件压缩制冷剂蒸气？",
+                answers: [
+                    "Evaporator",
+                    "Condenser",
+                    "Compressor",
+                    "Expansion Valve"
+                ],
+                correct: 2,
+                explanation: "压缩机（Compressor）负责压缩制冷剂蒸气。",
+                difficulty: "medium"
+            },
+            {
+                chapter:1,
+                story: "Chris学习如何安装新的冷凝器。",
+                question: "What is the purpose of the expansion valve in an AC system?",
+                questionCN: "空调系统中膨胀阀的作用是什么？",
+                answers: [
+                    "Compress the refrigerant",
+                    "Absorb heat from the indoor air",
+                    "Regulate the flow of refrigerant into the evaporator",
+                    "Convert refrigerant from liquid to gas"
+                ],
+                correct: 2,
+                explanation: "膨胀阀（Expansion Valve）调节制冷剂流入蒸发器的流量。",
+                difficulty: "medium"
+            },
+            {
+                chapter:1,
+                story: "Chris需要测试空调系统的温度变化。",
+                question: "What instrument is used to measure the temperature of the refrigerant in an AC system?",
+                questionCN: "用于测量空调系统中制冷剂温度的仪器是什么？",
+                answers: [
+                    "Pressure Gauge",
+                    "Thermocouple",
+                    "Thermometer",
+                    "Hygrometer"
+                ],
+                correct: 1,
+                explanation: "热电偶（Thermocouple）常用于测量制冷剂的温度。",
+                difficulty: "medium"
+            },
+            {
+                chapter:1,
+                story: "Chris发现制冷剂泄漏，需要进行修复。",
+                question: "What is a common sign of refrigerant leakage in an AC system?",
+                questionCN: "空调系统中制冷剂泄漏的常见迹象是什么？",
+                answers: [
+                    "Unusual noises",
+                    "Reduced cooling performance",
+                    "Increased humidity",
+                    "All of the above"
+                ],
+                correct: 3,
+                explanation: "制冷剂泄漏通常会导致异常噪音、制冷效果下降和湿度增加。",
+                difficulty: "hard"
+            },
+            {
+                chapter:1,
+                story: "Chris需要清洁蒸发器盘管。",
+                question: "Why is it important to clean the evaporator coils in an AC system?",
+                questionCN: "为什么清洁空调系统中的蒸发器盘管很重要？",
+                answers: [
+                    "提高空气流通",
+                    "防止霉菌生长",
+                    "确保高效制冷",
+                    "所有以上"
+                ],
+                correct: 3,
+                explanation: "清洁蒸发器盘管有助于提高空气流通，防止霉菌生长，并确保高效制冷。",
+                difficulty: "hard"
+            },
+            {
+                chapter:1,
+                story: "Chris需要检查并更换空调过滤网。",
+                question: "How often should air filters in an AC system typically be replaced?",
+                questionCN: "空调系统中的空气过滤器通常应该多久更换一次？",
+                answers: [
+                    "每月",
+                    "每3个月",
+                    "每6个月",
+                    "每年"
+                ],
+                correct: 1,
+                explanation: "空气过滤器通常建议每3个月更换一次，视使用情况而定。",
+                difficulty: "hard"
+            },
+            {
+                chapter:1,
+                story: "Chris完成了第一章的维修任务。",
+                question: "What is the function of the blower fan in an AC system?",
+                questionCN: "空调系统中鼓风机的功能是什么？",
+                answers: [
+                    "Compress refrigerant",
+                    "Circulate air through the system",
+                    "Condense refrigerant",
+                    "Regulate refrigerant flow"
+                ],
+                correct: 1,
+                explanation: "鼓风机（Blower Fan）负责在系统中循环空气。",
+                difficulty: "hard"
+            },
+            // 第二章
+            {
+                chapter:2,
+                story: "第二章：Chris的客户投诉空调运行不稳定，他需要深入分析。",
+                question: "What component regulates the pressure of the refrigerant leaving the condenser?",
+                questionCN: "哪个部件调节离开冷凝器的制冷剂压力？",
+                answers: [
+                    "Compressor",
+                    "Expansion Valve",
+                    "Thermostat",
+                    "Fan Motor"
+                ],
+                correct: 1,
+                explanation: "膨胀阀（Expansion Valve）调节离开冷凝器的制冷剂压力。",
+                difficulty: "easy"
+            },
+            {
+                chapter:2,
+                story: "Chris需要更换空调系统中的滤网。",
+                question: "What is the primary purpose of a high-efficiency particulate air (HEPA) filter in an AC system?",
+                questionCN: "高效颗粒空气（HEPA）过滤器在空调系统中的主要用途是什么？",
+                answers: [
+                    "提高空气流通",
+                    "去除细小颗粒和污染物",
+                    "降低系统噪音",
+                    "增强制冷效果"
+                ],
+                correct:1,
+                explanation: "HEPA过滤器主要用于去除空气中的细小颗粒和污染物。",
+                difficulty: "medium"
+            },
+            {
+                chapter:2,
+                story: "Chris发现蒸发器盘管结霜，需找出原因。",
+                question: "What could cause the evaporator coils in an AC system to freeze?",
+                questionCN: "什么原因会导致空调系统中的蒸发器盘管结霜？",
+                answers: [
+                    "Low refrigerant levels",
+                    "Dirty air filters",
+                    "Poor airflow",
+                    "All of the above"
+                ],
+                correct:3,
+                explanation: "低制冷剂水平、脏的空气过滤器和空气流通不良都可能导致蒸发器盘管结霜。",
+                difficulty: "medium"
+            },
+            {
+                chapter:2,
+                story: "Chris需要检测空调系统中的电路问题。",
+                question: "Which tool is essential for diagnosing electrical issues in an AC system?",
+                questionCN: "在诊断空调系统中的电气问题时，哪种工具是必不可少的？",
+                answers: [
+                    "Multimeter",
+                    "Manifold Gauge",
+                    "Thermometer",
+                    "Refrigerant Scale"
+                ],
+                correct:0,
+                explanation: "万用表（Multimeter）是诊断电气问题的重要工具。",
+                difficulty: "medium"
+            },
+            {
+                chapter:2,
+                story: "Chris需要调整空调系统的温度控制。",
+                question: "What type of thermostat is commonly used in modern AC systems for better energy efficiency?",
+                questionCN: "现代空调系统中常用于提高能效的温控器类型是什么？",
+                answers: [
+                    "Mechanical Thermostat",
+                    "Digital Thermostat",
+                    "Programmable Thermostat",
+                    "Smart Thermostat"
+                ],
+                correct:3,
+                explanation: "智能温控器（Smart Thermostat）提供更好的能效管理。",
+                difficulty: "hard"
+            },
+            {
+                chapter:2,
+                story: "Chris需要修复空调系统中的制冷剂泄漏。",
+                question: "What is the environmental impact of releasing refrigerants like R-22 into the atmosphere?",
+                questionCN: "将像R-22这样的制冷剂释放到大气中有什么环境影响？",
+                answers: [
+                    "Contributes to ozone depletion",
+                    "Causes global warming",
+                    "Both A and B",
+                    "No significant impact"
+                ],
+                correct:2,
+                explanation: "R-22制冷剂会导致臭氧层破坏和全球变暖。",
+                difficulty: "hard"
+            },
+            {
+                chapter:2,
+                story: "Chris学习如何使用真空泵进行系统抽真空。",
+                question: "Why is it necessary to evacuate an AC system before recharging it with refrigerant?",
+                questionCN: "为什么在为空调系统重新充注制冷剂之前需要进行抽真空？",
+                answers: [
+                    "Remove moisture and air from the system",
+                    "Cool down the system",
+                    "Increase refrigerant pressure",
+                    "Enhance airflow"
+                ],
+                correct:0,
+                explanation: "抽真空可以去除系统中的水分和空气，防止腐蚀和冰冻。",
+                difficulty: "hard"
+            },
+            {
+                chapter:2,
+                story: "Chris完成了第二章的维修任务。",
+                question: "What safety precaution should be taken when handling refrigerants?",
+                questionCN: "处理制冷剂时应采取什么安全预防措施？",
+                answers: [
+                    "Wear protective gloves",
+                    "Ensure proper ventilation",
+                    "Use appropriate tools",
+                    "All of the above"
+                ],
+                correct:3,
+                explanation: "处理制冷剂时应佩戴防护手套，确保良好通风，并使用适当的工具。",
+                difficulty: "hard"
+            },
+            // 可以继续添加更多问题
+        ];
+
+        // 词汇库
+        const vocabulary = [
+            { term: "Condenser", definition: "冷凝器，将制冷剂从气态转换为液态的部件。" },
+            { term: "Evaporator", definition: "蒸发器，制冷剂蒸发吸热的部件。" },
+            { term: "Compressor", definition: "压缩机，压缩制冷剂蒸气的装置。" },
+            { term: "Expansion Valve", definition: "膨胀阀，调节制冷剂流量的装置。" },
+            { term: "Refrigerant", definition: "制冷剂，用于传递热量的流体。" },
+            { term: "Manifold Gauge", definition: "压力表集成仪，用于测量系统压力。" },
+            { term: "Thermostat", definition: "温控器，调节空调系统温度的装置。" },
+            { term: "Blower Fan", definition: "鼓风机，负责在系统中循环空气的部件。" },
+            { term: "Heat Exchanger", definition: "换热器，进行热量交换的装置。" },
+            { term: "Vacuum Pump", definition: "真空泵，用于系统抽真空的工具。" },
+            { term: "Capacitor", definition: "电容器，储存电能的电子元件。" },
+            { term: "Circuit Breaker", definition: "断路器，保护电路免受过载的装置。" },
+            { term: "Filter Drier", definition: "过滤干燥器，去除系统中水分和杂质的装置。" },
+            { term: "Pressure Switch", definition: "压力开关，监测和控制系统压力的装置。" },
+            { term: "Refrigerant Scale", definition: "制冷剂秤，用于精确称量制冷剂的工具。" },
+            { term: "Smart Thermostat", definition: "智能温控器，提供更高能效管理的温控装置。" },
+            { term: "Leak Detector", definition: "泄漏检测器，用于检测系统中制冷剂泄漏的工具。" },
+            { term: "Service Wrench", definition: "维修扳手，用于连接和拆卸系统部件的工具。" },
+            { term: "Microchannel Coil", definition: "微通道盘管，设计用于提高换热效率的蒸发器盘管。" },
+            { term: "Heat Pump", definition: "热泵，能够进行制冷和制热的设备。" },
+            // 更多词汇
+        ];
+
+        // 成就库
+        const achievements = [
+            { name: "新手维修师", description: "完成第一章游戏。", achieved: false },
+            { name: "精准回答", description: "连续回答5个问题正确。", achieved: false },
+            { name: "维修大师", description: "回答所有问题正确。", achieved: false },
+            { name: "词汇达人", description: "学习10个词汇卡。", achieved: false },
+            { name: "高分达人", description: "在排行榜中进入前5名。", achieved: false },
+            { name: "全能维修师", description: "完成所有章节。", achieved: false },
+            // 更多成就
+        ];
+
+        // 初始化变量
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let currentChapter = null;
+        let consecutiveCorrect = 0;
+        const totalChapters = 2; // 根据问题级别调整
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+        // 获取DOM元素
+        const mainMenu = document.getElementById('main-menu');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const vocabBtn = document.getElementById('vocab-btn');
+        const achievementsBtn = document.getElementById('achievements-btn');
+        const leaderboardBtn = document.getElementById('leaderboard-btn');
+
+        const chapterSelect = document.getElementById('chapter-select');
+        const chapterButtons = document.querySelectorAll('.chapter-btn');
+        const backFromChapterBtn = document.getElementById('back-from-chapter-btn');
+
+        const gameContainer = document.getElementById('game-container');
+        const chris = document.getElementById('chris');
+        const toolbox = document.getElementById('toolbox');
+        const questionBox = document.getElementById('question-box');
+        const questionText = document.getElementById('question');
+        const answersDiv = document.getElementById('answers');
+        const feedback = document.getElementById('feedback');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+
+        const vocabContainer = document.getElementById('vocab-container');
+        const vocabCards = document.getElementById('vocab-cards');
+        const closeVocabBtn = document.getElementById('close-vocab-btn');
+
+        const achievementsContainer = document.getElementById('achievements-container');
+        const achievementsList = document.getElementById('achievements-list');
+        const closeAchievementsBtn = document.getElementById('close-achievements-btn');
+
+        const leaderboardContainer = document.getElementById('leaderboard-container');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
+
+        // 添加动画关键帧
+        const styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText = `
+            @keyframes celebrate {
+                0% { transform: rotate(0deg); }
+                25% { transform: rotate(10deg); }
+                50% { transform: rotate(-10deg); }
+                75% { transform: rotate(10deg); }
+                100% { transform: rotate(0deg); }
+            }
+            @keyframes shake {
+                0% { transform: translate(0, 0); }
+                25% { transform: translate(-10px, -10px); }
+                50% { transform: translate(10px, -10px); }
+                75% { transform: translate(-10px, 10px); }
+                100% { transform: translate(10px, 10px); }
+            }
+            @keyframes fix {
+                0% { transform: translateX(0); }
+                50% { transform: translateX(20px); }
+                100% { transform: translateX(0); }
+            }
+            @keyframes malfunction {
+                0% { transform: translateY(0); }
+                50% { transform: translateY(30px); }
+                100% { transform: translateY(0); }
+            }
+            .celebrate {
+                animation: celebrate 0.5s ease-in-out;
+            }
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+            .fix {
+                animation: fix 0.5s ease-in-out;
+            }
+            .malfunction {
+                animation: malfunction 0.5s ease-in-out;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // 生成词汇卡
+        function generateVocabCards() {
+            vocabCards.innerHTML = '';
+            vocabulary.forEach((vocab, index) => {
+                const card = document.createElement('div');
+                card.classList.add('vocab-card');
+                card.innerHTML = `
+                    <div class="vocab-term">${vocab.term}</div>
+                    <div class="vocab-definition">${vocab.definition}</div>
+                `;
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
+                });
+                vocabCards.appendChild(card);
+            });
+        }
+
+        // 生成成就列表
+        function generateAchievements() {
+            achievementsList.innerHTML = '';
+            achievements.forEach((achv, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.innerHTML = `
+                    <strong>${achv.name}</strong><br>
+                    ${achv.description} <br>
+                    ${achv.achieved ? '✅ 已达成' : '❌ 未达成'}
+                `;
+                achievementsList.appendChild(li);
+            });
+        }
+
+        // 更新成就
+        function updateAchievements() {
+            achievements.forEach(achv => {
+                if (!achv.achieved) {
+                    if (achv.name === "新手维修师" && currentChapter > 1) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "精准回答" && consecutiveCorrect >= 5) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "维修大师" && score >= getTotalQuestionsByChapter(currentChapter)) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "词汇达人" && vocabulary.length >= 10) {
+                        achv.achieved = true;
+                    }
+                    if (achv.name === "全能维修师" && currentChapter > totalChapters) {
+                        achv.achieved = true;
+                    }
+                    // 更多成就条件
+                }
+            });
+            generateAchievements();
+        }
+
+        // 生成排行榜
+        function generateLeaderboard() {
+            leaderboardList.innerHTML = '';
+            // 排序并取前10名
+            const sortedLeaderboard = leaderboard.sort((a, b) => b.score - a.score).slice(0, 10);
+            sortedLeaderboard.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-item');
+                li.textContent = `${index + 1}. ${entry.name} - ${entry.score}`;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        // 保存排行榜
+        function saveLeaderboard(name, score) {
+            leaderboard.push({ name, score });
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            generateLeaderboard();
+            updateAchievements();
+        }
+
+        // 获取当前章节的总问题数
+        function getTotalQuestionsByChapter(chapter) {
+            return questions.filter(q => q.chapter === chapter).length;
+        }
+
+        // 初始化词汇卡和成就
+        generateVocabCards();
+        generateAchievements();
+        generateLeaderboard();
+
+        // 导航按钮事件
+        startGameBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            chapterSelect.style.display = 'flex';
+        });
+
+        vocabBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            vocabContainer.style.display = 'block';
+        });
+
+        achievementsBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            achievementsContainer.style.display = 'block';
+        });
+
+        leaderboardBtn.addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            leaderboardContainer.style.display = 'block';
+        });
+
+        backFromChapterBtn.addEventListener('click', () => {
+            chapterSelect.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 章节选择按钮事件
+        chapterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const selectedChapter = parseInt(button.getAttribute('data-chapter'));
+                currentChapter = selectedChapter;
+                mainMenu.style.display = 'none';
+                chapterSelect.style.display = 'none';
+                gameContainer.style.display = 'block';
+                startChapter();
+            });
+        });
+
+        closeVocabBtn.addEventListener('click', () => {
+            vocabContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeAchievementsBtn.addEventListener('click', () => {
+            achievementsContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        closeLeaderboardBtn.addEventListener('click', () => {
+            leaderboardContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+        });
+
+        // 游戏逻辑
+        function startChapter() {
+            currentQuestionIndex = 0;
+            score = 0;
+            consecutiveCorrect = 0;
+            progressBar.style.width = '0%';
+            chris.style.left = '50px'; // 重置Chris的位置
+            toolbox.style.left = '400px'; // 重置工具箱的位置
+            moveToolbox();
+        }
+
+        function moveToolbox() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            if (currentQuestionIndex >= currentChapterQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const q = currentChapterQuestions[currentQuestionIndex];
+            // 设置进度条
+            const progress = ((currentQuestionIndex) / getTotalQuestionsByChapter(currentChapter)) * 100;
+            progressBar.style.width = progress + '%';
+            // 随机位置
+            const randomPositionX = Math.floor(Math.random() * (gameContainer.clientWidth - 100)) + 50;
+            const randomPositionY = Math.floor(Math.random() * (gameContainer.clientHeight - 200)) + 100;
+            toolbox.style.left = randomPositionX + 'px';
+            toolbox.style.bottom = randomPositionY + 'px';
+            // 添加动画效果
+            toolbox.style.transition = 'left 1s, bottom 1s';
+            setTimeout(triggerQuestion, 1000);
+        }
+
+        function triggerQuestion() {
+            questionBox.style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            if (!q) {
+                endGame();
+                return;
+            }
+            questionText.innerHTML = `<strong>${q.question}</strong><br><em>${q.questionCN}</em>`;
+            answersDiv.innerHTML = '';
+            q.answers.forEach((ans, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = ans;
+                btn.classList.add('answer-btn');
+                btn.addEventListener('click', () => checkAnswer(index));
+                answersDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const currentChapterQuestions = questions.filter(q => q.chapter === currentChapter);
+            const q = currentChapterQuestions[currentQuestionIndex];
+            questionBox.style.display = 'none';
+            if (selected === q.correct) {
+                score++;
+                consecutiveCorrect++;
+                feedbackText.innerHTML = `<strong>回答正确！👏</strong><br>Chris成功修复了空调！<br><em>${q.explanation}</em>`;
+                triggerPositiveEvent();
+            } else {
+                consecutiveCorrect = 0;
+                feedbackText.innerHTML = `<strong>回答错误！😅</strong><br>Chris导致空调故障加剧！<br><em>${q.explanation}</em>`;
+                triggerNegativeEvent();
+            }
+            updateAchievements();
+            feedback.style.display = 'block';
+        }
+
+        function triggerPositiveEvent() {
+            // 移动Chris向右
+            const newLeft = Math.min(gameContainer.clientWidth - 100, parseInt(chris.style.left) + 100);
+            chris.style.left = newLeft + 'px';
+            // 添加修复动画
+            chris.classList.add('celebrate');
+            setTimeout(() => {
+                chris.classList.remove('celebrate');
+            }, 500);
+        }
+
+        function triggerNegativeEvent() {
+            // 移动Chris向左
+            const newLeft = Math.max(50, parseInt(chris.style.left) - 50);
+            chris.style.left = newLeft + 'px';
+            // 添加故障动画
+            chris.classList.add('shake');
+            setTimeout(() => {
+                chris.classList.remove('shake');
+            }, 500);
+        }
+
+        function endGame() {
+            feedbackText.innerHTML = `<strong>游戏结束！🎉</strong><br>你的得分是 ${score} / ${questions.filter(q => q.chapter === currentChapter).length}`;
+            nextBtn.style.display = 'none';
+            feedback.style.display = 'block';
+            // 保存到排行榜
+            let playerName = prompt("请输入你的名字:", "玩家");
+            if (playerName) {
+                saveLeaderboard(playerName, score);
+            }
+        }
+
+        nextBtn.addEventListener('click', () => {
+            feedback.style.display = 'none';
+            currentQuestionIndex++;
+            moveToolbox();
+        });
+
+        // 生成词汇卡
+        generateVocabCards();
+
+        // 生成成就列表
+        generateAchievements();
+
+        // 生成排行榜
+        generateLeaderboard();
+    </script>
+
+</body>
+</html>
