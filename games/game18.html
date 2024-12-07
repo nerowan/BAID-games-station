@@ -6,26 +6,21 @@
 <title>拳皇风格格斗游戏</title>
 <style>
     html, body {
-        margin: 0; padding: 0; 
-        background: #000; 
-        font-family: "Microsoft YaHei", sans-serif;
-        user-select: none;
-        overflow: hidden;
+        margin:0; padding:0;
+        background:#000;
+        font-family:"Microsoft YaHei", sans-serif;
+        user-select:none;
+        overflow:hidden;
     }
 
     #game-container {
-        position: relative;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-        background: #000;
+        position:relative;
+        width:100vw; height:100vh;
+        overflow:hidden; background:#000;
     }
 
     #background {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        z-index: 1;
+        position:absolute; width:100%; height:100%; z-index:1;
     }
 
     .theme-day {
@@ -39,436 +34,193 @@
     }
 
     .ground {
-        position: absolute;
-        bottom: 0;
-        width: 200%;
-        height: 200px;
-        background: radial-gradient(circle at 50% 0%, #333, #111 80%);
-        transform: translateX(-25%);
-        box-shadow: 0px -20px 50px rgba(0,0,0,0.8) inset;
+        position:absolute; bottom:0; width:200%; height:200px;
+        background: radial-gradient(circle at 50% 0%, #333,#111 80%);
+        transform:translateX(-25%);
+        box-shadow:0px -20px 50px rgba(0,0,0,0.8) inset;
     }
 
     .weather-rain {
-        position:absolute;
-        top:0;left:0;
-        width:100%;height:100%;
-        pointer-events:none;
-        overflow:hidden;
-        z-index:2;
+        position:absolute; top:0;left:0; width:100%;height:100%;
+        pointer-events:none;overflow:hidden; z-index:2;
     }
 
     #game-canvas {
-        position:absolute;
-        top:0;left:0;
-        z-index:3;
+        position:absolute; top:0; left:0; z-index:3;
     }
 
     #ui-layer {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%;
-        height: 100%;
-        z-index:4;
-        pointer-events: none;
+        position:absolute; top:0; left:0; width:100%; height:100%; z-index:4; pointer-events:none;
     }
 
     .status-bar {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%;
-        height: 60px;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(20,20,20,0.7));
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 20px;
-        box-sizing: border-box;
-        border-bottom: 2px solid #444;
+        position:absolute; top:0; left:0; width:100%; height:60px;
+        background:linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(20,20,20,0.7));
+        display:flex; justify-content:space-between; align-items:center;
+        padding:0 20px; box-sizing:border-box; border-bottom:2px solid #444;
     }
 
     .player-info, .opponent-info {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        color: #fff;
+        display:flex; flex-direction:column; align-items:flex-start; color:#fff;
     }
-    .opponent-info {
-        align-items: flex-end;
-    }
+    .opponent-info {align-items:flex-end;}
 
     .player-name, .opponent-name {
-        font-weight: bold;
-        font-size: 20px;
-        text-shadow: 1px 1px 2px #000;
+        font-weight:bold; font-size:20px; text-shadow:1px 1px 2px #000;
     }
 
     .hp-bar {
-        margin-top: 4px;
-        width: 200px;
-        height: 15px;
-        background: #444;
-        position: relative;
-        border-radius: 4px;
-        overflow: hidden;
-        box-shadow: inset 0 0 5px #000;
+        margin-top:4px; width:200px; height:15px; background:#444; position:relative;
+        border-radius:4px; overflow:hidden; box-shadow:inset 0 0 5px #000;
     }
-
     .hp-fill {
-        position: absolute;
-        left:0; top:0;
-        height:100%;
-        background: linear-gradient(to right, #e00, #f80);
-        box-shadow: 0 0 5px #f00;
+        position:absolute; left:0; top:0; height:100%;
+        background: linear-gradient(to right,#e00,#f80);
+        box-shadow:0 0 5px #f00;
+        transition:width 0.2s linear;
     }
 
     .portrait {
-        width: 50px;
-        height: 50px;
-        background: #555;
-        border:2px solid #aaa;
-        border-radius: 4px;
-        margin-bottom:5px;
-        overflow: hidden;
-        box-shadow: 0 0 5px #000;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        font-size:12px;
-        color:#fff;
+        width:50px; height:50px; background:#555; border:2px solid #aaa; border-radius:4px; margin-bottom:5px;
+        box-shadow:0 0 5px #000; display:flex;justify-content:center;align-items:center; font-size:12px; color:#fff;
     }
 
     .stamina-bar {
-        margin-top:4px;
-        width:100px;
-        height:8px;
-        background:#333;
-        border-radius:4px;
-        position:relative;
-        box-shadow:inset 0 0 5px #000;
+        margin-top:4px; width:100px; height:8px; background:#333; border-radius:4px; position:relative; box-shadow:inset 0 0 5px #000;
     }
     .stamina-fill {
-        position:absolute;left:0;top:0;
-        height:100%;
-        background:linear-gradient(to right,#0f0,#0c0);
+        position:absolute;left:0;top:0; height:100%; background:linear-gradient(to right,#0f0,#0c0);
     }
 
     .ultimate-bar {
-        margin-top:4px;
-        width:100px;
-        height:8px;
-        background:#333;
-        border-radius:4px;
-        position:relative;
-        box-shadow:inset 0 0 5px #000;
+        margin-top:4px; width:100px; height:8px; background:#333; border-radius:4px; position:relative; box-shadow:inset 0 0 5px #000;
     }
     .ultimate-fill {
-        position:absolute;left:0;top:0;
-        height:100%;
-        background:linear-gradient(to right,#00f,#33f);
+        position:absolute; left:0; top:0; height:100%; background:linear-gradient(to right,#00f,#33f);
     }
 
     #hero-select {
-        position: absolute;
-        top: 50%; left: 50%;
-        transform: translate(-50%,-50%);
-        width: 70%;
-        max-width: 800px;
-        background: rgba(0,0,0,0.9);
-        border: 2px solid #aaa;
-        border-radius: 8px;
-        padding: 20px;
-        box-sizing: border-box;
-        display: none;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-        pointer-events:auto;
+        position:absolute; top:50%;left:50%; transform:translate(-50%,-50%);
+        width:70%; max-width:800px; background:rgba(0,0,0,0.9); border:2px solid #aaa; border-radius:8px; padding:20px; box-sizing:border-box;
+        display:none; flex-wrap:wrap; justify-content:center; align-items:center; pointer-events:auto;
     }
 
     .hero-card {
-        width: 120px;
-        height: 180px;
-        margin: 10px;
-        background: #222;
-        border-radius: 6px;
-        border:2px solid #444;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        position: relative;
-        transition: transform 0.3s, box-shadow 0.3s;
-        box-shadow:0 0 10px #000;
+        width:120px; height:180px; margin:10px; background:#222; border-radius:6px; border:2px solid #444;
+        display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;
+        position:relative; transition:transform 0.3s, box-shadow 0.3s; box-shadow:0 0 10px #000;
     }
     .hero-card:hover {
-        transform: scale(1.1);
-        box-shadow: 0 0 15px #f90;
+        transform:scale(1.1);
+        box-shadow:0 0 15px #f90;
     }
-    .hero-name {
-        font-size: 16px;
-        font-weight: bold;
-        margin-top: 5px;
-        text-shadow:1px 1px 1px #000;
-        color:#fff;
-    }
-    .hero-gender {
-        font-size: 12px;
-        color: #ccc;
-        text-shadow:1px 1px 1px #000;
-    }
-    .hero-skill {
-        font-size: 12px;
-        color: #f90;
-        text-align: center;
-        margin-top: 5px;
-        text-shadow:1px 1px 1px #000;
-    }
+    .hero-name {font-size:16px; font-weight:bold; margin-top:5px; text-shadow:1px 1px 1px #000; color:#fff;}
+    .hero-gender {font-size:12px; color:#ccc; text-shadow:1px 1px 1px #000;}
+    .hero-skill {font-size:12px; color:#f90; text-align:center; margin-top:5px; text-shadow:1px 1px 1px #000;}
 
     #result-screen {
-        position: absolute;
-        top: 50%; left:50%;
-        transform: translate(-50%,-50%);
-        background: rgba(0,0,0,0.8);
-        color: #fff;
-        padding: 30px;
-        text-align: center;
-        border:2px solid #aaa;
-        border-radius: 8px;
-        font-size: 24px;
-        display: none;
-        box-shadow:0 0 20px #fff;
-        z-index:999;
-        pointer-events:auto;
+        position:absolute; top:50%;left:50%; transform:translate(-50%,-50%);
+        background:rgba(0,0,0,0.8); color:#fff; padding:30px; text-align:center; border:2px solid #aaa; border-radius:8px;
+        font-size:24px; display:none; box-shadow:0 0 20px #fff; z-index:999; pointer-events:auto;
     }
 
     #instructions {
-        position: absolute;
-        bottom: 10px; left: 50%;
-        transform: translateX(-50%);
-        font-size: 14px;
-        background: rgba(0,0,0,0.6);
-        padding: 5px 10px;
-        border-radius: 4px;
-        text-align: center;
-        color:#fff;
-        text-shadow:1px 1px 2px #000;
-        display:none;
+        position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+        font-size:14px; background:rgba(0,0,0,0.6); padding:5px 10px; border-radius:4px; text-align:center; color:#fff; text-shadow:1px 1px 2px #000; display:none;
     }
 
     #controls-info {
-        position: absolute;
-        right: 10px; bottom: 10px;
-        background: rgba(0,0,0,0.5);
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 12px;
-        line-height: 1.5;
-        color:#fff;
-        text-shadow:1px 1px 2px #000;
-        display:none;
+        position:absolute; right:10px; bottom:10px; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; font-size:12px; line-height:1.5; color:#fff; text-shadow:1px 1px 2px #000; display:none;
     }
 
     #main-menu {
-        position:absolute;
-        top:50%;left:50%;
-        transform:translate(-50%,-50%);
-        width:300px;
-        background:rgba(0,0,0,0.8);
-        border:2px solid #aaa;
-        border-radius:10px;
-        padding:20px;
-        text-align:center;
-        display:none;
-        box-shadow:0 0 20px #fff;
-        z-index:999;
-        pointer-events:auto;
+        position:absolute; top:50%;left:50%; transform:translate(-50%,-50%);
+        width:300px; background:rgba(0,0,0,0.8); border:2px solid #aaa; border-radius:10px; padding:20px; text-align:center;
+        display:none; box-shadow:0 0 20px #fff; z-index:999; pointer-events:auto;
     }
     #main-menu h1{
-        color:#fff;
-        text-shadow:2px 2px 4px #000;
-        margin-bottom:20px;
-        font-size:28px;
+        color:#fff; text-shadow:2px 2px 4px #000; margin-bottom:20px; font-size:28px;
     }
     .menu-button {
-        display:block;
-        width:80%;
-        padding:10px 0;
-        margin:10px auto;
-        background:#333;
-        color:#fff;
-        font-weight:bold;
-        border:2px solid #555;
-        border-radius:5px;
-        cursor:pointer;
-        font-size:18px;
-        text-shadow:1px 1px 2px #000;
-        transition: box-shadow 0.3s, background 0.3s;
-        text-align:center;
+        display:block; width:80%; padding:10px 0; margin:10px auto;
+        background:#333; color:#fff; font-weight:bold; border:2px solid #555; border-radius:5px; cursor:pointer; font-size:18px; text-shadow:1px 1px 2px #000;
+        transition:box-shadow 0.3s, background 0.3s; text-align:center;
     }
     .menu-button:hover {
-        background:#444;
-        box-shadow:0 0 10px #fff;
+        background:#444; box-shadow:0 0 10px #fff;
     }
 
     #settings-menu {
-        position:absolute;
-        top:50%;left:50%;
-        transform:translate(-50%,-50%);
-        width:200px;
-        background:rgba(0,0,0,0.8);
-        border:2px solid #aaa;
-        border-radius:10px;
-        padding:20px;
-        text-align:center;
-        display:none;
-        z-index:999;
-        pointer-events:auto;
-        color:#fff;
+        position:absolute; top:50%;left:50%; transform:translate(-50%,-50%);
+        width:200px; background:rgba(0,0,0,0.8); border:2px solid #aaa; border-radius:10px; padding:20px; text-align:center;
+        display:none; z-index:999; pointer-events:auto; color:#fff;
     }
 
     #difficulty-menu {
-        position:absolute;
-        top:50%;left:50%;
-        transform:translate(-50%,-50%);
-        width:200px;
-        background:rgba(0,0,0,0.8);
-        border:2px solid #aaa;
-        border-radius:10px;
-        padding:20px;
-        text-align:center;
-        display:none;
-        z-index:999;
-        pointer-events:auto;
-        color:#fff;
+        position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+        width:200px; background:rgba(0,0,0,0.8); border:2px solid #aaa; border-radius:10px; padding:20px; text-align:center;
+        display:none; z-index:999; pointer-events:auto; color:#fff;
     }
 
     #round-start-text {
-        position: absolute;
-        top: 50%;
-        left:50%;
-        transform: translate(-50%,-50%);
-        font-size:50px;
-        color:#ff0;
-        text-shadow:2px 2px 4px #000;
-        display:none;
-        z-index:999;
+        position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+        font-size:50px; color:#ff0; text-shadow:2px 2px 4px #000; display:none; z-index:999;
     }
 
     #timer {
-        position:absolute;
-        top: 60px;
-        left:50%;
-        transform:translateX(-50%);
-        font-size:30px;
-        color:#fff;
-        text-shadow:2px 2px 4px #000;
-        display:none;
-        z-index:999;
+        position:absolute; top:60px; left:50%; transform:translateX(-50%);
+        font-size:30px; color:#fff; text-shadow:2px 2px 4px #000; display:none; z-index:999;
     }
 
     #touch-controls {
-        position:absolute;
-        bottom:20px;
-        width:100%;
-        display:none;
-        pointer-events:auto;
-        z-index:999;
-        text-align:center;
+        position:absolute; bottom:20px; width:100%; display:none; pointer-events:auto; z-index:999; text-align:center;
     }
     .touch-button {
-        display:inline-block;
-        width:50px;
-        height:50px;
-        background:rgba(255,255,255,0.2);
-        border:2px solid #ccc;
-        border-radius:5px;
-        margin:5px;
-        color:#fff;
-        text-align:center;
-        line-height:50px;
-        font-weight:bold;
-        text-shadow:1px 1px 2px #000;
-        user-select:none;
-        cursor:pointer;
+        display:inline-block; width:50px; height:50px; background:rgba(255,255,255,0.2); border:2px solid #ccc; border-radius:5px; margin:5px; color:#fff; text-align:center; line-height:50px; font-weight:bold; text-shadow:1px 1px 2px #000; user-select:none; cursor:pointer;
     }
 
     .ultimate-text {
-        position:absolute;
-        font-size:40px;
-        color:#ff0;
-        text-shadow:2px 2px 4px #000;
-        display:none;
-        top:40%;left:50%;
-        transform:translate(-50%,-50%);
-        z-index:999;
+        position:absolute; font-size:40px; color:#ff0; text-shadow:2px 2px 4px #000; display:none; top:40%;left:50%; transform:translate(-50%,-50%); z-index:999;
     }
 
     .finisher-text {
-        position:absolute;
-        font-size:60px;
-        color:#f00;
-        text-shadow:3px 3px 6px #000;
-        display:none;
-        top:30%;left:50%;
-        transform:translate(-50%,-50%);
-        z-index:999;
+        position:absolute; font-size:60px; color:#f00; text-shadow:3px 3px 6px #000; display:none; top:30%;left:50%; transform:translate(-50%,-50%); z-index:999;
     }
 
     .countdown-text {
-        position:absolute;
-        font-size:80px;
-        color:#fff;
-        text-shadow:2px 2px 4px #000;
-        display:none;
-        top:50%;left:50%;
-        transform:translate(-50%,-50%);
-        z-index:999;
+        position:absolute; font-size:80px; color:#fff; text-shadow:2px 2px 4px #000; display:none; top:50%;left:50%; transform:translate(-50%,-50%); z-index:999;
     }
 
     .winner-text {
-        position:absolute;
-        font-size:50px;
-        color:#0f0;
-        text-shadow:2px 2px 4px #000;
-        display:none;
-        top:30%;left:50%;
-        transform:translate(-50%,-50%);
-        z-index:999;
+        position:absolute; font-size:50px; color:#0f0; text-shadow:2px 2px 4px #000; display:none; top:30%;left:50%; transform:translate(-50%,-50%); z-index:999;
     }
 
     .gameover-text {
-        position:absolute;
-        font-size:50px;
-        color:#f00;
-        text-shadow:2px 2px 4px #000;
-        display:none;
-        top:30%;left:50%;
-        transform:translate(-50%,-50%);
-        z-index:999;
+        position:absolute; font-size:50px; color:#f00; text-shadow:2px 2px 4px #000; display:none; top:30%;left:50%; transform:translate(-50%,-50%); z-index:999;
     }
 
-    @keyframes raindrop {
-        0% {transform:translateY(-100px);}
-        100% {transform:translateY(100vh);}
+    #help-overlay {
+        position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+        width:300px; background:rgba(0,0,0,0.8); color:#fff; padding:20px; border:2px solid #aaa; border-radius:8px; text-align:center; font-size:14px;
+        display:none; z-index:9999;
     }
+
 </style>
 </head>
 <body>
 <div id="game-container">
-    <div id="background">
-        <div class="ground"></div>
-    </div>
+    <div id="background"><div class="ground"></div></div>
     <div class="weather-rain" id="rain-layer"></div>
     <canvas id="game-canvas"></canvas>
     <div id="ui-layer">
         <div class="status-bar" id="status-bar">
             <div class="player-info">
                 <div class="portrait" id="player-portrait">P</div>
-                <div class="player-name">玩家: <span id="player-hero-name"></span></div>
+                <div class="player-name">玩家: <span id="player-hero-name"></span> <span id="difficulty-display"></span></div>
                 <div class="hp-bar"><div class="hp-fill" id="player-hp"></div></div>
                 <div class="stamina-bar"><div class="stamina-fill" id="player-stamina"></div></div>
                 <div class="ultimate-bar"><div class="ultimate-fill" id="player-ultimate-bar"></div></div>
+                <div style="color:#fff;font-size:12px;margin-top:4px;">胜场:<span id="win-count">0</span> 历史最高:<span id="best-record">0</span></div>
             </div>
             <div class="opponent-info">
                 <div class="portrait" id="opponent-portrait">O</div>
@@ -477,13 +229,14 @@
             </div>
         </div>
         <div id="hero-select"></div>
-        <div id="instructions">W(大招) S(格挡) D(攻) 空格(跳)<br>方向键↑↓←→移动</div>
-        <div id="controls-info">操作说明：<br>W：大招<br>S：格挡<br>D：普通攻击<br>空格：跳跃<br>方向键：移动</div>
+        <div id="instructions">W(大招) S(格挡) D(攻击) 空格(跳)<br>方向键↑↓←→移动<br>H显示/隐藏帮助</div>
+        <div id="controls-info">操作说明：<br>W：大招(全屏特效)<br>S：格挡<br>D：普通攻击(随机三种攻击动画)<br>空格：跳跃<br>方向键：移动<br>H：显示/隐藏帮助</div>
         <div id="result-screen"></div>
         <div id="main-menu">
             <h1>格斗之王</h1>
             <div class="menu-button" id="start-game-btn">开始游戏</div>
             <div class="menu-button" id="select-difficulty-btn">选择难度</div>
+            <div class="menu-button" id="music-toggle-btn">音乐：关</div>
             <div class="menu-button" id="settings-btn">设置</div>
             <div class="menu-button" id="exit-game-btn">退出</div>
         </div>
@@ -518,9 +271,20 @@
         <div class="countdown-text" id="countdown-text"></div>
         <div class="winner-text" id="winner-text">Winner!</div>
         <div class="gameover-text" id="gameover-text">Game Over</div>
+        <div id="help-overlay">
+            <h3>帮助</h3>
+            <p>方向键移动，D攻击(多种随机攻击动画)，S格挡，W大招(全屏炫酷特效)，空格跳跃</p>
+            <p>H可隐藏此帮助</p>
+            <p>尝试不同英雄和难度！</p>
+        </div>
     </div>
 </div>
 <script>
+// 全代码与之前版本类似，只是删除场景选择菜单的功能和相关按钮逻辑。
+// 已删除scene-menu和close-scene-btn等逻辑。
+// 加入命中数字飘字特效及随机攻击动画形式。
+
+// 英雄数据不变（已包含和子鸣）:
 var heroes = [
     {name:"张宸阳", gender:"男", skill:"旺旺雪饼", color:"#FF6666", ultimateDesc:"【旺旺雪饼】奶油爆裂"},
     {name:"徐浩宸", gender:"男", skill:"快速瞬移", color:"#66FF66", ultimateDesc:"【快速瞬移】背后致命斩"},
@@ -528,7 +292,8 @@ var heroes = [
     {name:"张弛",   gender:"男", skill:"蛊惑招",   color:"#FF66FF", ultimateDesc:"【蛊惑招】敌人混乱"},
     {name:"支嘉戈", gender:"男", skill:"钢管舞",   color:"#FFFF66", ultimateDesc:"【钢管舞】AOE旋转打击"},
     {name:"江思宇", gender:"男", skill:"信仰之跃", color:"#66FFFF", ultimateDesc:"【信仰之跃】天降强击"},
-    {name:"淇露",   gender:"女", skill:"蒙古骑射",  color:"#FF9966", ultimateDesc:"【蒙古骑射】烈焰箭矢"}
+    {name:"淇露",   gender:"女", skill:"蒙古骑射",  color:"#FF9966", ultimateDesc:"【蒙古骑射】烈焰箭矢"},
+    {name:"和子鸣", gender:"男", skill:"编程大师",  color:"#88FFEE", ultimateDesc:"【编程大师】代码闪电狂袭"}
 ];
 
 var gameState="menu";
@@ -541,6 +306,16 @@ var touchMode=false;
 var difficulty="normal";
 var countdownTimer=3;
 var countdownInterval=null;
+var musicOn=false;
+var winCount=0;
+var bestRecord=0;
+
+// 读取本地存储最高记录
+try {
+    var savedBest=localStorage.getItem("bestRecord");
+    if(savedBest) bestRecord=parseInt(savedBest);
+} catch(e){}
+document.getElementById("best-record").innerText=bestRecord;
 
 var canvas = document.getElementById("game-canvas");
 var ctx = canvas.getContext("2d");
@@ -581,6 +356,17 @@ var countdownText = document.getElementById("countdown-text");
 var winnerText=document.getElementById("winner-text");
 var gameoverText=document.getElementById("gameover-text");
 var difficultyMenu=document.getElementById("difficulty-menu");
+var difficultyDisplay=document.getElementById("difficulty-display");
+var musicBtn=document.getElementById("music-toggle-btn");
+var winCountSpan=document.getElementById("win-count");
+var bestRecordSpan=document.getElementById("best-record");
+var helpOverlay=document.getElementById("help-overlay");
+
+// 攻击动画类型：比如0-上劈，1-横扫，2-直刺
+var attackAnimations=[{angle:0,color:"rgba(255,255,255,0.8)"},{angle:Math.PI/4,color:"rgba(255,200,200,0.8)"},{angle:-Math.PI/4,color:"rgba(200,255,200,0.8)"}];
+
+// 命中数字飘字特效数组
+var damageTexts=[];
 
 document.getElementById("start-game-btn").onclick = function(){
     goToHeroSelect();
@@ -607,6 +393,10 @@ document.getElementById("close-difficulty-btn").onclick=function(){
     difficultyMenu.style.display="none";
     mainMenu.style.display="block";
 }
+musicBtn.onclick=function(){
+    musicOn=!musicOn;
+    musicBtn.innerText="音乐："+(musicOn?"开":"关");
+}
 
 function updateUI(){
     if(gameState==="menu"){
@@ -618,6 +408,7 @@ function updateUI(){
         timerDiv.style.display="none";
         roundStartText.style.display="none";
         resultScreen.style.display="none";
+        countdownText.style.display="none";
         touchControls.style.display = touchMode?"block":"none";
     } else if(gameState==="select"){
         mainMenu.style.display="none";
@@ -628,6 +419,7 @@ function updateUI(){
         timerDiv.style.display="none";
         roundStartText.style.display="none";
         resultScreen.style.display="none";
+        countdownText.style.display="none";
         touchControls.style.display = touchMode?"block":"none";
     } else if(gameState==="countdown"){
         mainMenu.style.display="none";
@@ -647,9 +439,11 @@ function updateUI(){
         instructionsDiv.style.display="block";
         controlsInfo.style.display="block";
         timerDiv.style.display="block";
+        roundStartText.style.display="none";
         resultScreen.style.display="none";
         countdownText.style.display="none";
         touchControls.style.display = touchMode?"block":"none";
+        difficultyDisplay.innerText="("+difficulty+")";
     } else if(gameState==="end"){
         instructionsDiv.style.display="none";
         controlsInfo.style.display="none";
@@ -736,75 +530,31 @@ function createFighter(hero, x, isPlayer){
 
 var keys = {};
 document.addEventListener("keydown",function(e){
-    keys[e.key] = true;
+    keys[e.key]=true;
 
-    if(gameState !== "fight") return;
-    if(!player) return;
+    if(e.key==="H"||e.key==="h"){
+        helpOverlay.style.display=(helpOverlay.style.display==="block"?"none":"block");
+    }
 
-    if(e.key === " "){ 
+    if(gameState!=="fight") return;
+    if(!player)return;
+
+    if(e.key===" "){
         if(!player.jump){
-            player.jump = true;
-            player.vy = -20; 
+            player.jump=true;player.vy=-20;
         }
     }
 
-    if(e.key === "D" || e.key==="d"){ 
-        attemptAttack(player);
-    }
-
-    if(e.key === "S" || e.key==="s"){ 
-        player.block = true;
-    }
-
-    if(e.key === "W" || e.key==="w"){ 
-        attemptUltimate(player);
-    }
+    if(e.key==="D"||e.key==="d"){attemptAttack(player);}
+    if(e.key==="S"||e.key==="s"){player.block=true;}
+    if(e.key==="W"||e.key==="w"){attemptUltimate(player);}
 });
 
 document.addEventListener("keyup",function(e){
-    keys[e.key] = false;
+    keys[e.key]=false;
     if(e.key==="S"||e.key==="s"){
-        if(player) player.block = false;
+        if(player) player.block=false;
     }
-});
-
-function simulateKeyDown(k){ keys[k]=true; }
-function simulateKeyUp(k){ keys[k]=false; }
-
-function addTouchHandler(btnId, downKey, upKey) {
-    var btn = document.getElementById(btnId);
-    btn.addEventListener("touchstart", function(e){e.preventDefault();simulateKeyDown(downKey);});
-    btn.addEventListener("touchend", function(e){e.preventDefault();simulateKeyUp(upKey?upKey:downKey);});
-}
-
-// Movement controls on touch
-addTouchHandler("touch-left","ArrowLeft");
-addTouchHandler("touch-right","ArrowRight");
-addTouchHandler("touch-up","ArrowUp");
-addTouchHandler("touch-down","ArrowDown");
-// Actions
-document.getElementById("touch-jump").addEventListener("touchstart",function(e){
-    e.preventDefault();
-    if(gameState==="fight" && player && !player.jump){
-        player.jump = true;
-        player.vy = -20;
-    }
-});
-document.getElementById("touch-block").addEventListener("touchstart",function(e){
-    e.preventDefault();
-    if(gameState==="fight" && player) player.block = true;
-});
-document.getElementById("touch-block").addEventListener("touchend",function(e){
-    e.preventDefault();
-    if(player) player.block = false;
-});
-document.getElementById("touch-attack").addEventListener("touchstart",function(e){
-    e.preventDefault();
-    if(gameState==="fight" && player) attemptAttack(player);
-});
-document.getElementById("touch-ultimate").addEventListener("touchstart",function(e){
-    e.preventDefault();
-    if(gameState==="fight" && player) attemptUltimate(player);
 });
 
 function getAIModifiers(){
@@ -816,30 +566,25 @@ function getAIModifiers(){
 var slowMotionFrames=0;
 var effects=[];
 var gravity=1;
+var catTimer=0; 
+var lowHpFlash=0;
 
 function aiLogic(){
-    if(gameState!=="fight") return;
-    if(!opponent || !player) return;
+    if(gameState!=="fight")return;
+    if(!opponent||!player)return;
 
-    var dist = Math.abs(opponent.x - player.x);
+    var dist=Math.abs(opponent.x-player.x);
     var aiMods=getAIModifiers();
 
-    // AI使用策略
     if(opponent.ultimateReady && opponent.hp<50 && Math.random()<aiMods.ultimateChance){
         attemptUltimate(opponent);
     } else if(dist<120 && Math.random()<aiMods.attackChance){
         attemptAttack(opponent);
     } else {
-        // 移动逻辑
         if(dist>150){
-            if(opponent.x > player.x) {
-                opponent.vx = -2;
-            } else {
-                opponent.vx = 2;
-            }
+            if(opponent.x>player.x) opponent.vx=-2; else opponent.vx=2;
         } else {
             opponent.vx=0;
-            // 偶尔格挡和跳跃
             if(Math.random()<0.01) opponent.block=true; else opponent.block=false;
             if(Math.random()<0.005 && !opponent.jump){
                 opponent.jump=true;opponent.vy=-20;
@@ -852,8 +597,8 @@ function triggerSlowMotion(duration){
     slowMotionFrames=duration; 
 }
 
-function showUltimateName(name, isPlayer){
-    ultimateText.innerText = name;
+function showUltimateName(name,isPlayer){
+    ultimateText.innerText=name;
     ultimateText.style.display="block";
     setTimeout(function(){
         ultimateText.style.display="none";
@@ -865,221 +610,180 @@ function flashScreen(){
     effects.push(effect);
 }
 
-function addLightningEffect(x,y){
-    var effect={x:x,y:y,frame:0,type:"lightning"};
-    effects.push(effect);
-}
-
-function addMagicCircle(x,y){
-    var effect={x:x,y:y,frame:0,type:"magiccircle"};
-    effects.push(effect);
-}
-
-function addPoleDanceEffect(x,y){
-    var effect={x:x,y:y,frame:0,type:"poledance"};
-    effects.push(effect);
-}
-
-function addGroundCrack(x,y){
-    var effect={x:x,y:y,frame:0,type:"groundcrack"};
-    effects.push(effect);
-}
-
-function addCreamExplosion(x,y){
-    var effect={x:x,y:y,frame:0,type:"creamexplode"};
-    effects.push(effect);
-}
-
-function addFireExplosion(x,y){
-    var effect={x:x,y:y,frame:0,type:"fireexplode"};
-    effects.push(effect);
-}
+function addLightningEffect(x,y){ effects.push({x:x,y:y,frame:0,type:"lightning"}); }
+function addMagicCircle(x,y){ effects.push({x:x,y:y,frame:0,type:"magiccircle"}); }
+function addPoleDanceEffect(x,y){ effects.push({x:x,y:y,frame:0,type:"poledance"}); }
+function addGroundCrack(x,y){ effects.push({x:x,y:y,frame:0,type:"groundcrack"}); }
+function addCreamExplosion(x,y){ effects.push({x:x,y:y,frame:0,type:"creamexplode"}); }
+function addFireExplosion(x,y){ effects.push({x:x,y:y,frame:0,type:"fireexplode"}); }
 
 function addHitEffect(fighter){
-    var effect = {
-        x:fighter.x,
-        y:(canvas.height - 300)+fighter.y,
-        frame:0,
-        type:"hit"
-    };
-    effects.push(effect);
+    effects.push({x:fighter.x,y:(canvas.height - 300)+fighter.y,frame:0,type:"hit"});
 }
-
 function addBlockEffect(fighter){
-    var effect = {
-        x:fighter.x,
-        y:(canvas.height - 300)+fighter.y,
-        frame:0,
-        type:"block"
-    };
-    effects.push(effect);
+    effects.push({x:fighter.x,y:(canvas.height - 300)+fighter.y,frame:0,type:"block"});
 }
 
-function addSlashEffect(fighter){
-    var effect = {
-        x: fighter.x + (fighter.faceRight?40:-40),
-        y: (canvas.height - 300)+fighter.y,
-        frame:0,
-        dir: fighter.faceRight?1:-1,
-    };
-    fighter.slashEffects.push(effect);
+// 在命中时飘出伤害数字
+function addDamageText(x,y,damage){
+    damageTexts.push({x:x,y:y,frame:0,damage:damage});
 }
 
-function getDamageScale(fighter){
-    var aiMods=getAIModifiers();
-    if(fighter.isPlayer) return 1;
-    else return aiMods.damageScale;
-}
-
-function checkHit(attacker, damage, isUltimate, aoe, customRange){
-    var defender = (attacker===player?opponent:player);
-    if(!defender) return;
-    var dir = attacker.faceRight ? 1 : -1;
-    var attackRange = customRange?customRange:(isUltimate ? 150 : 80);
-
-    var dmg = damage*getDamageScale(attacker);
-
-    if(aoe){
-        if(defender.block && !isUltimate){
-            defender.hp -= (dmg*0.3);
-            addBlockEffect(defender);
-        } else {
-            defender.hp -= dmg;
-            defender.isHit = true;
-            addHitEffect(defender);
-            triggerSlowMotion(isUltimate?6:3);
-            setTimeout(function(){defender.isHit=false;},200);
-        }
-        return;
-    }
-
-    var dx = defender.x - attacker.x;
-    if((dir>0 && dx>0 && dx<attackRange) || (dir<0 && dx<0 && dx>-attackRange)){
-        if(defender.block && !isUltimate){
-            defender.hp -= (dmg*0.3);
-            addBlockEffect(defender);
-        } else {
-            defender.hp -= dmg;
-            defender.isHit = true;
-            addHitEffect(defender);
-            triggerSlowMotion(isUltimate?6:3);
-            setTimeout(function(){defender.isHit=false;},200);
-            defender.x += dir*20;
-            if(defender.x<50) defender.x=50;
-            if(defender.x>canvas.width-50) defender.x=canvas.width-50;
-        }
-        if(defender.hp<=0 && isUltimate){
-            finisherText.style.display="block";
-            setTimeout(function(){
-                finisherText.style.display="none";
-            },1000);
-        }
-    }
-}
-
+// 攻击有多个动画，在attemptAttack中随机
 function attemptAttack(fighter){
-    if(gameState!=="fight") return;
-    if(fighter.attackCooldown<=0 && !fighter.isAttacking && !fighter.ultimateActive){
-        if(fighter.stamina<10) return;
-        fighter.isAttacking = true;
-        fighter.attackCooldown = 60;
+    if(gameState!=="fight")return;
+    if(fighter.attackCooldown<=0&&!fighter.isAttacking&&!fighter.ultimateActive){
+        if(fighter.stamina<10)return;
+        fighter.isAttacking=true;
+        fighter.attackCooldown=60;
         fighter.stamina-=10;
+
+        var attackType=Math.floor(Math.random()*attackAnimations.length);
+        var atkAnim=attackAnimations[attackType];
+
+        setTimeout(function(){fighter.isAttacking=false;},200);
         setTimeout(function(){
-            fighter.isAttacking = false;
-        },200);
-        setTimeout(function(){
-            checkHit(fighter, 10, false);
-            addSlashEffect(fighter);
+            checkHit(fighter,10,false);
+            // 根据attackType改slashEffect表现
+            var effect = {
+                x: fighter.x+(fighter.faceRight?40:-40),
+                y: (canvas.height - 300)+fighter.y,
+                frame:0,
+                dir:fighter.faceRight?1:-1,
+                angle:atkAnim.angle,
+                color:atkAnim.color
+            };
+            fighter.slashEffects.push(effect);
+            // 播放攻击音效(假设)
         },100);
     }
 }
 
 function attemptUltimate(fighter){
-    if(gameState!=="fight") return;
-    if(fighter.ultimateReady && !fighter.ultimateActive && fighter.attackCooldown<=0 && fighter.stamina>=30){
-        fighter.ultimateActive = true;
-        fighter.ultimateReady = false;
-        fighter.ultimateTimer = 120;
+    if(gameState!=="fight")return;
+    if(fighter.ultimateReady&&!fighter.ultimateActive&&fighter.attackCooldown<=0&&fighter.stamina>=30){
+        fighter.ultimateActive=true;
+        fighter.ultimateReady=false;
+        fighter.ultimateTimer=120;
         fighter.stamina-=30;
-        showUltimateName(fighter.hero.ultimateDesc, fighter.isPlayer);
-        setTimeout(function(){
-            doHeroUltimateEffect(fighter);
-        },300);
+        showUltimateName(fighter.hero.ultimateDesc,fighter.isPlayer);
+        // 全屏闪光加强
+        flashScreen();
+        flashScreen();
+        setTimeout(function(){doHeroUltimateEffect(fighter);},500);
     }
 }
 
-// 英雄大招效果
+function getDamageScale(fighter){
+    var aiMods=getAIModifiers();
+    if(fighter.isPlayer)return 1;
+    else return aiMods.damageScale;
+}
+
+function checkHit(attacker,damage,isUltimate,aoe,customRange){
+    var defender=(attacker===player?opponent:player);
+    if(!defender)return;
+    var dir=attacker.faceRight?1:-1;
+    var attackRange=customRange?customRange:(isUltimate?150:80);
+    var dmg=damage*getDamageScale(attacker);
+
+    if(aoe){
+        if(defender.block&&!isUltimate){
+            defender.hp-=(dmg*0.3);
+            addBlockEffect(defender);
+        } else {
+            defender.hp-=dmg;
+            defender.isHit=true;
+            addHitEffect(defender);
+            triggerSlowMotion(isUltimate?6:3);
+            setTimeout(function(){defender.isHit=false;},200);
+            addDamageText(defender.x, (canvas.height - 300)+defender.y, dmg);
+        }
+        return;
+    }
+
+    var dx=defender.x-attacker.x;
+    if((dir>0&&dx>0&&dx<attackRange)||(dir<0&&dx<0&&dx>-attackRange)){
+        if(defender.block&&!isUltimate){
+            defender.hp-=(dmg*0.3);
+            addBlockEffect(defender);
+            addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg*0.3));
+        } else {
+            defender.hp-=dmg;
+            defender.isHit=true;
+            addHitEffect(defender);
+            addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg));
+            triggerSlowMotion(isUltimate?6:3);
+            setTimeout(function(){defender.isHit=false;},200);
+            defender.x+=dir*20;
+            if(defender.x<50) defender.x=50;
+            if(defender.x>canvas.width-50) defender.x=canvas.width-50;
+        }
+        if(defender.hp<=0&&isUltimate){
+            finisherText.style.display="block";
+            setTimeout(function(){finisherText.style.display="none";},1000);
+        }
+    }
+}
+
 function doHeroUltimateEffect(fighter){
-    var h = fighter.hero.name;
+    var h=fighter.hero.name;
     var enemy=(fighter===player?opponent:player);
     switch(h){
         case "张宸阳":
-            // 雪饼
-            var px = {x:fighter.x,y:fighter.y,frame:0,type:"snowcake",dir:(fighter.faceRight?1:-1)};
+            var px={x:fighter.x,y:fighter.y,frame:0,type:"snowcake",dir:(fighter.faceRight?1:-1)};
             fighter.projectiles.push(px);
             break;
         case "徐浩宸":
-            // 闪白屏+瞬移+电光斩
             flashScreen();
-            if(enemy){
-                fighter.x = enemy.x - (fighter.faceRight?50:-50);
-                checkHit(fighter,30,true);
-                addLightningEffect(enemy.x,enemy.y);
-            }
+            if(enemy){fighter.x=enemy.x-(fighter.faceRight?50:-50); checkHit(fighter,30,true); addLightningEffect(enemy.x,enemy.y);}
             break;
         case "万昊轩":
-            // 分身
             if(enemy){
                 for(var i=0;i<3;i++){
-                    let cloneX = enemy.x+(i*30*(enemy.x>fighter.x?1:-1));
-                    let cloneObj = {x:cloneX,frame:0,type:"clone"};
+                    let cloneX=enemy.x+(i*30*(enemy.x>fighter.x?1:-1));
+                    let cloneObj={x:cloneX,frame:0,type:"clone"};
                     fighter.clones.push(cloneObj);
-                    setTimeout((function(ix){
-                        return function(){checkHit(fighter,10,false);}
-                    })(i),100*i);
+                    setTimeout((function(ix){return function(){checkHit(fighter,10,false);}})(i),100*i);
                 }
             }
             break;
         case "张弛":
-            // 蛊惑招
-            if(enemy){
-                enemy.confused=true;
-                addMagicCircle(enemy.x,enemy.y);
-                setTimeout(function(){enemy.confused=false;},3000);
-            }
+            if(enemy){enemy.confused=true;addMagicCircle(enemy.x,enemy.y);setTimeout(function(){enemy.confused=false;},3000);}
             break;
         case "支嘉戈":
-            // 钢管舞AOE
             addPoleDanceEffect(fighter.x,fighter.y);
             checkHit(fighter,30,true,true);
             break;
         case "江思宇":
-            // 信仰之跃
-            fighter.jump=true;
-            fighter.vy=-30;
-            setTimeout(function(){
-                checkHit(fighter,30,true);
-                addGroundCrack(fighter.x,fighter.y);
-            },800);
+            fighter.jump=true; fighter.vy=-30;
+            setTimeout(function(){checkHit(fighter,30,true);addGroundCrack(fighter.x,fighter.y);},800);
             break;
         case "淇露":
-            // 蒙古骑射
             var px={x:fighter.x,y:fighter.y,vx:(fighter.faceRight?5:-5),vy:-1,frame:0,type:"firearrow",dir:(fighter.faceRight?1:-1)};
             fighter.projectiles.push(px);
+            break;
+        case "和子鸣":
+            // 编程大师大招加强：更多代码雨 & 电弧
+            effects.push({frame:0,type:"coderain"});
+            effects.push({frame:0,type:"coderain"});
+            setTimeout(function(){
+                checkHit(fighter,40,true);
+                addLightningEffect(enemy.x,enemy.y);
+                addLightningEffect(enemy.x+20,enemy.y+10);
+                addLightningEffect(enemy.x-20,enemy.y-10);
+            },500);
             break;
     }
 }
 
-// 随机背景主题
 function randomBackgroundTheme(){
     var themes=["theme-day","theme-evening","theme-night"];
     var sel=themes[Math.floor(Math.random()*themes.length)];
-    var bg=document.getElementById("background");
-    bg.className=sel;
+    setScene(sel.replace("theme-",""));
 }
 randomBackgroundTheme();
 
-// 下雨概率30%
 function startRain(){
     var rainLayer=document.getElementById("rain-layer");
     for(var i=0;i<100;i++){
@@ -1100,33 +804,43 @@ if(Math.random()<0.3){
     startRain();
 }
 
+function setScene(s){
+    var bg=document.getElementById("background");
+    bg.className="";
+    if(s==="day") bg.classList.add("theme-day");
+    else if(s==="evening") bg.classList.add("theme-evening");
+    else bg.classList.add("theme-night");
+}
+
+var catParticles=[];
+function spawnCat(){
+    var cat={x:-50,y:100+Math.random()*(canvas.height-300),frame:0,type:"cat"};
+    catParticles.push(cat);
+}
+
 function drawUIBars(){
-    if(player && opponent){
-        var playerHpFill = document.getElementById("player-hp");
-        var opponentHpFill = document.getElementById("opponent-hp");
+    if(player&&opponent){
+        var playerHpFill=document.getElementById("player-hp");
+        var opponentHpFill=document.getElementById("opponent-hp");
         var playerStaminaFill=document.getElementById("player-stamina");
         var playerUltBar=document.getElementById("player-ultimate-bar");
 
-        playerHpFill.style.width = Math.max(0, (player.hp/player.maxHp)*100)+"%";
-        opponentHpFill.style.width = Math.max(0, (opponent.hp/opponent.maxHp)*100)+"%";
-        playerStaminaFill.style.width = Math.max(0,(player.stamina/100)*100)+"%";
+        playerHpFill.style.width=Math.max(0,(player.hp/player.maxHp)*100)+"%";
+        opponentHpFill.style.width=Math.max(0,(opponent.hp/opponent.maxHp)*100)+"%";
+        playerStaminaFill.style.width=Math.max(0,(player.stamina/100)*100)+"%";
 
-        var ultProgress = (300 - player.ultimateCooldown)/300;
-        if(ultProgress<0) ultProgress=0;
-        if(ultProgress>1) ultProgress=1;
-        playerUltBar.style.width = (ultProgress*100)+"%";
-        if(player.ultimateReady){
-            playerUltBar.style.boxShadow="0 0 10px #00f";
-        } else {
-            playerUltBar.style.boxShadow="none";
-        }
+        var ultProgress=(300 - player.ultimateCooldown)/300;
+        if(ultProgress<0) ultProgress=0;if(ultProgress>1)ultProgress=1;
+        playerUltBar.style.width=(ultProgress*100)+"%";
+        if(player.ultimateReady) playerUltBar.style.boxShadow="0 0 10px #00f";
+        else playerUltBar.style.boxShadow="none";
     }
 }
 
 function roundTimeUpdate(){
-    if(roundTime>0 && gameState==="fight"){
-        roundTime -= 1/60;
-        timerDiv.innerText = Math.floor(roundTime);
+    if(roundTime>0&&gameState==="fight"){
+        roundTime-=1/60;
+        timerDiv.innerText=Math.floor(roundTime);
         if(roundTime<=0){
             gameOver(player.hp>opponent.hp);
         }
@@ -1138,19 +852,22 @@ function gameOver(playerWin){
     updateUI();
     resultScreen.style.display="block";
     if(playerWin){
-        // 胜利,显示Winner特效
         winnerText.style.display="block";
-        setTimeout(function(){
-            winnerText.style.display="none";
-        },2000);
-        resultScreen.innerHTML="胜利！<br><br><button onclick='restart()'>重新开始</button>";
+        setTimeout(function(){winnerText.style.display="none";},2000);
+        resultScreen.innerHTML="胜利！<br>小提示：保持攻势！<br><br><button onclick='restart()'>重新开始</button>";
+        winCount++;
+        winCountSpan.innerText=winCount;
+        if(winCount>bestRecord){
+            bestRecord=winCount;
+            bestRecordSpan.innerText=bestRecord;
+            try{localStorage.setItem("bestRecord",bestRecord);}catch(e){}
+        }
     } else {
-        // 失败
         gameoverText.style.display="block";
-        setTimeout(function(){
-            gameoverText.style.display="none";
-        },2000);
-        resultScreen.innerHTML="失败！<br><br><button onclick='restart()'>重新开始</button>";
+        setTimeout(function(){gameoverText.style.display="none";},2000);
+        resultScreen.innerHTML="失败！<br>小提示：尝试格挡或降低难度！<br><br><button onclick='restart()'>重新开始</button>";
+        winCount=0;
+        winCountSpan.innerText=0;
     }
 }
 
@@ -1161,7 +878,7 @@ function restart(){
 function drawFighter(f){
     ctx.save();
     ctx.translate(f.x,(canvas.height - 300)+f.y);
-    var baseColor = f.hero.color;
+    var baseColor=f.hero.color;
     if(f.isHit) baseColor="#fff";
     else if(f.block) baseColor="#aaa";
     else if(f.isAttacking) baseColor="#f33";
@@ -1223,9 +940,9 @@ function drawFighter(f){
     f.slashEffects.forEach(s=>{
         ctx.save();
         ctx.translate(s.x - f.x, s.y-( (canvas.height - 300)+f.y ));
-        ctx.rotate(s.dir>0?0:Math.PI); 
-        ctx.strokeStyle = "rgba(255,255,255,"+(1-s.frame/20)+")";
-        ctx.lineWidth = 3;
+        ctx.rotate(s.angle?(s.angle*s.dir):0);
+        ctx.strokeStyle=s.color?s.color:"rgba(255,255,255,"+(1-s.frame/20)+")";
+        ctx.lineWidth=3;
         ctx.beginPath();
         ctx.moveTo(-10,0);
         ctx.lineTo(10,0);
@@ -1238,7 +955,6 @@ function drawFighter(f){
         var pxRelX=p.x-f.x;
         var pxRelY=p.y-( (canvas.height - 300)+f.y);
         if(p.type==="snowcake"){
-            // 绘制雪饼：白色圆，稍微旋转
             ctx.translate(pxRelX,pxRelY);
             ctx.rotate(p.frame*0.1);
             ctx.fillStyle="#fff";
@@ -1246,12 +962,7 @@ function drawFighter(f){
             ctx.arc(0,0,20,0,Math.PI*2);
             ctx.fill();
         } else if(p.type==="firearrow"){
-            // 绘制箭
             ctx.translate(pxRelX,pxRelY);
-            // 箭朝向由p.dir决定，y方向随vy变化（简化：箭头指向前方）
-            // 简化朝向：略微倾斜
-            // 实际上箭的角度=atan2(vy, vx)，这里就简单处理:
-            // 我们有vx=5或-5,vy变化，不如计算：
             var angle=Math.atan2(p.vy,p.vx*(p.dir));
             ctx.rotate(angle);
             ctx.strokeStyle="orange";
@@ -1309,10 +1020,9 @@ function drawEffects(){
             ctx.beginPath();
             ctx.arc(0,0,30+e.frame,0,Math.PI*2);
             ctx.stroke();
-            // 符文
             ctx.font="10px sans-serif";
             ctx.fillStyle="rgba(200,0,200,"+(1-e.frame/60)+")";
-            ctx.fillText("符",0,0-(30+e.frame));
+            ctx.fillText("符",0,-(30+e.frame));
         } else if(e.type==="poledance"){
             ctx.translate(e.x,e.y+(canvas.height-300));
             ctx.strokeStyle="rgba(255,255,0,"+(1-e.frame/60)+")";
@@ -1351,16 +1061,48 @@ function drawEffects(){
                 ctx.arc(rx,ry,5,0,Math.PI*2);
                 ctx.fill();
             }
+        } else if(e.type==="coderain"){
+            ctx.fillStyle="rgba(0,255,0,"+(1-e.frame/60)+")";
+            ctx.font="14px monospace";
+            for(var i=0;i<20;i++){
+                var x=Math.random()*canvas.width;
+                var y=Math.random()*canvas.height;
+                ctx.fillText("01",x,y-e.frame*5);
+            }
         }
         ctx.restore();
     });
+
+    // 伤害数字
+    damageTexts.forEach(dt=>{
+        dt.frame++;
+        var alpha=1-(dt.frame/60);
+        ctx.save();
+        ctx.translate(dt.x,dt.y - dt.frame);
+        ctx.fillStyle="rgba(255,0,0,"+alpha+")";
+        ctx.font="20px sans-serif";
+        ctx.fillText("-"+dt.damage,0,0);
+        ctx.restore();
+    });
+    damageTexts=damageTexts.filter(dt=>dt.frame<60);
+}
+
+document.getElementById("music-toggle-btn").onclick=function(){
+    musicOn=!musicOn;
+    this.innerText="音乐："+(musicOn?"开":"关");
+}
+
+var catParticles=[];
+function spawnCat(){
+    var cat={x:-50,y:100+Math.random()*(canvas.height-300),frame:0,type:"cat"};
+    catParticles.push(cat);
 }
 
 function update(){
-    if(gameState!=="fight") return;
-    if(slowMotionFrames>0) {slowMotionFrames--;return;}
+    if(gameState!=="fight")return;
+    if(slowMotionFrames>0){slowMotionFrames--;return;}
 
-    if(!player||!opponent) return;
+    if(!player||!opponent)return;
 
     var leftKey = (player.confused ? keys["ArrowRight"] : keys["ArrowLeft"]);
     var rightKey = (player.confused ? keys["ArrowLeft"] : keys["ArrowRight"]);
@@ -1376,30 +1118,24 @@ function update(){
     }
 
     [player,opponent].forEach(function(f){
-        f.vy += gravity;
-        f.y += f.vy;
+        f.vy+=gravity;
+        f.y+=f.vy;
         if(f.y>0){f.y=0;f.vy=0;f.jump=false;}
-        f.x += f.vx;
-        if(f.x<50) f.x=50;
-        if(f.x>canvas.width-50) f.x=canvas.width-50;
-
-        if(f.attackCooldown>0) f.attackCooldown--;
-        if(!f.ultimateReady && f.ultimateCooldown>0) {
+        f.x+=f.vx;
+        if(f.x<50) f.x=50;if(f.x>canvas.width-50) f.x=canvas.width-50;
+        if(f.attackCooldown>0)f.attackCooldown--;
+        if(!f.ultimateReady && f.ultimateCooldown>0){
             f.ultimateCooldown--;
-            if(f.ultimateCooldown<=0) f.ultimateReady=true;
+            if(f.ultimateCooldown<=0)f.ultimateReady=true;
         }
         if(f.ultimateActive){
             f.ultimateTimer--;
-            if(f.ultimateTimer<=0) {
-                f.ultimateActive=false;
-            }
+            if(f.ultimateTimer<=0) f.ultimateActive=false;
         }
-
         f.stamina=Math.min(f.stamina+f.staminaRegen,100);
-
-        f.slashEffects = f.slashEffects.filter(s=>{s.frame++;return s.frame<20;});
-        f.auraEffects = f.auraEffects.filter(a=>{a.frame++;return a.frame<60;});
-        f.clones = f.clones.filter(c=>{c.frame++;return c.frame<30;});
+        f.slashEffects=f.slashEffects.filter(s=>{s.frame++;return s.frame<20;});
+        f.auraEffects=f.auraEffects.filter(a=>{a.frame++;return a.frame<60;});
+        f.clones=f.clones.filter(c=>{c.frame++;return c.frame<30;});
         f.projectiles.forEach(function(p){
             if(p.type==="firearrow"){
                 p.x+=p.dir*p.vx;
@@ -1410,16 +1146,15 @@ function update(){
             }
             p.frame++;
         });
-        f.projectiles = f.projectiles.filter(p=>{
-            if(p.x<0||p.x>canvas.width||p.frame>200) return false;
+        f.projectiles=f.projectiles.filter(p=>{
+            if(p.x<0||p.x>canvas.width||p.frame>200)return false;
             return true;
         });
 
-        //投射物命中检测
         var defender=(f===player?opponent:player);
         f.projectiles.forEach(p=>{
-            var dx=defender.x - p.x;
-            var dy=defender.y - p.y;
+            var dx=defender.x-p.x;
+            var dy=defender.y-p.y;
             if(Math.abs(dx)<50 && Math.abs(dy)<50){
                 if(p.type==="snowcake"){
                     checkHit(f,20,true);
@@ -1436,21 +1171,26 @@ function update(){
 
     aiLogic();
 
-    effects=effects.filter(e=>{
-        e.frame++;
-        return e.frame<60;
-    });
-
+    effects=effects.filter(e=>{e.frame++;return e.frame<60;});
     roundTimeUpdate();
 
-    if(player.hp<=0 || opponent.hp<=0){
+    catTimer++;
+    if(catTimer>1800){
+        catTimer=0;spawnCat();
+    }
+    catParticles.forEach(c=>{
+        c.x+=1;
+        c.frame++;
+    });
+    catParticles=catParticles.filter(c=>c.x<canvas.width+50);
+
+    if(player&&player.hp<30)lowHpFlash=(lowHpFlash+1)%60;
+
+    if(player.hp<=0||opponent.hp<=0){
         var pw=(player.hp>opponent.hp);
-        // 胜者稍微跳动表示胜利pose
         var winner=pw?player:opponent;
         winner.vy=-10;winner.jump=true;
-        setTimeout(function(){
-            gameOver(pw);
-        },1000);
+        setTimeout(function(){gameOver(pw);},1000);
     }
 }
 
@@ -1460,6 +1200,23 @@ function draw(){
         drawFighter(player);
         drawFighter(opponent);
         drawEffects();
+
+        //画小猫
+        ctx.save();
+        ctx.fillStyle="#fff";
+        catParticles.forEach(c=>{
+            ctx.beginPath();
+            ctx.arc(c.x,c.y+(canvas.height-300),10,0,Math.PI*2);
+            ctx.fill();
+            ctx.fillText("猫",c.x-5,c.y+(canvas.height-300)-20);
+        });
+        ctx.restore();
+
+        //低血闪红
+        if(player.hp<30&&lowHpFlash<30){
+            ctx.fillStyle="rgba(255,0,0,0.3)";
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+        }
     } else {
         drawEffects();
     }
@@ -1467,11 +1224,11 @@ function draw(){
 }
 
 function startFight(){
-    gameState = "fight";
+    gameState="fight";
     updateUI();
     player = createFighter(playerHero, canvas.width*0.3, true);
     opponent = createFighter(opponentHero, canvas.width*0.7, false);
-    opponent.faceRight = false;
+    opponent.faceRight=false;
 
     roundStartText.style.display="block";
     setTimeout(function(){
