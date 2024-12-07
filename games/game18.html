@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>拳皇风格格斗游戏</title>
+<style>
+    html, body {
+        margin: 0; padding: 0; 
+        background: #000; 
+        font-family: "Microsoft YaHei", sans-serif;
+        user-select: none;
+        overflow: hidden;
+    }
+
+    #game-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #000;
+    }
+
+    #background {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    .theme-day {
+        background: linear-gradient(to bottom, #87ceeb 0%, #4dc0f0 30%, #3388ee 60%);
+    }
+    .theme-evening {
+        background: linear-gradient(to bottom, #ddaa55 0%, #aa7744 30%, #774422 60%);
+    }
+    .theme-night {
+        background: linear-gradient(to bottom, #111122 0%, #000033 30%, #000011 60%);
+    }
+
+    .ground {
+        position: absolute;
+        bottom: 0;
+        width: 200%;
+        height: 200px;
+        background: radial-gradient(circle at 50% 0%, #333, #111 80%);
+        transform: translateX(-25%);
+        box-shadow: 0px -20px 50px rgba(0,0,0,0.8) inset;
+    }
+
+    .weather-rain {
+        position:absolute;
+        top:0;left:0;
+        width:100%;height:100%;
+        pointer-events:none;
+        overflow:hidden;
+        z-index:2;
+    }
+
+    #game-canvas {
+        position:absolute;
+        top:0;left:0;
+        z-index:3;
+    }
+
+    #ui-layer {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        z-index:4;
+        pointer-events: none;
+    }
+
+    .status-bar {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 60px;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(20,20,20,0.7));
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        box-sizing: border-box;
+        border-bottom: 2px solid #444;
+    }
+
+    .player-info, .opponent-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        color: #fff;
+    }
+    .opponent-info {
+        align-items: flex-end;
+    }
+
+    .player-name, .opponent-name {
+        font-weight: bold;
+        font-size: 20px;
+        text-shadow: 1px 1px 2px #000;
+    }
+
+    .hp-bar {
+        margin-top: 4px;
+        width: 200px;
+        height: 15px;
+        background: #444;
+        position: relative;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: inset 0 0 5px #000;
+    }
+
+    .hp-fill {
+        position: absolute;
+        left:0; top:0;
+        height:100%;
+        background: linear-gradient(to right, #e00, #f80);
+        box-shadow: 0 0 5px #f00;
+    }
+
+    .portrait {
+        width: 50px;
+        height: 50px;
+        background: #555;
+        border:2px solid #aaa;
+        border-radius: 4px;
+        margin-bottom:5px;
+        overflow: hidden;
+        box-shadow: 0 0 5px #000;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        font-size:12px;
+        color:#fff;
+    }
+
+    .stamina-bar {
+        margin-top:4px;
+        width:100px;
+        height:8px;
+        background:#333;
+        border-radius:4px;
+        position:relative;
+        box-shadow:inset 0 0 5px #000;
+    }
+    .stamina-fill {
+        position:absolute;left:0;top:0;
+        height:100%;
+        background:linear-gradient(to right,#0f0,#0c0);
+    }
+
+    .ultimate-bar {
+        margin-top:4px;
+        width:100px;
+        height:8px;
+        background:#333;
+        border-radius:4px;
+        position:relative;
+        box-shadow:inset 0 0 5px #000;
+    }
+    .ultimate-fill {
+        position:absolute;left:0;top:0;
+        height:100%;
+        background:linear-gradient(to right,#00f,#33f);
+    }
+
+    #hero-select {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%,-50%);
+        width: 70%;
+        max-width: 800px;
+        background: rgba(0,0,0,0.9);
+        border: 2px solid #aaa;
+        border-radius: 8px;
+        padding: 20px;
+        box-sizing: border-box;
+        display: none;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        pointer-events:auto;
+    }
+
+    .hero-card {
+        width: 120px;
+        height: 180px;
+        margin: 10px;
+        background: #222;
+        border-radius: 6px;
+        border:2px solid #444;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow:0 0 10px #000;
+    }
+    .hero-card:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 15px #f90;
+    }
+    .hero-name {
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 5px;
+        text-shadow:1px 1px 1px #000;
+        color:#fff;
+    }
+    .hero-gender {
+        font-size: 12px;
+        color: #ccc;
+        text-shadow:1px 1px 1px #000;
+    }
+    .hero-skill {
+        font-size: 12px;
+        color: #f90;
+        text-align: center;
+        margin-top: 5px;
+        text-shadow:1px 1px 1px #000;
+    }
+
+    #result-screen {
+        position: absolute;
+        top: 50%; left:50%;
+        transform: translate(-50%,-50%);
+        background: rgba(0,0,0,0.8);
+        color: #fff;
+        padding: 30px;
+        text-align: center;
+        border:2px solid #aaa;
+        border-radius: 8px;
+        font-size: 24px;
+        display: none;
+        box-shadow:0 0 20px #fff;
+        z-index:999;
+        pointer-events:auto;
+    }
+
+    #instructions {
+        position: absolute;
+        bottom: 10px; left: 50%;
+        transform: translateX(-50%);
+        font-size: 14px;
+        background: rgba(0,0,0,0.6);
+        padding: 5px 10px;
+        border-radius: 4px;
+        text-align: center;
+        color:#fff;
+        text-shadow:1px 1px 2px #000;
+        display:none;
+    }
+
+    #controls-info {
+        position: absolute;
+        right: 10px; bottom: 10px;
+        background: rgba(0,0,0,0.5);
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        line-height: 1.5;
+        color:#fff;
+        text-shadow:1px 1px 2px #000;
+        display:none;
+    }
+
+    #main-menu {
+        position:absolute;
+        top:50%;left:50%;
+        transform:translate(-50%,-50%);
+        width:300px;
+        background:rgba(0,0,0,0.8);
+        border:2px solid #aaa;
+        border-radius:10px;
+        padding:20px;
+        text-align:center;
+        display:none;
+        box-shadow:0 0 20px #fff;
+        z-index:999;
+        pointer-events:auto;
+    }
+    #main-menu h1{
+        color:#fff;
+        text-shadow:2px 2px 4px #000;
+        margin-bottom:20px;
+        font-size:28px;
+    }
+    .menu-button {
+        display:block;
+        width:80%;
+        padding:10px 0;
+        margin:10px auto;
+        background:#333;
+        color:#fff;
+        font-weight:bold;
+        border:2px solid #555;
+        border-radius:5px;
+        cursor:pointer;
+        font-size:18px;
+        text-shadow:1px 1px 2px #000;
+        transition: box-shadow 0.3s, background 0.3s;
+        text-align:center;
+    }
+    .menu-button:hover {
+        background:#444;
+        box-shadow:0 0 10px #fff;
+    }
+
+    #settings-menu {
+        position:absolute;
+        top:50%;left:50%;
+        transform:translate(-50%,-50%);
+        width:200px;
+        background:rgba(0,0,0,0.8);
+        border:2px solid #aaa;
+        border-radius:10px;
+        padding:20px;
+        text-align:center;
+        display:none;
+        z-index:999;
+        pointer-events:auto;
+        color:#fff;
+    }
+
+    #difficulty-menu {
+        position:absolute;
+        top:50%;left:50%;
+        transform:translate(-50%,-50%);
+        width:200px;
+        background:rgba(0,0,0,0.8);
+        border:2px solid #aaa;
+        border-radius:10px;
+        padding:20px;
+        text-align:center;
+        display:none;
+        z-index:999;
+        pointer-events:auto;
+        color:#fff;
+    }
+
+    #round-start-text {
+        position: absolute;
+        top: 50%;
+        left:50%;
+        transform: translate(-50%,-50%);
+        font-size:50px;
+        color:#ff0;
+        text-shadow:2px 2px 4px #000;
+        display:none;
+        z-index:999;
+    }
+
+    #timer {
+        position:absolute;
+        top: 60px;
+        left:50%;
+        transform:translateX(-50%);
+        font-size:30px;
+        color:#fff;
+        text-shadow:2px 2px 4px #000;
+        display:none;
+        z-index:999;
+    }
+
+    #touch-controls {
+        position:absolute;
+        bottom:20px;
+        width:100%;
+        display:none;
+        pointer-events:auto;
+        z-index:999;
+        text-align:center;
+    }
+    .touch-button {
+        display:inline-block;
+        width:50px;
+        height:50px;
+        background:rgba(255,255,255,0.2);
+        border:2px solid #ccc;
+        border-radius:5px;
+        margin:5px;
+        color:#fff;
+        text-align:center;
+        line-height:50px;
+        font-weight:bold;
+        text-shadow:1px 1px 2px #000;
+        user-select:none;
+        cursor:pointer;
+    }
+
+    .ultimate-text {
+        position:absolute;
+        font-size:40px;
+        color:#ff0;
+        text-shadow:2px 2px 4px #000;
+        display:none;
+        top:40%;left:50%;
+        transform:translate(-50%,-50%);
+        z-index:999;
+    }
+
+    .finisher-text {
+        position:absolute;
+        font-size:60px;
+        color:#f00;
+        text-shadow:3px 3px 6px #000;
+        display:none;
+        top:30%;left:50%;
+        transform:translate(-50%,-50%);
+        z-index:999;
+    }
+
+    .countdown-text {
+        position:absolute;
+        font-size:80px;
+        color:#fff;
+        text-shadow:2px 2px 4px #000;
+        display:none;
+        top:50%;left:50%;
+        transform:translate(-50%,-50%);
+        z-index:999;
+    }
+
+    .winner-text {
+        position:absolute;
+        font-size:50px;
+        color:#0f0;
+        text-shadow:2px 2px 4px #000;
+        display:none;
+        top:30%;left:50%;
+        transform:translate(-50%,-50%);
+        z-index:999;
+    }
+
+    .gameover-text {
+        position:absolute;
+        font-size:50px;
+        color:#f00;
+        text-shadow:2px 2px 4px #000;
+        display:none;
+        top:30%;left:50%;
+        transform:translate(-50%,-50%);
+        z-index:999;
+    }
+
+    @keyframes raindrop {
+        0% {transform:translateY(-100px);}
+        100% {transform:translateY(100vh);}
+    }
+</style>
+</head>
+<body>
+<div id="game-container">
+    <div id="background">
+        <div class="ground"></div>
+    </div>
+    <div class="weather-rain" id="rain-layer"></div>
+    <canvas id="game-canvas"></canvas>
+    <div id="ui-layer">
+        <div class="status-bar" id="status-bar">
+            <div class="player-info">
+                <div class="portrait" id="player-portrait">P</div>
+                <div class="player-name">玩家: <span id="player-hero-name"></span></div>
+                <div class="hp-bar"><div class="hp-fill" id="player-hp"></div></div>
+                <div class="stamina-bar"><div class="stamina-fill" id="player-stamina"></div></div>
+                <div class="ultimate-bar"><div class="ultimate-fill" id="player-ultimate-bar"></div></div>
+            </div>
+            <div class="opponent-info">
+                <div class="portrait" id="opponent-portrait">O</div>
+                <div class="opponent-name">对手: <span id="opponent-hero-name"></span></div>
+                <div class="hp-bar"><div class="hp-fill" id="opponent-hp"></div></div>
+            </div>
+        </div>
+        <div id="hero-select"></div>
+        <div id="instructions">W(大招) S(格挡) D(攻) 空格(跳)<br>方向键↑↓←→移动</div>
+        <div id="controls-info">操作说明：<br>W：大招<br>S：格挡<br>D：普通攻击<br>空格：跳跃<br>方向键：移动</div>
+        <div id="result-screen"></div>
+        <div id="main-menu">
+            <h1>格斗之王</h1>
+            <div class="menu-button" id="start-game-btn">开始游戏</div>
+            <div class="menu-button" id="select-difficulty-btn">选择难度</div>
+            <div class="menu-button" id="settings-btn">设置</div>
+            <div class="menu-button" id="exit-game-btn">退出</div>
+        </div>
+        <div id="settings-menu">
+            <h2>设置</h2>
+            <label><input type="checkbox" id="touch-mode-checkbox"> 触屏操作模式</label><br><br>
+            <div class="menu-button" id="close-settings-btn">关闭</div>
+        </div>
+        <div id="difficulty-menu">
+            <h3>选择难度</h3>
+            <select id="difficulty-selector">
+                <option value="easy">简单</option>
+                <option value="normal" selected>正常</option>
+                <option value="hard">困难</option>
+            </select>
+            <div class="menu-button" id="close-difficulty-btn">确定</div>
+        </div>
+        <div id="round-start-text">Round Start!</div>
+        <div id="timer">60</div>
+        <div id="touch-controls">
+            <div class="touch-button" id="touch-left">←</div>
+            <div class="touch-button" id="touch-right">→</div>
+            <div class="touch-button" id="touch-up">↑</div>
+            <div class="touch-button" id="touch-down">↓</div>
+            <div class="touch-button" id="touch-jump">跳</div>
+            <div class="touch-button" id="touch-block">格</div>
+            <div class="touch-button" id="touch-attack">攻</div>
+            <div class="touch-button" id="touch-ultimate">大</div>
+        </div>
+        <div class="ultimate-text" id="ultimate-text"></div>
+        <div class="finisher-text" id="finisher-text">终结!</div>
+        <div class="countdown-text" id="countdown-text"></div>
+        <div class="winner-text" id="winner-text">Winner!</div>
+        <div class="gameover-text" id="gameover-text">Game Over</div>
+    </div>
+</div>
+<script>
+var heroes = [
+    {name:"张宸阳", gender:"男", skill:"旺旺雪饼", color:"#FF6666", ultimateDesc:"【旺旺雪饼】奶油爆裂"},
+    {name:"徐浩宸", gender:"男", skill:"快速瞬移", color:"#66FF66", ultimateDesc:"【快速瞬移】背后致命斩"},
+    {name:"万昊轩", gender:"男", skill:"影分身",   color:"#6666FF", ultimateDesc:"【影分身】多重突击"},
+    {name:"张弛",   gender:"男", skill:"蛊惑招",   color:"#FF66FF", ultimateDesc:"【蛊惑招】敌人混乱"},
+    {name:"支嘉戈", gender:"男", skill:"钢管舞",   color:"#FFFF66", ultimateDesc:"【钢管舞】AOE旋转打击"},
+    {name:"江思宇", gender:"男", skill:"信仰之跃", color:"#66FFFF", ultimateDesc:"【信仰之跃】天降强击"},
+    {name:"淇露",   gender:"女", skill:"蒙古骑射",  color:"#FF9966", ultimateDesc:"【蒙古骑射】烈焰箭矢"}
+];
+
+var gameState="menu";
+var playerHero=null;
+var opponentHero=null;
+var player=null;
+var opponent=null;
+var roundTime=60;
+var touchMode=false;
+var difficulty="normal";
+var countdownTimer=3;
+var countdownInterval=null;
+
+var canvas = document.getElementById("game-canvas");
+var ctx = canvas.getContext("2d");
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.onresize = resizeCanvas;
+resizeCanvas();
+
+var heroSelectDiv = document.getElementById("hero-select");
+heroes.forEach(function(h){
+    var card = document.createElement("div");
+    card.className = "hero-card";
+    card.style.background = h.color;
+    card.innerHTML = '<div class="hero-name">'+h.name+'</div>'+
+                     '<div class="hero-gender">性别:'+h.gender+'</div>'+
+                     '<div class="hero-skill">'+h.skill+'</div>';
+    card.onclick = function(){
+        selectHero(h);
+    }
+    heroSelectDiv.appendChild(card);
+});
+
+var mainMenu = document.getElementById("main-menu");
+var settingsMenu = document.getElementById("settings-menu");
+var resultScreen = document.getElementById("result-screen");
+var instructionsDiv = document.getElementById("instructions");
+var controlsInfo = document.getElementById("controls-info");
+var statusBar = document.getElementById("status-bar");
+var timerDiv = document.getElementById("timer");
+var roundStartText = document.getElementById("round-start-text");
+var touchControls = document.getElementById("touch-controls");
+var touchModeCheckbox = document.getElementById("touch-mode-checkbox");
+var ultimateText = document.getElementById("ultimate-text");
+var finisherText = document.getElementById("finisher-text");
+var countdownText = document.getElementById("countdown-text");
+var winnerText=document.getElementById("winner-text");
+var gameoverText=document.getElementById("gameover-text");
+var difficultyMenu=document.getElementById("difficulty-menu");
+
+document.getElementById("start-game-btn").onclick = function(){
+    goToHeroSelect();
+}
+document.getElementById("exit-game-btn").onclick = function(){
+    location.reload();
+}
+document.getElementById("settings-btn").onclick = function(){
+    settingsMenu.style.display="block";
+    mainMenu.style.display="none";
+}
+document.getElementById("close-settings-btn").onclick = function(){
+    settingsMenu.style.display="none";
+    mainMenu.style.display="block";
+    touchMode = touchModeCheckbox.checked;
+    updateUI();
+}
+document.getElementById("select-difficulty-btn").onclick=function(){
+    mainMenu.style.display="none";
+    difficultyMenu.style.display="block";
+}
+document.getElementById("close-difficulty-btn").onclick=function(){
+    difficulty=document.getElementById("difficulty-selector").value;
+    difficultyMenu.style.display="none";
+    mainMenu.style.display="block";
+}
+
+function updateUI(){
+    if(gameState==="menu"){
+        mainMenu.style.display="block";
+        heroSelectDiv.style.display="none";
+        statusBar.style.display="none";
+        instructionsDiv.style.display="none";
+        controlsInfo.style.display="none";
+        timerDiv.style.display="none";
+        roundStartText.style.display="none";
+        resultScreen.style.display="none";
+        touchControls.style.display = touchMode?"block":"none";
+    } else if(gameState==="select"){
+        mainMenu.style.display="none";
+        heroSelectDiv.style.display="flex";
+        statusBar.style.display="none";
+        instructionsDiv.style.display="none";
+        controlsInfo.style.display="none";
+        timerDiv.style.display="none";
+        roundStartText.style.display="none";
+        resultScreen.style.display="none";
+        touchControls.style.display = touchMode?"block":"none";
+    } else if(gameState==="countdown"){
+        mainMenu.style.display="none";
+        heroSelectDiv.style.display="none";
+        statusBar.style.display="none";
+        instructionsDiv.style.display="none";
+        controlsInfo.style.display="none";
+        timerDiv.style.display="none";
+        roundStartText.style.display="none";
+        resultScreen.style.display="none";
+        countdownText.style.display="block";
+        touchControls.style.display = touchMode?"block":"none";
+    } else if(gameState==="fight"){
+        mainMenu.style.display="none";
+        heroSelectDiv.style.display="none";
+        statusBar.style.display="flex";
+        instructionsDiv.style.display="block";
+        controlsInfo.style.display="block";
+        timerDiv.style.display="block";
+        resultScreen.style.display="none";
+        countdownText.style.display="none";
+        touchControls.style.display = touchMode?"block":"none";
+    } else if(gameState==="end"){
+        instructionsDiv.style.display="none";
+        controlsInfo.style.display="none";
+        timerDiv.style.display="none";
+        touchControls.style.display = touchMode?"block":"none";
+    }
+}
+
+function goToHeroSelect(){
+    gameState="select";
+    updateUI();
+}
+
+function chooseOpponent(){
+    var opp = heroes[Math.floor(Math.random()*heroes.length)];
+    while(opp === playerHero){
+        opp = heroes[Math.floor(Math.random()*heroes.length)];
+    }
+    return opp;
+}
+
+function selectHero(h){
+    playerHero = h;
+    opponentHero = chooseOpponent();
+    document.getElementById("player-hero-name").innerText = playerHero.name;
+    document.getElementById("opponent-hero-name").innerText = opponentHero.name;
+    document.getElementById("player-portrait").innerText = playerHero.name[0];
+    document.getElementById("opponent-portrait").innerText = opponentHero.name[0];
+    startCountdown();
+}
+
+function startCountdown(){
+    gameState="countdown";
+    updateUI();
+    countdownTimer=3;
+    countdownText.innerText=countdownTimer;
+    countdownInterval = setInterval(function(){
+        countdownTimer--;
+        if(countdownTimer>0){
+            countdownText.innerText=countdownTimer;
+        } else {
+            countdownText.innerText="Fight!";
+            setTimeout(function(){
+                clearInterval(countdownInterval);
+                startFight();
+            },1000);
+        }
+    },1000);
+}
+
+function createFighter(hero, x, isPlayer){
+    return {
+        hero: hero,
+        x: x,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        width:50,
+        height:100,
+        faceRight: isPlayer ? true : false,
+        hp: 100,
+        maxHp: 100,
+        isPlayer: isPlayer,
+        attackCooldown:0,
+        block: false,
+        ultimateReady:true,
+        ultimateCooldown:300,
+        isAttacking:false,
+        isHit:false,
+        jump:false,
+        ultimateActive:false,
+        ultimateTimer:0,
+        skillEffectTimer:0,
+        confused:false,
+        clones:[],
+        stamina:100,
+        staminaRegen:0.2,
+        slashEffects:[],
+        auraEffects:[],
+        projectiles:[],
+        specialEffects:[]
+    }
+}
+
+var keys = {};
+document.addEventListener("keydown",function(e){
+    keys[e.key] = true;
+
+    if(gameState !== "fight") return;
+    if(!player) return;
+
+    if(e.key === " "){ 
+        if(!player.jump){
+            player.jump = true;
+            player.vy = -20; 
+        }
+    }
+
+    if(e.key === "D" || e.key==="d"){ 
+        attemptAttack(player);
+    }
+
+    if(e.key === "S" || e.key==="s"){ 
+        player.block = true;
+    }
+
+    if(e.key === "W" || e.key==="w"){ 
+        attemptUltimate(player);
+    }
+});
+
+document.addEventListener("keyup",function(e){
+    keys[e.key] = false;
+    if(e.key==="S"||e.key==="s"){
+        if(player) player.block = false;
+    }
+});
+
+function simulateKeyDown(k){ keys[k]=true; }
+function simulateKeyUp(k){ keys[k]=false; }
+
+function addTouchHandler(btnId, downKey, upKey) {
+    var btn = document.getElementById(btnId);
+    btn.addEventListener("touchstart", function(e){e.preventDefault();simulateKeyDown(downKey);});
+    btn.addEventListener("touchend", function(e){e.preventDefault();simulateKeyUp(upKey?upKey:downKey);});
+}
+
+// Movement controls on touch
+addTouchHandler("touch-left","ArrowLeft");
+addTouchHandler("touch-right","ArrowRight");
+addTouchHandler("touch-up","ArrowUp");
+addTouchHandler("touch-down","ArrowDown");
+// Actions
+document.getElementById("touch-jump").addEventListener("touchstart",function(e){
+    e.preventDefault();
+    if(gameState==="fight" && player && !player.jump){
+        player.jump = true;
+        player.vy = -20;
+    }
+});
+document.getElementById("touch-block").addEventListener("touchstart",function(e){
+    e.preventDefault();
+    if(gameState==="fight" && player) player.block = true;
+});
+document.getElementById("touch-block").addEventListener("touchend",function(e){
+    e.preventDefault();
+    if(player) player.block = false;
+});
+document.getElementById("touch-attack").addEventListener("touchstart",function(e){
+    e.preventDefault();
+    if(gameState==="fight" && player) attemptAttack(player);
+});
+document.getElementById("touch-ultimate").addEventListener("touchstart",function(e){
+    e.preventDefault();
+    if(gameState==="fight" && player) attemptUltimate(player);
+});
+
+function getAIModifiers(){
+    if(difficulty==="easy") return {attackChance:0.01,ultimateChance:0.001,damageScale:0.8};
+    if(difficulty==="hard") return {attackChance:0.03,ultimateChance:0.01,damageScale:1.2};
+    return {attackChance:0.02,ultimateChance:0.005,damageScale:1};
+}
+
+var slowMotionFrames=0;
+var effects=[];
+var gravity=1;
+
+function aiLogic(){
+    if(gameState!=="fight") return;
+    if(!opponent || !player) return;
+
+    var dist = Math.abs(opponent.x - player.x);
+    var aiMods=getAIModifiers();
+
+    // AI使用策略
+    if(opponent.ultimateReady && opponent.hp<50 && Math.random()<aiMods.ultimateChance){
+        attemptUltimate(opponent);
+    } else if(dist<120 && Math.random()<aiMods.attackChance){
+        attemptAttack(opponent);
+    } else {
+        // 移动逻辑
+        if(dist>150){
+            if(opponent.x > player.x) {
+                opponent.vx = -2;
+            } else {
+                opponent.vx = 2;
+            }
+        } else {
+            opponent.vx=0;
+            // 偶尔格挡和跳跃
+            if(Math.random()<0.01) opponent.block=true; else opponent.block=false;
+            if(Math.random()<0.005 && !opponent.jump){
+                opponent.jump=true;opponent.vy=-20;
+            }
+        }
+    }
+}
+
+function triggerSlowMotion(duration){
+    slowMotionFrames=duration; 
+}
+
+function showUltimateName(name, isPlayer){
+    ultimateText.innerText = name;
+    ultimateText.style.display="block";
+    setTimeout(function(){
+        ultimateText.style.display="none";
+    },1500);
+}
+
+function flashScreen(){
+    var effect={frame:0,type:"flash"};
+    effects.push(effect);
+}
+
+function addLightningEffect(x,y){
+    var effect={x:x,y:y,frame:0,type:"lightning"};
+    effects.push(effect);
+}
+
+function addMagicCircle(x,y){
+    var effect={x:x,y:y,frame:0,type:"magiccircle"};
+    effects.push(effect);
+}
+
+function addPoleDanceEffect(x,y){
+    var effect={x:x,y:y,frame:0,type:"poledance"};
+    effects.push(effect);
+}
+
+function addGroundCrack(x,y){
+    var effect={x:x,y:y,frame:0,type:"groundcrack"};
+    effects.push(effect);
+}
+
+function addCreamExplosion(x,y){
+    var effect={x:x,y:y,frame:0,type:"creamexplode"};
+    effects.push(effect);
+}
+
+function addFireExplosion(x,y){
+    var effect={x:x,y:y,frame:0,type:"fireexplode"};
+    effects.push(effect);
+}
+
+function addHitEffect(fighter){
+    var effect = {
+        x:fighter.x,
+        y:(canvas.height - 300)+fighter.y,
+        frame:0,
+        type:"hit"
+    };
+    effects.push(effect);
+}
+
+function addBlockEffect(fighter){
+    var effect = {
+        x:fighter.x,
+        y:(canvas.height - 300)+fighter.y,
+        frame:0,
+        type:"block"
+    };
+    effects.push(effect);
+}
+
+function addSlashEffect(fighter){
+    var effect = {
+        x: fighter.x + (fighter.faceRight?40:-40),
+        y: (canvas.height - 300)+fighter.y,
+        frame:0,
+        dir: fighter.faceRight?1:-1,
+    };
+    fighter.slashEffects.push(effect);
+}
+
+function getDamageScale(fighter){
+    var aiMods=getAIModifiers();
+    if(fighter.isPlayer) return 1;
+    else return aiMods.damageScale;
+}
+
+function checkHit(attacker, damage, isUltimate, aoe, customRange){
+    var defender = (attacker===player?opponent:player);
+    if(!defender) return;
+    var dir = attacker.faceRight ? 1 : -1;
+    var attackRange = customRange?customRange:(isUltimate ? 150 : 80);
+
+    var dmg = damage*getDamageScale(attacker);
+
+    if(aoe){
+        if(defender.block && !isUltimate){
+            defender.hp -= (dmg*0.3);
+            addBlockEffect(defender);
+        } else {
+            defender.hp -= dmg;
+            defender.isHit = true;
+            addHitEffect(defender);
+            triggerSlowMotion(isUltimate?6:3);
+            setTimeout(function(){defender.isHit=false;},200);
+        }
+        return;
+    }
+
+    var dx = defender.x - attacker.x;
+    if((dir>0 && dx>0 && dx<attackRange) || (dir<0 && dx<0 && dx>-attackRange)){
+        if(defender.block && !isUltimate){
+            defender.hp -= (dmg*0.3);
+            addBlockEffect(defender);
+        } else {
+            defender.hp -= dmg;
+            defender.isHit = true;
+            addHitEffect(defender);
+            triggerSlowMotion(isUltimate?6:3);
+            setTimeout(function(){defender.isHit=false;},200);
+            defender.x += dir*20;
+            if(defender.x<50) defender.x=50;
+            if(defender.x>canvas.width-50) defender.x=canvas.width-50;
+        }
+        if(defender.hp<=0 && isUltimate){
+            finisherText.style.display="block";
+            setTimeout(function(){
+                finisherText.style.display="none";
+            },1000);
+        }
+    }
+}
+
+function attemptAttack(fighter){
+    if(gameState!=="fight") return;
+    if(fighter.attackCooldown<=0 && !fighter.isAttacking && !fighter.ultimateActive){
+        if(fighter.stamina<10) return;
+        fighter.isAttacking = true;
+        fighter.attackCooldown = 60;
+        fighter.stamina-=10;
+        setTimeout(function(){
+            fighter.isAttacking = false;
+        },200);
+        setTimeout(function(){
+            checkHit(fighter, 10, false);
+            addSlashEffect(fighter);
+        },100);
+    }
+}
+
+function attemptUltimate(fighter){
+    if(gameState!=="fight") return;
+    if(fighter.ultimateReady && !fighter.ultimateActive && fighter.attackCooldown<=0 && fighter.stamina>=30){
+        fighter.ultimateActive = true;
+        fighter.ultimateReady = false;
+        fighter.ultimateTimer = 120;
+        fighter.stamina-=30;
+        showUltimateName(fighter.hero.ultimateDesc, fighter.isPlayer);
+        setTimeout(function(){
+            doHeroUltimateEffect(fighter);
+        },300);
+    }
+}
+
+// 英雄大招效果
+function doHeroUltimateEffect(fighter){
+    var h = fighter.hero.name;
+    var enemy=(fighter===player?opponent:player);
+    switch(h){
+        case "张宸阳":
+            // 雪饼
+            var px = {x:fighter.x,y:fighter.y,frame:0,type:"snowcake",dir:(fighter.faceRight?1:-1)};
+            fighter.projectiles.push(px);
+            break;
+        case "徐浩宸":
+            // 闪白屏+瞬移+电光斩
+            flashScreen();
+            if(enemy){
+                fighter.x = enemy.x - (fighter.faceRight?50:-50);
+                checkHit(fighter,30,true);
+                addLightningEffect(enemy.x,enemy.y);
+            }
+            break;
+        case "万昊轩":
+            // 分身
+            if(enemy){
+                for(var i=0;i<3;i++){
+                    let cloneX = enemy.x+(i*30*(enemy.x>fighter.x?1:-1));
+                    let cloneObj = {x:cloneX,frame:0,type:"clone"};
+                    fighter.clones.push(cloneObj);
+                    setTimeout((function(ix){
+                        return function(){checkHit(fighter,10,false);}
+                    })(i),100*i);
+                }
+            }
+            break;
+        case "张弛":
+            // 蛊惑招
+            if(enemy){
+                enemy.confused=true;
+                addMagicCircle(enemy.x,enemy.y);
+                setTimeout(function(){enemy.confused=false;},3000);
+            }
+            break;
+        case "支嘉戈":
+            // 钢管舞AOE
+            addPoleDanceEffect(fighter.x,fighter.y);
+            checkHit(fighter,30,true,true);
+            break;
+        case "江思宇":
+            // 信仰之跃
+            fighter.jump=true;
+            fighter.vy=-30;
+            setTimeout(function(){
+                checkHit(fighter,30,true);
+                addGroundCrack(fighter.x,fighter.y);
+            },800);
+            break;
+        case "淇露":
+            // 蒙古骑射
+            var px={x:fighter.x,y:fighter.y,vx:(fighter.faceRight?5:-5),vy:-1,frame:0,type:"firearrow",dir:(fighter.faceRight?1:-1)};
+            fighter.projectiles.push(px);
+            break;
+    }
+}
+
+// 随机背景主题
+function randomBackgroundTheme(){
+    var themes=["theme-day","theme-evening","theme-night"];
+    var sel=themes[Math.floor(Math.random()*themes.length)];
+    var bg=document.getElementById("background");
+    bg.className=sel;
+}
+randomBackgroundTheme();
+
+// 下雨概率30%
+function startRain(){
+    var rainLayer=document.getElementById("rain-layer");
+    for(var i=0;i<100;i++){
+        var drop=document.createElement("div");
+        drop.style.position="absolute";
+        drop.style.top=Math.random()*100+"%";
+        drop.style.left=Math.random()*100+"%";
+        drop.style.width="2px";
+        drop.style.height="10px";
+        drop.style.background="#ccc";
+        drop.style.opacity=0.5;
+        drop.style.animation="raindrop 1s linear infinite";
+        drop.style.animationDelay=(Math.random())+"s";
+        rainLayer.appendChild(drop);
+    }
+}
+if(Math.random()<0.3){
+    startRain();
+}
+
+function drawUIBars(){
+    if(player && opponent){
+        var playerHpFill = document.getElementById("player-hp");
+        var opponentHpFill = document.getElementById("opponent-hp");
+        var playerStaminaFill=document.getElementById("player-stamina");
+        var playerUltBar=document.getElementById("player-ultimate-bar");
+
+        playerHpFill.style.width = Math.max(0, (player.hp/player.maxHp)*100)+"%";
+        opponentHpFill.style.width = Math.max(0, (opponent.hp/opponent.maxHp)*100)+"%";
+        playerStaminaFill.style.width = Math.max(0,(player.stamina/100)*100)+"%";
+
+        var ultProgress = (300 - player.ultimateCooldown)/300;
+        if(ultProgress<0) ultProgress=0;
+        if(ultProgress>1) ultProgress=1;
+        playerUltBar.style.width = (ultProgress*100)+"%";
+        if(player.ultimateReady){
+            playerUltBar.style.boxShadow="0 0 10px #00f";
+        } else {
+            playerUltBar.style.boxShadow="none";
+        }
+    }
+}
+
+function roundTimeUpdate(){
+    if(roundTime>0 && gameState==="fight"){
+        roundTime -= 1/60;
+        timerDiv.innerText = Math.floor(roundTime);
+        if(roundTime<=0){
+            gameOver(player.hp>opponent.hp);
+        }
+    }
+}
+
+function gameOver(playerWin){
+    gameState="end";
+    updateUI();
+    resultScreen.style.display="block";
+    if(playerWin){
+        // 胜利,显示Winner特效
+        winnerText.style.display="block";
+        setTimeout(function(){
+            winnerText.style.display="none";
+        },2000);
+        resultScreen.innerHTML="胜利！<br><br><button onclick='restart()'>重新开始</button>";
+    } else {
+        // 失败
+        gameoverText.style.display="block";
+        setTimeout(function(){
+            gameoverText.style.display="none";
+        },2000);
+        resultScreen.innerHTML="失败！<br><br><button onclick='restart()'>重新开始</button>";
+    }
+}
+
+function restart(){
+    location.reload();
+}
+
+function drawFighter(f){
+    ctx.save();
+    ctx.translate(f.x,(canvas.height - 300)+f.y);
+    var baseColor = f.hero.color;
+    if(f.isHit) baseColor="#fff";
+    else if(f.block) baseColor="#aaa";
+    else if(f.isAttacking) baseColor="#f33";
+    else if(f.ultimateActive) baseColor="#ff0";
+
+    var gradBody=ctx.createLinearGradient(0,-f.height,0,0);
+    gradBody.addColorStop(0,baseColor);
+    gradBody.addColorStop(1,"#000");
+    ctx.fillStyle=gradBody;
+    ctx.fillRect(-f.width/2,-f.height,f.width,f.height);
+
+    ctx.beginPath();
+    ctx.arc(0,-f.height-10,15,0,Math.PI*2);
+    var gradHead=ctx.createRadialGradient(0,-f.height-10,5,0,-f.height-10,15);
+    gradHead.addColorStop(0,"#fff");
+    gradHead.addColorStop(1,baseColor);
+    ctx.fillStyle=gradHead;
+    ctx.fill();
+    ctx.strokeStyle="#000";
+    ctx.lineWidth=2;
+    ctx.stroke();
+
+    ctx.strokeStyle=baseColor;
+    ctx.lineWidth=5;
+    ctx.beginPath();
+    var armDir=f.faceRight?1:-1;
+    if(f.isAttacking){
+        ctx.moveTo(0,-f.height/2);
+        ctx.lineTo(armDir*30,-f.height/2);
+    } else {
+        ctx.moveTo(0,-f.height/2);
+        ctx.lineTo(armDir*15,-f.height/2);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle="#fff";
+    ctx.font="14px Microsoft YaHei";
+    ctx.textAlign="center";
+    ctx.fillText(f.hero.name,0,-f.height-30);
+
+    f.auraEffects.forEach(a=>{
+        ctx.save();
+        ctx.strokeStyle="rgba(255,255,0,"+(1 - a.frame/60)+")";
+        ctx.lineWidth=5;
+        ctx.beginPath();
+        ctx.arc(0,-f.height/2,50+a.frame,0,Math.PI*2);
+        ctx.stroke();
+        ctx.restore();
+    });
+
+    f.clones.forEach(c=>{
+        ctx.save();
+        ctx.translate(c.x-f.x,0);
+        ctx.fillStyle="rgba(200,200,255,"+(1-c.frame/30)+")";
+        ctx.fillRect(-f.width/2,-f.height,f.width,f.height);
+        ctx.restore();
+    });
+
+    f.slashEffects.forEach(s=>{
+        ctx.save();
+        ctx.translate(s.x - f.x, s.y-( (canvas.height - 300)+f.y ));
+        ctx.rotate(s.dir>0?0:Math.PI); 
+        ctx.strokeStyle = "rgba(255,255,255,"+(1-s.frame/20)+")";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-10,0);
+        ctx.lineTo(10,0);
+        ctx.stroke();
+        ctx.restore();
+    });
+
+    f.projectiles.forEach(p=>{
+        ctx.save();
+        var pxRelX=p.x-f.x;
+        var pxRelY=p.y-( (canvas.height - 300)+f.y);
+        if(p.type==="snowcake"){
+            // 绘制雪饼：白色圆，稍微旋转
+            ctx.translate(pxRelX,pxRelY);
+            ctx.rotate(p.frame*0.1);
+            ctx.fillStyle="#fff";
+            ctx.beginPath();
+            ctx.arc(0,0,20,0,Math.PI*2);
+            ctx.fill();
+        } else if(p.type==="firearrow"){
+            // 绘制箭
+            ctx.translate(pxRelX,pxRelY);
+            // 箭朝向由p.dir决定，y方向随vy变化（简化：箭头指向前方）
+            // 简化朝向：略微倾斜
+            // 实际上箭的角度=atan2(vy, vx)，这里就简单处理:
+            // 我们有vx=5或-5,vy变化，不如计算：
+            var angle=Math.atan2(p.vy,p.vx*(p.dir));
+            ctx.rotate(angle);
+            ctx.strokeStyle="orange";
+            ctx.lineWidth=2;
+            ctx.beginPath();
+            ctx.moveTo(-10,0);
+            ctx.lineTo(10,0);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(10,0);
+            ctx.lineTo(5,-3);
+            ctx.lineTo(5,3);
+            ctx.closePath();
+            ctx.fillStyle="red";
+            ctx.fill();
+        }
+        ctx.restore();
+    });
+
+    ctx.restore();
+}
+
+function drawEffects(){
+    effects.forEach(e=>{
+        ctx.save();
+        if(e.type==="hit"){
+            ctx.translate(e.x,e.y);
+            ctx.fillStyle = "rgba(255,255,255,"+(1-e.frame/30)+")";
+            ctx.beginPath();
+            ctx.arc(0,0,10+e.frame,0,Math.PI*2);
+            ctx.fill();
+        } else if(e.type==="block"){
+            ctx.translate(e.x,e.y);
+            ctx.strokeStyle = "rgba(0,200,255,"+(1-e.frame/30)+")";
+            ctx.lineWidth=2;
+            ctx.beginPath();
+            ctx.arc(0,0,5+e.frame,0,Math.PI*2);
+            ctx.stroke();
+        } else if(e.type==="flash"){
+            ctx.fillStyle="rgba(255,255,255,"+(1-e.frame/60)+")";
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+        } else if(e.type==="lightning"){
+            ctx.translate(e.x,e.y+(canvas.height-300));
+            ctx.strokeStyle="rgba(0,255,0,"+(1-e.frame/60)+")";
+            ctx.lineWidth=3;
+            ctx.beginPath();
+            ctx.moveTo(0,-50);
+            ctx.lineTo(-10,0);
+            ctx.lineTo(10,50);
+            ctx.stroke();
+        } else if(e.type==="magiccircle"){
+            ctx.translate(e.x,e.y+(canvas.height-300));
+            ctx.strokeStyle="rgba(200,0,200,"+(1-e.frame/60)+")";
+            ctx.lineWidth=2;
+            ctx.beginPath();
+            ctx.arc(0,0,30+e.frame,0,Math.PI*2);
+            ctx.stroke();
+            // 符文
+            ctx.font="10px sans-serif";
+            ctx.fillStyle="rgba(200,0,200,"+(1-e.frame/60)+")";
+            ctx.fillText("符",0,0-(30+e.frame));
+        } else if(e.type==="poledance"){
+            ctx.translate(e.x,e.y+(canvas.height-300));
+            ctx.strokeStyle="rgba(255,255,0,"+(1-e.frame/60)+")";
+            ctx.lineWidth=5;
+            ctx.beginPath();
+            ctx.arc(0,0,50+e.frame,0,Math.PI*2);
+            ctx.stroke();
+        } else if(e.type==="groundcrack"){
+            ctx.translate(e.x,e.y+(canvas.height-300));
+            ctx.strokeStyle="rgba(255,0,0,"+(1-e.frame/60)+")";
+            ctx.lineWidth=2;
+            ctx.beginPath();
+            ctx.moveTo(-10,0);
+            ctx.lineTo(10,10);
+            ctx.lineTo(-5,20);
+            ctx.stroke();
+        } else if(e.type==="creamexplode"){
+            ctx.translate(e.x,e.y+(canvas.height-300));
+            ctx.fillStyle="rgba(255,255,255,"+(1-e.frame/60)+")";
+            for(var i=0;i<5;i++){
+                ctx.beginPath();
+                var angle=i*(Math.PI*2/5);
+                var rx=Math.cos(angle)*e.frame;
+                var ry=Math.sin(angle)*e.frame;
+                ctx.arc(rx,ry,5,0,Math.PI*2);
+                ctx.fill();
+            }
+        } else if(e.type==="fireexplode"){
+            ctx.translate(e.x,e.y+(canvas.height-300));
+            ctx.fillStyle="rgba(255,100,0,"+(1-e.frame/60)+")";
+            for(var i=0;i<8;i++){
+                ctx.beginPath();
+                var angle=i*(Math.PI*2/8);
+                var rx=Math.cos(angle)*e.frame;
+                var ry=Math.sin(angle)*e.frame;
+                ctx.arc(rx,ry,5,0,Math.PI*2);
+                ctx.fill();
+            }
+        }
+        ctx.restore();
+    });
+}
+
+function update(){
+    if(gameState!=="fight") return;
+    if(slowMotionFrames>0) {slowMotionFrames--;return;}
+
+    if(!player||!opponent) return;
+
+    var leftKey = (player.confused ? keys["ArrowRight"] : keys["ArrowLeft"]);
+    var rightKey = (player.confused ? keys["ArrowLeft"] : keys["ArrowRight"]);
+    var upKey = (player.confused ? keys["ArrowDown"] : keys["ArrowUp"]);
+
+    var speed=5;
+    if(leftKey){player.vx=-speed;player.faceRight=false;} 
+    else if(rightKey){player.vx=speed;player.faceRight=true;} 
+    else {player.vx=0;}
+
+    if(upKey && !player.jump){
+        player.jump=true;player.vy=-20;
+    }
+
+    [player,opponent].forEach(function(f){
+        f.vy += gravity;
+        f.y += f.vy;
+        if(f.y>0){f.y=0;f.vy=0;f.jump=false;}
+        f.x += f.vx;
+        if(f.x<50) f.x=50;
+        if(f.x>canvas.width-50) f.x=canvas.width-50;
+
+        if(f.attackCooldown>0) f.attackCooldown--;
+        if(!f.ultimateReady && f.ultimateCooldown>0) {
+            f.ultimateCooldown--;
+            if(f.ultimateCooldown<=0) f.ultimateReady=true;
+        }
+        if(f.ultimateActive){
+            f.ultimateTimer--;
+            if(f.ultimateTimer<=0) {
+                f.ultimateActive=false;
+            }
+        }
+
+        f.stamina=Math.min(f.stamina+f.staminaRegen,100);
+
+        f.slashEffects = f.slashEffects.filter(s=>{s.frame++;return s.frame<20;});
+        f.auraEffects = f.auraEffects.filter(a=>{a.frame++;return a.frame<60;});
+        f.clones = f.clones.filter(c=>{c.frame++;return c.frame<30;});
+        f.projectiles.forEach(function(p){
+            if(p.type==="firearrow"){
+                p.x+=p.dir*p.vx;
+                p.y+=p.vy;
+                p.vy+=0.1;
+            } else if(p.type==="snowcake"){
+                p.x+=p.dir*4;
+            }
+            p.frame++;
+        });
+        f.projectiles = f.projectiles.filter(p=>{
+            if(p.x<0||p.x>canvas.width||p.frame>200) return false;
+            return true;
+        });
+
+        //投射物命中检测
+        var defender=(f===player?opponent:player);
+        f.projectiles.forEach(p=>{
+            var dx=defender.x - p.x;
+            var dy=defender.y - p.y;
+            if(Math.abs(dx)<50 && Math.abs(dy)<50){
+                if(p.type==="snowcake"){
+                    checkHit(f,20,true);
+                    addCreamExplosion(defender.x,defender.y);
+                } else if(p.type==="firearrow"){
+                    checkHit(f,30,true);
+                    addFireExplosion(defender.x,defender.y);
+                }
+                p.frame=9999;
+            }
+        });
+        f.projectiles=f.projectiles.filter(p=>p.frame<9999);
+    });
+
+    aiLogic();
+
+    effects=effects.filter(e=>{
+        e.frame++;
+        return e.frame<60;
+    });
+
+    roundTimeUpdate();
+
+    if(player.hp<=0 || opponent.hp<=0){
+        var pw=(player.hp>opponent.hp);
+        // 胜者稍微跳动表示胜利pose
+        var winner=pw?player:opponent;
+        winner.vy=-10;winner.jump=true;
+        setTimeout(function(){
+            gameOver(pw);
+        },1000);
+    }
+}
+
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(gameState==="fight"){
+        drawFighter(player);
+        drawFighter(opponent);
+        drawEffects();
+    } else {
+        drawEffects();
+    }
+    drawUIBars();
+}
+
+function startFight(){
+    gameState = "fight";
+    updateUI();
+    player = createFighter(playerHero, canvas.width*0.3, true);
+    opponent = createFighter(opponentHero, canvas.width*0.7, false);
+    opponent.faceRight = false;
+
+    roundStartText.style.display="block";
+    setTimeout(function(){
+        roundStartText.style.display="none";
+    },1500);
+
+    loop();
+}
+
+function loop(){
+    if(gameState==="fight"){
+        update();
+    }
+    draw();
+    requestAnimationFrame(loop);
+}
+
+// 初始化
+gameState="menu";
+updateUI();
+mainMenu.style.display="block";
+</script>
+</body>
+</html>
