@@ -280,7 +280,7 @@
     </div>
 </div>
 <script>
-// 英雄数据包含新增的张博彦和程湘婷
+// 英雄数据(完整最终版本):
 var heroes = [
     {name:"张宸阳", gender:"男", skill:"旺旺雪饼", color:"#FF6666", ultimateDesc:"【旺旺雪饼】奶油爆裂"},
     {name:"徐浩宸", gender:"男", skill:"快速瞬移", color:"#66FF66", ultimateDesc:"【快速瞬移】背后致命斩"},
@@ -291,7 +291,9 @@ var heroes = [
     {name:"淇露",   gender:"女", skill:"蒙古骑射",  color:"#FF9966", ultimateDesc:"【蒙古骑射】烈焰箭矢"},
     {name:"和子鸣", gender:"男", skill:"编程大师",  color:"#88FFEE", ultimateDesc:"【编程大师】代码闪电狂袭"},
     {name:"张博彦", gender:"男", skill:"人工智能", color:"#FFB266", ultimateDesc:"【人工智能】智能风暴袭击"},
-    {name:"程湘婷", gender:"女", skill:"将军", color:"#CC99FF", ultimateDesc:"【将军】铁血军团冲锋"}
+    {name:"程湘婷", gender:"女", skill:"将军", color:"#CC99FF", ultimateDesc:"【将军】铁血军团冲锋"},
+    {name:"李梓瑞", gender:"男", skill:"大力王", color:"#FF8844", ultimateDesc:"【大力王】巨拳震撼"},
+    {name:"杨嘉玉", gender:"女", skill:"生物技术", color:"#99FF99", ultimateDesc:"【生物技术】召唤巨兽冲锋"}
 ];
 
 var gameState="menu";
@@ -320,6 +322,7 @@ function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.inne
 window.onresize=resizeCanvas;resizeCanvas();
 
 var heroSelectDiv=document.getElementById("hero-select");
+
 heroes.forEach(function(h){
     var card=document.createElement("div");
     card.className="hero-card";
@@ -481,24 +484,17 @@ var lowHpFlash=0;
 var catParticles=[];
 
 function aiLogic(){
-    if(gameState!=="fight")return;
-    if(!opponent||!player)return;
     var dist=Math.abs(opponent.x-player.x);
     var aiMods=getAIModifiers();
-
     if(opponent.ultimateReady&&opponent.hp<50&&Math.random()<aiMods.ultimateChance){attemptUltimate(opponent);}
     else if(dist<120&&Math.random()<aiMods.attackChance){attemptAttack(opponent);}
     else {
         if(dist>150){if(opponent.x>player.x)opponent.vx=-2;else opponent.vx=2;}
-        else {
-            opponent.vx=0;if(Math.random()<0.01)opponent.block=true;else opponent.block=false;
-            if(Math.random()<0.005&&!opponent.jump){opponent.jump=true;opponent.vy=-20;}
-        }
+        else {opponent.vx=0;if(Math.random()<0.01)opponent.block=true;else opponent.block=false;if(Math.random()<0.005&&!opponent.jump){opponent.jump=true;opponent.vy=-20;}}
     }
 }
 
 function triggerSlowMotion(duration){slowMotionFrames=duration;}
-
 function showUltimateName(name,isPlayer){ultimateText.innerText=name;ultimateText.style.display="block";setTimeout(function(){ultimateText.style.display="none";},1500);}
 function flashScreen(){effects.push({frame:0,type:"flash"});}
 function addLightningEffect(x,y){effects.push({x:x,y:y,frame:0,type:"lightning"});}
@@ -507,10 +503,9 @@ function addPoleDanceEffect(x,y){effects.push({x:x,y:y,frame:0,type:"poledance"}
 function addGroundCrack(x,y){effects.push({x:x,y:y,frame:0,type:"groundcrack"});}
 function addCreamExplosion(x,y){effects.push({x:x,y:y,frame:0,type:"creamexplode"});}
 function addFireExplosion(x,y){effects.push({x:x,y:y,frame:0,type:"fireexplode"});}
-
-function addHitEffect(fighter){effects.push({x:fighter.x,y:(canvas.height - 300)+fighter.y,frame:0,type:"hit"});}
-function addBlockEffect(fighter){effects.push({x:fighter.x,y:(canvas.height - 300)+fighter.y,frame:0,type:"block"});}
-function addDamageText(x,y,damage){damageTexts.push({x:x,y:y,frame:0,damage:damage});}
+function addHitEffect(f){effects.push({x:f.x,y:(canvas.height - 300)+f.y,frame:0,type:"hit"});}
+function addBlockEffect(f){effects.push({x:f.x,y:(canvas.height - 300)+f.y,frame:0,type:"block"});}
+function addDamageText(x,y,dmg){damageTexts.push({x:x,y:y,frame:0,damage:dmg});}
 
 function attemptAttack(fighter){
     if(gameState!=="fight")return;
@@ -548,24 +543,15 @@ function checkHit(attacker,damage,isUltimate,aoe,customRange){
     var dmg=damage*getDamageScale(attacker);
 
     if(aoe){
-        if(defender.block&&!isUltimate){
-            defender.hp-=(dmg*0.3);addBlockEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg*0.3));
-        } else {
-            defender.hp-=dmg;defender.isHit=true;addHitEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg));
-            triggerSlowMotion(isUltimate?6:3);setTimeout(function(){defender.isHit=false;},200);
-        }
+        if(defender.block&&!isUltimate){defender.hp-=(dmg*0.3);addBlockEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg*0.3));}
+        else {defender.hp-=dmg;defender.isHit=true;addHitEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg));triggerSlowMotion(isUltimate?6:3);setTimeout(function(){defender.isHit=false;},200);}
         return;
     }
 
     var dx=defender.x-attacker.x;
     if((dir>0&&dx>0&&dx<attackRange)||(dir<0&&dx<0&&dx>-attackRange)){
-        if(defender.block&&!isUltimate){
-            defender.hp-=(dmg*0.3);addBlockEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg*0.3));
-        } else {
-            defender.hp-=dmg;defender.isHit=true;addHitEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg));
-            triggerSlowMotion(isUltimate?6:3);setTimeout(function(){defender.isHit=false;},200);
-            defender.x+=dir*20;if(defender.x<50)defender.x=50;if(defender.x>canvas.width-50)defender.x=canvas.width-50;
-        }
+        if(defender.block&&!isUltimate){defender.hp-=(dmg*0.3);addBlockEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg*0.3));}
+        else {defender.hp-=dmg;defender.isHit=true;addHitEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg));triggerSlowMotion(isUltimate?6:3);setTimeout(function(){defender.isHit=false;},200);defender.x+=dir*20;if(defender.x<50)defender.x=50;if(defender.x>canvas.width-50)defender.x=canvas.width-50;}
         if(defender.hp<=0&&isUltimate){finisherText.style.display="block";setTimeout(function(){finisherText.style.display="none";},1000);}
     }
 }
@@ -575,31 +561,52 @@ function doHeroUltimateEffect(fighter){
     var enemy=(fighter===player?opponent:player);
     switch(h){
         case "张宸阳":
-            var px={x:fighter.x,y:fighter.y,frame:0,type:"snowcake",dir:(fighter.faceRight?1:-1)};fighter.projectiles.push(px);
+            effects.push({frame:0,type:"creamexplode"});
+            effects.push({frame:0,type:"creamexplode"});
+            var px={x:fighter.x,y:fighter.y,frame:0,type:"snowcake",dir:(fighter.faceRight?1:-1)};
+            fighter.projectiles.push(px);
             break;
         case "徐浩宸":
             flashScreen();
+            effects.push({frame:0,type:"lightning",x:canvas.width/2,y:canvas.height/2});
+            effects.push({frame:0,type:"lightning",x:canvas.width/3,y:canvas.height/3});
             if(enemy){fighter.x=enemy.x-(fighter.faceRight?50:-50);checkHit(fighter,30,true);addLightningEffect(enemy.x,enemy.y);}
             break;
         case "万昊轩":
-            if(enemy){for(var i=0;i<3;i++){let cloneX=enemy.x+(i*30*(enemy.x>fighter.x?1:-1));let cloneObj={x:cloneX,frame:0,type:"clone"};fighter.clones.push(cloneObj);setTimeout((function(ix){return function(){checkHit(fighter,10,false);}})(i),100*i);}}
+            for(var i=0;i<5;i++){effects.push({frame:0,type:"poledance"});}
+            if(enemy){
+                for(var i=0;i<5;i++){
+                    let cloneX=enemy.x+(i*30*(enemy.x>fighter.x?1:-1));
+                    let cloneObj={x:cloneX,frame:0,type:"clone"};
+                    fighter.clones.push(cloneObj);
+                    setTimeout((function(ix){return function(){checkHit(fighter,10,false);}})(i),100*i);
+                }
+            }
             break;
         case "张弛":
-            if(enemy){enemy.confused=true;addMagicCircle(enemy.x,enemy.y);setTimeout(function(){enemy.confused=false;},3000);}
+            for(var i=0;i<3;i++){effects.push({x:enemy.x,y:enemy.y,frame:0,type:"magiccircle"});}
+            if(enemy){enemy.confused=true;setTimeout(function(){enemy.confused=false;},3000);checkHit(fighter,20,true);}
             break;
         case "支嘉戈":
-            addPoleDanceEffect(fighter.x,fighter.y);checkHit(fighter,30,true,true);
+            for(var i=0;i<5;i++){effects.push({frame:0,type:"poledance",x:canvas.width/2,y:canvas.height/2});}
+            checkHit(fighter,30,true,true);
             break;
         case "江思宇":
-            fighter.jump=true;fighter.vy=-30;setTimeout(function(){checkHit(fighter,30,true);addGroundCrack(fighter.x,fighter.y);},800);
+            flashScreen();
+            fighter.jump=true;fighter.vy=-30;
+            setTimeout(function(){
+                checkHit(fighter,30,true);
+                addGroundCrack(fighter.x,fighter.y);
+                for(var i=0;i<3;i++){addFireExplosion(fighter.x,fighter.y);}
+            },800);
             break;
         case "淇露":
+            for(var i=0;i<3;i++){addFireExplosion(fighter.x+(i*10*(fighter.faceRight?1:-1)),fighter.y);}
             var px={x:fighter.x,y:fighter.y,vx:(fighter.faceRight?5:-5),vy:-1,frame:0,type:"firearrow",dir:(fighter.faceRight?1:-1)};
             fighter.projectiles.push(px);
             break;
         case "和子鸣":
-            effects.push({frame:0,type:"coderain"});
-            effects.push({frame:0,type:"coderain"});
+            for(var i=0;i<5;i++){effects.push({frame:0,type:"coderain"});}
             setTimeout(function(){
                 checkHit(fighter,40,true);
                 addLightningEffect(enemy.x,enemy.y);
@@ -608,19 +615,32 @@ function doHeroUltimateEffect(fighter){
             },500);
             break;
         case "张博彦":
-            effects.push({frame:0,type:"coderain"});
-            effects.push({frame:0,type:"coderain"});
+            for(var i=0;i<5;i++){effects.push({frame:0,type:"coderain"});}
             setTimeout(function(){
                 checkHit(fighter,35,true);
                 addLightningEffect(enemy.x,enemy.y);
+                addLightningEffect(enemy.x+30,enemy.y+30);
             },400);
             break;
         case "程湘婷":
             flashScreen();
-            effects.push({frame:0,type:"poledance"});
+            for(var i=0;i<3;i++){effects.push({frame:0,type:"poledance"});}
             setTimeout(function(){
                 checkHit(fighter,35,true,true);
             },300);
+            break;
+        case "李梓瑞":
+            flashScreen();
+            for(var i=0;i<5;i++){addGroundCrack(canvas.width/2,canvas.height/2-300);}
+            setTimeout(function(){
+                checkHit(fighter,50,true,true);
+            },300);
+            break;
+        case "杨嘉玉":
+            for(var i=0;i<5;i++){addFireExplosion((i*50)+50,(canvas.height/2)-100);}
+            setTimeout(function(){
+                checkHit(fighter,40,true,true);
+            },500);
             break;
     }
 }
@@ -696,13 +716,13 @@ function gameOver(playerWin){
         setTimeout(function(){winnerText.style.display="none";},2000);
         resultScreen.innerHTML="胜利！<br>小提示：保持攻势！<br><br><button onclick='restart()'>重新开始</button>";
         winCount++;
-        winCountSpan.innerText=winCount;
-        if(winCount>bestRecord){bestRecord=winCount;bestRecordSpan.innerText=bestRecord;try{localStorage.setItem("bestRecord",bestRecord);}catch(e){}}
+        document.getElementById("win-count").innerText=winCount;
+        if(winCount>bestRecord){bestRecord=winCount;document.getElementById("best-record").innerText=bestRecord;try{localStorage.setItem("bestRecord",bestRecord);}catch(e){}}
     } else {
         gameoverText.style.display="block";
         setTimeout(function(){gameoverText.style.display="none";},2000);
         resultScreen.innerHTML="失败！<br>小提示：尝试格挡或降低难度！<br><br><button onclick='restart()'>重新开始</button>";
-        winCount=0;winCountSpan.innerText=0;
+        winCount=0;document.getElementById("win-count").innerText=0;
     }
 }
 
@@ -838,7 +858,7 @@ function drawEffects(){
             ctx.fillStyle="rgba(255,255,255,"+(1-e.frame/60)+")";
             ctx.fillRect(0,0,canvas.width,canvas.height);
         } else if(e.type==="lightning"){
-            ctx.translate(e.x,e.y+(canvas.height-300));
+            ctx.translate(e.x?e.x:canvas.width/2,e.y?e.y+(canvas.height-300):canvas.height/2);
             ctx.strokeStyle="rgba(0,255,0,"+(1-e.frame/60)+")";
             ctx.lineWidth=3;
             ctx.beginPath();
@@ -857,7 +877,7 @@ function drawEffects(){
             ctx.fillStyle="rgba(200,0,200,"+(1-e.frame/60)+")";
             ctx.fillText("符",0,-(30+e.frame));
         } else if(e.type==="poledance"){
-            ctx.translate(e.x,e.y+(canvas.height-300));
+            ctx.translate(e.x?e.x:canvas.width/2,e.y?e.y+(canvas.height-300):canvas.height/2);
             ctx.strokeStyle="rgba(255,255,0,"+(1-e.frame/60)+")";
             ctx.lineWidth=5;
             ctx.beginPath();
@@ -873,7 +893,7 @@ function drawEffects(){
             ctx.lineTo(-5,20);
             ctx.stroke();
         } else if(e.type==="creamexplode"){
-            ctx.translate(e.x,e.y+(canvas.height-300));
+            ctx.translate(e.x?e.x:canvas.width/2,e.y?e.y+(canvas.height-300):canvas.height/2);
             ctx.fillStyle="rgba(255,255,255,"+(1-e.frame/60)+")";
             for(var i=0;i<5;i++){
                 ctx.beginPath();
@@ -884,7 +904,7 @@ function drawEffects(){
                 ctx.fill();
             }
         } else if(e.type==="fireexplode"){
-            ctx.translate(e.x,e.y+(canvas.height-300));
+            ctx.translate(e.x?e.x:canvas.width/2,e.y?e.y+(canvas.height-300):canvas.height/2);
             ctx.fillStyle="rgba(255,100,0,"+(1-e.frame/60)+")";
             for(var i=0;i<8;i++){
                 ctx.beginPath();
@@ -924,21 +944,18 @@ document.getElementById("music-toggle-btn").onclick=function(){musicOn=!musicOn;
 function update(){
     if(gameState!=="fight")return;
     if(slowMotionFrames>0){slowMotionFrames--;return;}
-
     if(!player||!opponent)return;
 
-    var leftKey = (player.confused ? keys["ArrowRight"] : keys["ArrowLeft"]);
-    var rightKey = (player.confused ? keys["ArrowLeft"] : keys["ArrowRight"]);
-    var upKey = (player.confused ? keys["ArrowDown"] : keys["ArrowUp"]);
+    var leftKey=(player.confused?keys["ArrowRight"]:keys["ArrowLeft"]);
+    var rightKey=(player.confused?keys["ArrowLeft"]:keys["ArrowRight"]);
+    var upKey=(player.confused?keys["ArrowDown"]:keys["ArrowUp"]);
 
     var speed=5;
     if(leftKey){player.vx=-speed;player.faceRight=false;} 
     else if(rightKey){player.vx=speed;player.faceRight=true;} 
     else {player.vx=0;}
 
-    if(upKey && !player.jump){
-        player.jump=true;player.vy=-20;
-    }
+    if(upKey&&!player.jump){player.jump=true;player.vy=-20;}
 
     [player,opponent].forEach(function(f){
         f.vy+=gravity;f.y+=f.vy;if(f.y>0){f.y=0;f.vy=0;f.jump=false;}
