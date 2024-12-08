@@ -230,7 +230,7 @@
         </div>
         <div id="hero-select"></div>
         <div id="instructions">W(大招) S(格挡) D(攻击) 空格(跳)<br>方向键↑↓←→移动<br>H显示/隐藏帮助</div>
-        <div id="controls-info">操作说明：<br>W：大招(全屏特效)<br>S：格挡<br>D：普通攻击(随机三种攻击动画)<br>空格：跳跃<br>方向键：移动<br>H：显示/隐藏帮助</div>
+        <div id="controls-info">操作说明：<br>W：大招(全屏特效)<br>S：格挡<br>D：普通攻击(多种随机攻击动画)<br>空格：跳跃<br>方向键：移动<br>H：显示/隐藏帮助</div>
         <div id="result-screen"></div>
         <div id="main-menu">
             <h1>格斗之王</h1>
@@ -280,11 +280,7 @@
     </div>
 </div>
 <script>
-// 全代码与之前版本类似，只是删除场景选择菜单的功能和相关按钮逻辑。
-// 已删除scene-menu和close-scene-btn等逻辑。
-// 加入命中数字飘字特效及随机攻击动画形式。
-
-// 英雄数据不变（已包含和子鸣）:
+// 英雄数据包含新增的张博彦和程湘婷
 var heroes = [
     {name:"张宸阳", gender:"男", skill:"旺旺雪饼", color:"#FF6666", ultimateDesc:"【旺旺雪饼】奶油爆裂"},
     {name:"徐浩宸", gender:"男", skill:"快速瞬移", color:"#66FF66", ultimateDesc:"【快速瞬移】背后致命斩"},
@@ -293,7 +289,9 @@ var heroes = [
     {name:"支嘉戈", gender:"男", skill:"钢管舞",   color:"#FFFF66", ultimateDesc:"【钢管舞】AOE旋转打击"},
     {name:"江思宇", gender:"男", skill:"信仰之跃", color:"#66FFFF", ultimateDesc:"【信仰之跃】天降强击"},
     {name:"淇露",   gender:"女", skill:"蒙古骑射",  color:"#FF9966", ultimateDesc:"【蒙古骑射】烈焰箭矢"},
-    {name:"和子鸣", gender:"男", skill:"编程大师",  color:"#88FFEE", ultimateDesc:"【编程大师】代码闪电狂袭"}
+    {name:"和子鸣", gender:"男", skill:"编程大师",  color:"#88FFEE", ultimateDesc:"【编程大师】代码闪电狂袭"},
+    {name:"张博彦", gender:"男", skill:"人工智能", color:"#FFB266", ultimateDesc:"【人工智能】智能风暴袭击"},
+    {name:"程湘婷", gender:"女", skill:"将军", color:"#CC99FF", ultimateDesc:"【将军】铁血军团冲锋"}
 ];
 
 var gameState="menu";
@@ -310,49 +308,42 @@ var musicOn=false;
 var winCount=0;
 var bestRecord=0;
 
-// 读取本地存储最高记录
 try {
     var savedBest=localStorage.getItem("bestRecord");
     if(savedBest) bestRecord=parseInt(savedBest);
-} catch(e){}
+}catch(e){}
 document.getElementById("best-record").innerText=bestRecord;
 
-var canvas = document.getElementById("game-canvas");
-var ctx = canvas.getContext("2d");
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-window.onresize = resizeCanvas;
-resizeCanvas();
+var canvas=document.getElementById("game-canvas");
+var ctx=canvas.getContext("2d");
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+window.onresize=resizeCanvas;resizeCanvas();
 
-var heroSelectDiv = document.getElementById("hero-select");
+var heroSelectDiv=document.getElementById("hero-select");
 heroes.forEach(function(h){
-    var card = document.createElement("div");
-    card.className = "hero-card";
-    card.style.background = h.color;
-    card.innerHTML = '<div class="hero-name">'+h.name+'</div>'+
-                     '<div class="hero-gender">性别:'+h.gender+'</div>'+
-                     '<div class="hero-skill">'+h.skill+'</div>';
-    card.onclick = function(){
-        selectHero(h);
-    }
+    var card=document.createElement("div");
+    card.className="hero-card";
+    card.style.background=h.color;
+    card.innerHTML='<div class="hero-name">'+h.name+'</div>'+
+                   '<div class="hero-gender">性别:'+h.gender+'</div>'+
+                   '<div class="hero-skill">'+h.skill+'</div>';
+    card.onclick=function(){selectHero(h);}
     heroSelectDiv.appendChild(card);
 });
 
-var mainMenu = document.getElementById("main-menu");
-var settingsMenu = document.getElementById("settings-menu");
-var resultScreen = document.getElementById("result-screen");
-var instructionsDiv = document.getElementById("instructions");
-var controlsInfo = document.getElementById("controls-info");
-var statusBar = document.getElementById("status-bar");
-var timerDiv = document.getElementById("timer");
-var roundStartText = document.getElementById("round-start-text");
-var touchControls = document.getElementById("touch-controls");
-var touchModeCheckbox = document.getElementById("touch-mode-checkbox");
-var ultimateText = document.getElementById("ultimate-text");
-var finisherText = document.getElementById("finisher-text");
-var countdownText = document.getElementById("countdown-text");
+var mainMenu=document.getElementById("main-menu");
+var settingsMenu=document.getElementById("settings-menu");
+var resultScreen=document.getElementById("result-screen");
+var instructionsDiv=document.getElementById("instructions");
+var controlsInfo=document.getElementById("controls-info");
+var statusBar=document.getElementById("status-bar");
+var timerDiv=document.getElementById("timer");
+var roundStartText=document.getElementById("round-start-text");
+var touchControls=document.getElementById("touch-controls");
+var touchModeCheckbox=document.getElementById("touch-mode-checkbox");
+var ultimateText=document.getElementById("ultimate-text");
+var finisherText=document.getElementById("finisher-text");
+var countdownText=document.getElementById("countdown-text");
 var winnerText=document.getElementById("winner-text");
 var gameoverText=document.getElementById("gameover-text");
 var difficultyMenu=document.getElementById("difficulty-menu");
@@ -362,41 +353,16 @@ var winCountSpan=document.getElementById("win-count");
 var bestRecordSpan=document.getElementById("best-record");
 var helpOverlay=document.getElementById("help-overlay");
 
-// 攻击动画类型：比如0-上劈，1-横扫，2-直刺
 var attackAnimations=[{angle:0,color:"rgba(255,255,255,0.8)"},{angle:Math.PI/4,color:"rgba(255,200,200,0.8)"},{angle:-Math.PI/4,color:"rgba(200,255,200,0.8)"}];
-
-// 命中数字飘字特效数组
 var damageTexts=[];
 
-document.getElementById("start-game-btn").onclick = function(){
-    goToHeroSelect();
-}
-document.getElementById("exit-game-btn").onclick = function(){
-    location.reload();
-}
-document.getElementById("settings-btn").onclick = function(){
-    settingsMenu.style.display="block";
-    mainMenu.style.display="none";
-}
-document.getElementById("close-settings-btn").onclick = function(){
-    settingsMenu.style.display="none";
-    mainMenu.style.display="block";
-    touchMode = touchModeCheckbox.checked;
-    updateUI();
-}
-document.getElementById("select-difficulty-btn").onclick=function(){
-    mainMenu.style.display="none";
-    difficultyMenu.style.display="block";
-}
-document.getElementById("close-difficulty-btn").onclick=function(){
-    difficulty=document.getElementById("difficulty-selector").value;
-    difficultyMenu.style.display="none";
-    mainMenu.style.display="block";
-}
-musicBtn.onclick=function(){
-    musicOn=!musicOn;
-    musicBtn.innerText="音乐："+(musicOn?"开":"关");
-}
+document.getElementById("start-game-btn").onclick=function(){goToHeroSelect();};
+document.getElementById("exit-game-btn").onclick=function(){location.reload();};
+document.getElementById("settings-btn").onclick=function(){settingsMenu.style.display="block";mainMenu.style.display="none";};
+document.getElementById("close-settings-btn").onclick=function(){settingsMenu.style.display="none";mainMenu.style.display="block";touchMode=touchModeCheckbox.checked;updateUI();};
+document.getElementById("select-difficulty-btn").onclick=function(){mainMenu.style.display="none";difficultyMenu.style.display="block";};
+document.getElementById("close-difficulty-btn").onclick=function(){difficulty=document.getElementById("difficulty-selector").value;difficultyMenu.style.display="none";mainMenu.style.display="block";};
+musicBtn.onclick=function(){musicOn=!musicOn;musicBtn.innerText="音乐："+(musicOn?"开":"关");};
 
 function updateUI(){
     if(gameState==="menu"){
@@ -409,8 +375,8 @@ function updateUI(){
         roundStartText.style.display="none";
         resultScreen.style.display="none";
         countdownText.style.display="none";
-        touchControls.style.display = touchMode?"block":"none";
-    } else if(gameState==="select"){
+        touchControls.style.display=touchMode?"block":"none";
+    }else if(gameState==="select"){
         mainMenu.style.display="none";
         heroSelectDiv.style.display="flex";
         statusBar.style.display="none";
@@ -420,8 +386,8 @@ function updateUI(){
         roundStartText.style.display="none";
         resultScreen.style.display="none";
         countdownText.style.display="none";
-        touchControls.style.display = touchMode?"block":"none";
-    } else if(gameState==="countdown"){
+        touchControls.style.display=touchMode?"block":"none";
+    }else if(gameState==="countdown"){
         mainMenu.style.display="none";
         heroSelectDiv.style.display="none";
         statusBar.style.display="none";
@@ -431,8 +397,8 @@ function updateUI(){
         roundStartText.style.display="none";
         resultScreen.style.display="none";
         countdownText.style.display="block";
-        touchControls.style.display = touchMode?"block":"none";
-    } else if(gameState==="fight"){
+        touchControls.style.display=touchMode?"block":"none";
+    }else if(gameState==="fight"){
         mainMenu.style.display="none";
         heroSelectDiv.style.display="none";
         statusBar.style.display="flex";
@@ -442,125 +408,69 @@ function updateUI(){
         roundStartText.style.display="none";
         resultScreen.style.display="none";
         countdownText.style.display="none";
-        touchControls.style.display = touchMode?"block":"none";
+        touchControls.style.display=touchMode?"block":"none";
         difficultyDisplay.innerText="("+difficulty+")";
-    } else if(gameState==="end"){
+    }else if(gameState==="end"){
         instructionsDiv.style.display="none";
         controlsInfo.style.display="none";
         timerDiv.style.display="none";
-        touchControls.style.display = touchMode?"block":"none";
+        touchControls.style.display=touchMode?"block":"none";
     }
 }
 
-function goToHeroSelect(){
-    gameState="select";
-    updateUI();
-}
+function goToHeroSelect(){gameState="select";updateUI();}
 
 function chooseOpponent(){
-    var opp = heroes[Math.floor(Math.random()*heroes.length)];
-    while(opp === playerHero){
-        opp = heroes[Math.floor(Math.random()*heroes.length)];
-    }
+    var opp=heroes[Math.floor(Math.random()*heroes.length)];
+    while(opp===playerHero){opp=heroes[Math.floor(Math.random()*heroes.length)];}
     return opp;
 }
 
 function selectHero(h){
-    playerHero = h;
-    opponentHero = chooseOpponent();
-    document.getElementById("player-hero-name").innerText = playerHero.name;
-    document.getElementById("opponent-hero-name").innerText = opponentHero.name;
-    document.getElementById("player-portrait").innerText = playerHero.name[0];
-    document.getElementById("opponent-portrait").innerText = opponentHero.name[0];
+    playerHero=h;
+    opponentHero=chooseOpponent();
+    document.getElementById("player-hero-name").innerText=playerHero.name;
+    document.getElementById("opponent-hero-name").innerText=opponentHero.name;
+    document.getElementById("player-portrait").innerText=playerHero.name[0];
+    document.getElementById("opponent-portrait").innerText=opponentHero.name[0];
     startCountdown();
 }
 
 function startCountdown(){
-    gameState="countdown";
-    updateUI();
-    countdownTimer=3;
-    countdownText.innerText=countdownTimer;
-    countdownInterval = setInterval(function(){
+    gameState="countdown";updateUI();
+    countdownTimer=3;countdownText.innerText=countdownTimer;
+    countdownInterval=setInterval(function(){
         countdownTimer--;
-        if(countdownTimer>0){
-            countdownText.innerText=countdownTimer;
-        } else {
+        if(countdownTimer>0){countdownText.innerText=countdownTimer;}
+        else {
             countdownText.innerText="Fight!";
-            setTimeout(function(){
-                clearInterval(countdownInterval);
-                startFight();
-            },1000);
+            setTimeout(function(){clearInterval(countdownInterval);startFight();},1000);
         }
     },1000);
 }
 
-function createFighter(hero, x, isPlayer){
-    return {
-        hero: hero,
-        x: x,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        width:50,
-        height:100,
-        faceRight: isPlayer ? true : false,
-        hp: 100,
-        maxHp: 100,
-        isPlayer: isPlayer,
-        attackCooldown:0,
-        block: false,
-        ultimateReady:true,
-        ultimateCooldown:300,
-        isAttacking:false,
-        isHit:false,
-        jump:false,
-        ultimateActive:false,
-        ultimateTimer:0,
-        skillEffectTimer:0,
-        confused:false,
-        clones:[],
-        stamina:100,
-        staminaRegen:0.2,
-        slashEffects:[],
-        auraEffects:[],
-        projectiles:[],
-        specialEffects:[]
-    }
+function createFighter(hero,x,isPlayer){
+    return {hero:hero,x:x,y:0,vx:0,vy:0,width:50,height:100,faceRight:isPlayer?true:false,hp:100,maxHp:100,isPlayer:isPlayer,attackCooldown:0,block:false,ultimateReady:true,ultimateCooldown:300,isAttacking:false,isHit:false,jump:false,ultimateActive:false,ultimateTimer:0,skillEffectTimer:0,confused:false,clones:[],stamina:100,staminaRegen:0.2,slashEffects:[],auraEffects:[],projectiles:[],specialEffects:[]};
 }
 
-var keys = {};
+var keys={};
 document.addEventListener("keydown",function(e){
     keys[e.key]=true;
-
-    if(e.key==="H"||e.key==="h"){
-        helpOverlay.style.display=(helpOverlay.style.display==="block"?"none":"block");
-    }
-
+    if(e.key==="H"||e.key==="h"){helpOverlay.style.display=(helpOverlay.style.display==="block"?"none":"block");}
     if(gameState!=="fight") return;
     if(!player)return;
 
-    if(e.key===" "){
-        if(!player.jump){
-            player.jump=true;player.vy=-20;
-        }
-    }
-
+    if(e.key===" "){if(!player.jump){player.jump=true;player.vy=-20;}}
     if(e.key==="D"||e.key==="d"){attemptAttack(player);}
     if(e.key==="S"||e.key==="s"){player.block=true;}
     if(e.key==="W"||e.key==="w"){attemptUltimate(player);}
 });
-
-document.addEventListener("keyup",function(e){
-    keys[e.key]=false;
-    if(e.key==="S"||e.key==="s"){
-        if(player) player.block=false;
-    }
-});
+document.addEventListener("keyup",function(e){keys[e.key]=false;if((e.key==="S"||e.key==="s")&&player)player.block=false;});
 
 function getAIModifiers(){
-    if(difficulty==="easy") return {attackChance:0.01,ultimateChance:0.001,damageScale:0.8};
-    if(difficulty==="hard") return {attackChance:0.03,ultimateChance:0.01,damageScale:1.2};
-    return {attackChance:0.02,ultimateChance:0.005,damageScale:1};
+    if(difficulty==="easy")return{attackChance:0.01,ultimateChance:0.001,damageScale:0.8};
+    if(difficulty==="hard")return{attackChance:0.03,ultimateChance:0.01,damageScale:1.2};
+    return{attackChance:0.02,ultimateChance:0.005,damageScale:1};
 }
 
 var slowMotionFrames=0;
@@ -568,93 +478,52 @@ var effects=[];
 var gravity=1;
 var catTimer=0; 
 var lowHpFlash=0;
+var catParticles=[];
 
 function aiLogic(){
     if(gameState!=="fight")return;
     if(!opponent||!player)return;
-
     var dist=Math.abs(opponent.x-player.x);
     var aiMods=getAIModifiers();
 
-    if(opponent.ultimateReady && opponent.hp<50 && Math.random()<aiMods.ultimateChance){
-        attemptUltimate(opponent);
-    } else if(dist<120 && Math.random()<aiMods.attackChance){
-        attemptAttack(opponent);
-    } else {
-        if(dist>150){
-            if(opponent.x>player.x) opponent.vx=-2; else opponent.vx=2;
-        } else {
-            opponent.vx=0;
-            if(Math.random()<0.01) opponent.block=true; else opponent.block=false;
-            if(Math.random()<0.005 && !opponent.jump){
-                opponent.jump=true;opponent.vy=-20;
-            }
+    if(opponent.ultimateReady&&opponent.hp<50&&Math.random()<aiMods.ultimateChance){attemptUltimate(opponent);}
+    else if(dist<120&&Math.random()<aiMods.attackChance){attemptAttack(opponent);}
+    else {
+        if(dist>150){if(opponent.x>player.x)opponent.vx=-2;else opponent.vx=2;}
+        else {
+            opponent.vx=0;if(Math.random()<0.01)opponent.block=true;else opponent.block=false;
+            if(Math.random()<0.005&&!opponent.jump){opponent.jump=true;opponent.vy=-20;}
         }
     }
 }
 
-function triggerSlowMotion(duration){
-    slowMotionFrames=duration; 
-}
+function triggerSlowMotion(duration){slowMotionFrames=duration;}
 
-function showUltimateName(name,isPlayer){
-    ultimateText.innerText=name;
-    ultimateText.style.display="block";
-    setTimeout(function(){
-        ultimateText.style.display="none";
-    },1500);
-}
+function showUltimateName(name,isPlayer){ultimateText.innerText=name;ultimateText.style.display="block";setTimeout(function(){ultimateText.style.display="none";},1500);}
+function flashScreen(){effects.push({frame:0,type:"flash"});}
+function addLightningEffect(x,y){effects.push({x:x,y:y,frame:0,type:"lightning"});}
+function addMagicCircle(x,y){effects.push({x:x,y:y,frame:0,type:"magiccircle"});}
+function addPoleDanceEffect(x,y){effects.push({x:x,y:y,frame:0,type:"poledance"});}
+function addGroundCrack(x,y){effects.push({x:x,y:y,frame:0,type:"groundcrack"});}
+function addCreamExplosion(x,y){effects.push({x:x,y:y,frame:0,type:"creamexplode"});}
+function addFireExplosion(x,y){effects.push({x:x,y:y,frame:0,type:"fireexplode"});}
 
-function flashScreen(){
-    var effect={frame:0,type:"flash"};
-    effects.push(effect);
-}
+function addHitEffect(fighter){effects.push({x:fighter.x,y:(canvas.height - 300)+fighter.y,frame:0,type:"hit"});}
+function addBlockEffect(fighter){effects.push({x:fighter.x,y:(canvas.height - 300)+fighter.y,frame:0,type:"block"});}
+function addDamageText(x,y,damage){damageTexts.push({x:x,y:y,frame:0,damage:damage});}
 
-function addLightningEffect(x,y){ effects.push({x:x,y:y,frame:0,type:"lightning"}); }
-function addMagicCircle(x,y){ effects.push({x:x,y:y,frame:0,type:"magiccircle"}); }
-function addPoleDanceEffect(x,y){ effects.push({x:x,y:y,frame:0,type:"poledance"}); }
-function addGroundCrack(x,y){ effects.push({x:x,y:y,frame:0,type:"groundcrack"}); }
-function addCreamExplosion(x,y){ effects.push({x:x,y:y,frame:0,type:"creamexplode"}); }
-function addFireExplosion(x,y){ effects.push({x:x,y:y,frame:0,type:"fireexplode"}); }
-
-function addHitEffect(fighter){
-    effects.push({x:fighter.x,y:(canvas.height - 300)+fighter.y,frame:0,type:"hit"});
-}
-function addBlockEffect(fighter){
-    effects.push({x:fighter.x,y:(canvas.height - 300)+fighter.y,frame:0,type:"block"});
-}
-
-// 在命中时飘出伤害数字
-function addDamageText(x,y,damage){
-    damageTexts.push({x:x,y:y,frame:0,damage:damage});
-}
-
-// 攻击有多个动画，在attemptAttack中随机
 function attemptAttack(fighter){
     if(gameState!=="fight")return;
     if(fighter.attackCooldown<=0&&!fighter.isAttacking&&!fighter.ultimateActive){
         if(fighter.stamina<10)return;
-        fighter.isAttacking=true;
-        fighter.attackCooldown=60;
-        fighter.stamina-=10;
-
+        fighter.isAttacking=true;fighter.attackCooldown=60;fighter.stamina-=10;
         var attackType=Math.floor(Math.random()*attackAnimations.length);
         var atkAnim=attackAnimations[attackType];
-
         setTimeout(function(){fighter.isAttacking=false;},200);
         setTimeout(function(){
             checkHit(fighter,10,false);
-            // 根据attackType改slashEffect表现
-            var effect = {
-                x: fighter.x+(fighter.faceRight?40:-40),
-                y: (canvas.height - 300)+fighter.y,
-                frame:0,
-                dir:fighter.faceRight?1:-1,
-                angle:atkAnim.angle,
-                color:atkAnim.color
-            };
+            var effect={x:fighter.x+(fighter.faceRight?40:-40),y:(canvas.height - 300)+fighter.y,frame:0,dir:fighter.faceRight?1:-1,angle:atkAnim.angle,color:atkAnim.color};
             fighter.slashEffects.push(effect);
-            // 播放攻击音效(假设)
         },100);
     }
 }
@@ -662,23 +531,14 @@ function attemptAttack(fighter){
 function attemptUltimate(fighter){
     if(gameState!=="fight")return;
     if(fighter.ultimateReady&&!fighter.ultimateActive&&fighter.attackCooldown<=0&&fighter.stamina>=30){
-        fighter.ultimateActive=true;
-        fighter.ultimateReady=false;
-        fighter.ultimateTimer=120;
-        fighter.stamina-=30;
+        fighter.ultimateActive=true;fighter.ultimateReady=false;fighter.ultimateTimer=120;fighter.stamina-=30;
         showUltimateName(fighter.hero.ultimateDesc,fighter.isPlayer);
-        // 全屏闪光加强
-        flashScreen();
-        flashScreen();
+        flashScreen();flashScreen();
         setTimeout(function(){doHeroUltimateEffect(fighter);},500);
     }
 }
 
-function getDamageScale(fighter){
-    var aiMods=getAIModifiers();
-    if(fighter.isPlayer)return 1;
-    else return aiMods.damageScale;
-}
+function getDamageScale(fighter){var aiMods=getAIModifiers();return fighter.isPlayer?1:aiMods.damageScale;}
 
 function checkHit(attacker,damage,isUltimate,aoe,customRange){
     var defender=(attacker===player?opponent:player);
@@ -689,15 +549,10 @@ function checkHit(attacker,damage,isUltimate,aoe,customRange){
 
     if(aoe){
         if(defender.block&&!isUltimate){
-            defender.hp-=(dmg*0.3);
-            addBlockEffect(defender);
+            defender.hp-=(dmg*0.3);addBlockEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg*0.3));
         } else {
-            defender.hp-=dmg;
-            defender.isHit=true;
-            addHitEffect(defender);
-            triggerSlowMotion(isUltimate?6:3);
-            setTimeout(function(){defender.isHit=false;},200);
-            addDamageText(defender.x, (canvas.height - 300)+defender.y, dmg);
+            defender.hp-=dmg;defender.isHit=true;addHitEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg));
+            triggerSlowMotion(isUltimate?6:3);setTimeout(function(){defender.isHit=false;},200);
         }
         return;
     }
@@ -705,24 +560,13 @@ function checkHit(attacker,damage,isUltimate,aoe,customRange){
     var dx=defender.x-attacker.x;
     if((dir>0&&dx>0&&dx<attackRange)||(dir<0&&dx<0&&dx>-attackRange)){
         if(defender.block&&!isUltimate){
-            defender.hp-=(dmg*0.3);
-            addBlockEffect(defender);
-            addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg*0.3));
+            defender.hp-=(dmg*0.3);addBlockEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg*0.3));
         } else {
-            defender.hp-=dmg;
-            defender.isHit=true;
-            addHitEffect(defender);
-            addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg));
-            triggerSlowMotion(isUltimate?6:3);
-            setTimeout(function(){defender.isHit=false;},200);
-            defender.x+=dir*20;
-            if(defender.x<50) defender.x=50;
-            if(defender.x>canvas.width-50) defender.x=canvas.width-50;
+            defender.hp-=dmg;defender.isHit=true;addHitEffect(defender);addDamageText(defender.x,(canvas.height - 300)+defender.y,Math.floor(dmg));
+            triggerSlowMotion(isUltimate?6:3);setTimeout(function(){defender.isHit=false;},200);
+            defender.x+=dir*20;if(defender.x<50)defender.x=50;if(defender.x>canvas.width-50)defender.x=canvas.width-50;
         }
-        if(defender.hp<=0&&isUltimate){
-            finisherText.style.display="block";
-            setTimeout(function(){finisherText.style.display="none";},1000);
-        }
+        if(defender.hp<=0&&isUltimate){finisherText.style.display="block";setTimeout(function(){finisherText.style.display="none";},1000);}
     }
 }
 
@@ -731,40 +575,29 @@ function doHeroUltimateEffect(fighter){
     var enemy=(fighter===player?opponent:player);
     switch(h){
         case "张宸阳":
-            var px={x:fighter.x,y:fighter.y,frame:0,type:"snowcake",dir:(fighter.faceRight?1:-1)};
-            fighter.projectiles.push(px);
+            var px={x:fighter.x,y:fighter.y,frame:0,type:"snowcake",dir:(fighter.faceRight?1:-1)};fighter.projectiles.push(px);
             break;
         case "徐浩宸":
             flashScreen();
-            if(enemy){fighter.x=enemy.x-(fighter.faceRight?50:-50); checkHit(fighter,30,true); addLightningEffect(enemy.x,enemy.y);}
+            if(enemy){fighter.x=enemy.x-(fighter.faceRight?50:-50);checkHit(fighter,30,true);addLightningEffect(enemy.x,enemy.y);}
             break;
         case "万昊轩":
-            if(enemy){
-                for(var i=0;i<3;i++){
-                    let cloneX=enemy.x+(i*30*(enemy.x>fighter.x?1:-1));
-                    let cloneObj={x:cloneX,frame:0,type:"clone"};
-                    fighter.clones.push(cloneObj);
-                    setTimeout((function(ix){return function(){checkHit(fighter,10,false);}})(i),100*i);
-                }
-            }
+            if(enemy){for(var i=0;i<3;i++){let cloneX=enemy.x+(i*30*(enemy.x>fighter.x?1:-1));let cloneObj={x:cloneX,frame:0,type:"clone"};fighter.clones.push(cloneObj);setTimeout((function(ix){return function(){checkHit(fighter,10,false);}})(i),100*i);}}
             break;
         case "张弛":
             if(enemy){enemy.confused=true;addMagicCircle(enemy.x,enemy.y);setTimeout(function(){enemy.confused=false;},3000);}
             break;
         case "支嘉戈":
-            addPoleDanceEffect(fighter.x,fighter.y);
-            checkHit(fighter,30,true,true);
+            addPoleDanceEffect(fighter.x,fighter.y);checkHit(fighter,30,true,true);
             break;
         case "江思宇":
-            fighter.jump=true; fighter.vy=-30;
-            setTimeout(function(){checkHit(fighter,30,true);addGroundCrack(fighter.x,fighter.y);},800);
+            fighter.jump=true;fighter.vy=-30;setTimeout(function(){checkHit(fighter,30,true);addGroundCrack(fighter.x,fighter.y);},800);
             break;
         case "淇露":
             var px={x:fighter.x,y:fighter.y,vx:(fighter.faceRight?5:-5),vy:-1,frame:0,type:"firearrow",dir:(fighter.faceRight?1:-1)};
             fighter.projectiles.push(px);
             break;
         case "和子鸣":
-            // 编程大师大招加强：更多代码雨 & 电弧
             effects.push({frame:0,type:"coderain"});
             effects.push({frame:0,type:"coderain"});
             setTimeout(function(){
@@ -773,6 +606,21 @@ function doHeroUltimateEffect(fighter){
                 addLightningEffect(enemy.x+20,enemy.y+10);
                 addLightningEffect(enemy.x-20,enemy.y-10);
             },500);
+            break;
+        case "张博彦":
+            effects.push({frame:0,type:"coderain"});
+            effects.push({frame:0,type:"coderain"});
+            setTimeout(function(){
+                checkHit(fighter,35,true);
+                addLightningEffect(enemy.x,enemy.y);
+            },400);
+            break;
+        case "程湘婷":
+            flashScreen();
+            effects.push({frame:0,type:"poledance"});
+            setTimeout(function(){
+                checkHit(fighter,35,true,true);
+            },300);
             break;
     }
 }
@@ -800,9 +648,7 @@ function startRain(){
         rainLayer.appendChild(drop);
     }
 }
-if(Math.random()<0.3){
-    startRain();
-}
+if(Math.random()<0.3){startRain();}
 
 function setScene(s){
     var bg=document.getElementById("background");
@@ -812,11 +658,7 @@ function setScene(s){
     else bg.classList.add("theme-night");
 }
 
-var catParticles=[];
-function spawnCat(){
-    var cat={x:-50,y:100+Math.random()*(canvas.height-300),frame:0,type:"cat"};
-    catParticles.push(cat);
-}
+function spawnCat(){var cat={x:-50,y:100+Math.random()*(canvas.height-300),frame:0,type:"cat"};catParticles.push(cat);}
 
 function drawUIBars(){
     if(player&&opponent){
@@ -841,9 +683,7 @@ function roundTimeUpdate(){
     if(roundTime>0&&gameState==="fight"){
         roundTime-=1/60;
         timerDiv.innerText=Math.floor(roundTime);
-        if(roundTime<=0){
-            gameOver(player.hp>opponent.hp);
-        }
+        if(roundTime<=0){gameOver(player.hp>opponent.hp);}
     }
 }
 
@@ -857,23 +697,16 @@ function gameOver(playerWin){
         resultScreen.innerHTML="胜利！<br>小提示：保持攻势！<br><br><button onclick='restart()'>重新开始</button>";
         winCount++;
         winCountSpan.innerText=winCount;
-        if(winCount>bestRecord){
-            bestRecord=winCount;
-            bestRecordSpan.innerText=bestRecord;
-            try{localStorage.setItem("bestRecord",bestRecord);}catch(e){}
-        }
+        if(winCount>bestRecord){bestRecord=winCount;bestRecordSpan.innerText=bestRecord;try{localStorage.setItem("bestRecord",bestRecord);}catch(e){}}
     } else {
         gameoverText.style.display="block";
         setTimeout(function(){gameoverText.style.display="none";},2000);
         resultScreen.innerHTML="失败！<br>小提示：尝试格挡或降低难度！<br><br><button onclick='restart()'>重新开始</button>";
-        winCount=0;
-        winCountSpan.innerText=0;
+        winCount=0;winCountSpan.innerText=0;
     }
 }
 
-function restart(){
-    location.reload();
-}
+function restart(){location.reload();}
 
 function drawFighter(f){
     ctx.save();
@@ -1073,7 +906,6 @@ function drawEffects(){
         ctx.restore();
     });
 
-    // 伤害数字
     damageTexts.forEach(dt=>{
         dt.frame++;
         var alpha=1-(dt.frame/60);
@@ -1087,16 +919,7 @@ function drawEffects(){
     damageTexts=damageTexts.filter(dt=>dt.frame<60);
 }
 
-document.getElementById("music-toggle-btn").onclick=function(){
-    musicOn=!musicOn;
-    this.innerText="音乐："+(musicOn?"开":"关");
-}
-
-var catParticles=[];
-function spawnCat(){
-    var cat={x:-50,y:100+Math.random()*(canvas.height-300),frame:0,type:"cat"};
-    catParticles.push(cat);
-}
+document.getElementById("music-toggle-btn").onclick=function(){musicOn=!musicOn;this.innerText="音乐："+(musicOn?"开":"关");}
 
 function update(){
     if(gameState!=="fight")return;
@@ -1118,51 +941,28 @@ function update(){
     }
 
     [player,opponent].forEach(function(f){
-        f.vy+=gravity;
-        f.y+=f.vy;
-        if(f.y>0){f.y=0;f.vy=0;f.jump=false;}
-        f.x+=f.vx;
-        if(f.x<50) f.x=50;if(f.x>canvas.width-50) f.x=canvas.width-50;
+        f.vy+=gravity;f.y+=f.vy;if(f.y>0){f.y=0;f.vy=0;f.jump=false;}
+        f.x+=f.vx;if(f.x<50)f.x=50;if(f.x>canvas.width-50)f.x=canvas.width-50;
         if(f.attackCooldown>0)f.attackCooldown--;
-        if(!f.ultimateReady && f.ultimateCooldown>0){
-            f.ultimateCooldown--;
-            if(f.ultimateCooldown<=0)f.ultimateReady=true;
-        }
-        if(f.ultimateActive){
-            f.ultimateTimer--;
-            if(f.ultimateTimer<=0) f.ultimateActive=false;
-        }
+        if(!f.ultimateReady&&f.ultimateCooldown>0){f.ultimateCooldown--;if(f.ultimateCooldown<=0)f.ultimateReady=true;}
+        if(f.ultimateActive){f.ultimateTimer--;if(f.ultimateTimer<=0)f.ultimateActive=false;}
         f.stamina=Math.min(f.stamina+f.staminaRegen,100);
         f.slashEffects=f.slashEffects.filter(s=>{s.frame++;return s.frame<20;});
         f.auraEffects=f.auraEffects.filter(a=>{a.frame++;return a.frame<60;});
         f.clones=f.clones.filter(c=>{c.frame++;return c.frame<30;});
         f.projectiles.forEach(function(p){
-            if(p.type==="firearrow"){
-                p.x+=p.dir*p.vx;
-                p.y+=p.vy;
-                p.vy+=0.1;
-            } else if(p.type==="snowcake"){
-                p.x+=p.dir*4;
-            }
+            if(p.type==="firearrow"){p.x+=p.dir*p.vx;p.y+=p.vy;p.vy+=0.1;}
+            else if(p.type==="snowcake"){p.x+=p.dir*4;}
             p.frame++;
         });
-        f.projectiles=f.projectiles.filter(p=>{
-            if(p.x<0||p.x>canvas.width||p.frame>200)return false;
-            return true;
-        });
+        f.projectiles=f.projectiles.filter(p=>{if(p.x<0||p.x>canvas.width||p.frame>200)return false;return true;});
 
         var defender=(f===player?opponent:player);
         f.projectiles.forEach(p=>{
-            var dx=defender.x-p.x;
-            var dy=defender.y-p.y;
-            if(Math.abs(dx)<50 && Math.abs(dy)<50){
-                if(p.type==="snowcake"){
-                    checkHit(f,20,true);
-                    addCreamExplosion(defender.x,defender.y);
-                } else if(p.type==="firearrow"){
-                    checkHit(f,30,true);
-                    addFireExplosion(defender.x,defender.y);
-                }
+            var dx=defender.x-p.x;var dy=defender.y-p.y;
+            if(Math.abs(dx)<50&&Math.abs(dy)<50){
+                if(p.type==="snowcake"){checkHit(f,20,true);addCreamExplosion(defender.x,defender.y);}
+                else if(p.type==="firearrow"){checkHit(f,30,true);addFireExplosion(defender.x,defender.y);}
                 p.frame=9999;
             }
         });
@@ -1174,14 +974,8 @@ function update(){
     effects=effects.filter(e=>{e.frame++;return e.frame<60;});
     roundTimeUpdate();
 
-    catTimer++;
-    if(catTimer>1800){
-        catTimer=0;spawnCat();
-    }
-    catParticles.forEach(c=>{
-        c.x+=1;
-        c.frame++;
-    });
+    catTimer++;if(catTimer>1800){catTimer=0;spawnCat();}
+    catParticles.forEach(c=>{c.x+=1;c.frame++;});
     catParticles=catParticles.filter(c=>c.x<canvas.width+50);
 
     if(player&&player.hp<30)lowHpFlash=(lowHpFlash+1)%60;
@@ -1201,7 +995,6 @@ function draw(){
         drawFighter(opponent);
         drawEffects();
 
-        //画小猫
         ctx.save();
         ctx.fillStyle="#fff";
         catParticles.forEach(c=>{
@@ -1212,7 +1005,6 @@ function draw(){
         });
         ctx.restore();
 
-        //低血闪红
         if(player.hp<30&&lowHpFlash<30){
             ctx.fillStyle="rgba(255,0,0,0.3)";
             ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -1224,31 +1016,24 @@ function draw(){
 }
 
 function startFight(){
-    gameState="fight";
-    updateUI();
-    player = createFighter(playerHero, canvas.width*0.3, true);
-    opponent = createFighter(opponentHero, canvas.width*0.7, false);
+    gameState="fight";updateUI();
+    player=createFighter(playerHero,canvas.width*0.3,true);
+    opponent=createFighter(opponentHero,canvas.width*0.7,false);
     opponent.faceRight=false;
 
     roundStartText.style.display="block";
-    setTimeout(function(){
-        roundStartText.style.display="none";
-    },1500);
+    setTimeout(function(){roundStartText.style.display="none";},1500);
 
     loop();
 }
 
 function loop(){
-    if(gameState==="fight"){
-        update();
-    }
+    if(gameState==="fight"){update();}
     draw();
     requestAnimationFrame(loop);
 }
 
-// 初始化
-gameState="menu";
-updateUI();
+gameState="menu";updateUI();
 mainMenu.style.display="block";
 </script>
 </body>
