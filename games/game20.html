@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>刺客信条 - HTML版 多关卡版</title>
+<style>
+    /* 
+    ================================
+    刺客信条 HTML版 - 样式表（多关卡扩展版）
+    ================================
+    本版本在前面基础上扩展了多关卡与更多场景、难度和细节。
+    增加关卡选择界面和难度调整、不同场景（城市、森林、堡垒）切换，以及更多UI元素展示。
+
+    UI设计：高级简洁的扁平化UI，中性色调，少量亮色点缀。
+    新增：
+    - 多关卡选择界面
+    - 难度调节按钮
+    - 不同场景背景色彩变化
+    - 场景切换动画（简单过渡）
+    ================================
+    */
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        font-family: "Microsoft YaHei", sans-serif;
+        background: #111;
+        color: #ccc;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    #game-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(to bottom, #333, #111);
+        overflow: hidden;
+    }
+
+    /* 启动画面 */
+    #start-screen {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0,0,0,0.8);
+        z-index: 1000;
+    }
+
+    #start-screen h1 {
+        font-size: 3em;
+        color: #eee;
+        margin-bottom: 20px;
+        text-shadow: 0 0 10px #fff;
+    }
+
+    #start-screen p {
+        font-size: 1.2em;
+        color: #aaa;
+        margin-bottom: 40px;
+        text-align: center;
+        width: 60%;
+        line-height: 1.6;
+    }
+
+    #start-screen button {
+        background: #555;
+        color: #eee;
+        border: none;
+        padding: 15px 30px;
+        font-size: 1.2em;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s;
+        margin: 10px;
+    }
+
+    #start-screen button:hover {
+        background: #777;
+    }
+
+    /* 关卡选择界面 */
+    #level-select-screen {
+        position: absolute;
+        top:0;left:0;right:0;bottom:0;
+        background: rgba(0,0,0,0.8);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    #level-select-screen h2 {
+        font-size: 2em;
+        color: #eee;
+        margin-bottom: 20px;
+        text-shadow: 0 0 5px #fff;
+    }
+
+    #level-select-screen .levels {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #level-select-screen .levels button {
+        background: #555;
+        color: #eee;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1.2em;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s;
+        margin: 10px;
+    }
+
+    #level-select-screen .levels button:hover {
+        background: #777;
+    }
+
+    #level-select-screen .difficulty {
+        margin-top: 30px;
+        display: flex;
+        align-items: center;
+    }
+
+    #level-select-screen .difficulty span {
+        margin-right: 10px;
+    }
+
+    #level-select-screen .difficulty select {
+        background: #333;
+        color: #eee;
+        border: 1px solid #555;
+        border-radius: 3px;
+        padding: 5px;
+    }
+
+    #hud {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 50px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+        padding: 0 20px;
+        background: rgba(0,0,0,0.4);
+        box-shadow: 0 0 10px #000;
+    }
+
+    #hud .left-hud, #hud .right-hud {
+        display: flex;
+        align-items: center;
+    }
+
+    #hud .left-hud .health-bar-container {
+        position: relative;
+        width: 200px;
+        height: 20px;
+        background: #333;
+        border: 2px solid #555;
+        margin-right: 20px;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    #hud .left-hud .health-bar {
+        position: absolute;
+        top: 0; left: 0;
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(to right, #8b0000, #ff0000);
+        transition: width 0.3s;
+    }
+
+    #hud .left-hud .weapon-info {
+        font-size: 1em;
+        color: #eee;
+        margin-right: 20px;
+    }
+
+    #hud .left-hud .mission-info {
+        font-size: 1em;
+        color: #eee;
+    }
+
+    #hud .right-hud .mini-map {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        background: #222;
+        border: 2px solid #555;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #hud .right-hud .mini-map canvas {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* 对话与提示框 */
+    #dialog-box {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50%;
+        min-height: 100px;
+        background: rgba(0,0,0,0.6);
+        color: #eee;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px #000;
+        display: none;
+    }
+
+    #dialog-box h2 {
+        font-size: 1.4em;
+        margin-bottom: 10px;
+    }
+
+    #dialog-box p {
+        line-height: 1.6;
+    }
+
+    #dialog-box button {
+        margin-top: 20px;
+        background: #555;
+        color: #eee;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1em;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s;
+    }
+
+    #dialog-box button:hover {
+        background: #777;
+    }
+
+    /* 游戏区 */
+    #game-canvas {
+        position: absolute;
+        top: 50px;
+        left: 0;
+        width: 100%;
+        height: calc(100% - 50px);
+        background: #000;
+        display: block;
+        transition: background 1s;
+    }
+
+    /* 游戏结束屏幕 */
+    #game-over-screen {
+        position: absolute;
+        top:0; left:0; right:0; bottom:0;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        display: none;
+    }
+
+    #game-over-screen h1 {
+        font-size: 3em;
+        color: #eee;
+        margin-bottom: 20px;
+        text-shadow: 0 0 10px #f00;
+    }
+
+    #game-over-screen p {
+        font-size: 1.4em;
+        color: #ccc;
+        margin-bottom: 40px;
+        text-align: center;
+        width: 60%;
+        line-height: 1.6;
+    }
+
+    #game-over-screen button {
+        background: #555;
+        color: #eee;
+        border: none;
+        padding: 15px 30px;
+        font-size: 1.2em;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s;
+    }
+
+    #game-over-screen button:hover {
+        background: #777;
+    }
+
+    /* 胜利屏幕 */
+    #victory-screen {
+        position: absolute;
+        top:0; left:0; right:0; bottom:0;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        display: none;
+    }
+
+    #victory-screen h1 {
+        font-size: 3em;
+        color: #eee;
+        margin-bottom: 20px;
+        text-shadow: 0 0 10px #0f0;
+    }
+
+    #victory-screen p {
+        font-size: 1.4em;
+        color: #ccc;
+        margin-bottom: 40px;
+        text-align: center;
+        width: 60%;
+        line-height: 1.6;
+    }
+
+    #victory-screen button {
+        background: #555;
+        color: #eee;
+        border: none;
+        padding: 15px 30px;
+        font-size: 1.2em;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s;
+    }
+
+    #victory-screen button:hover {
+        background: #777;
+    }
+</style>
+</head>
+<body>
+<div id="game-container">
+    <div id="start-screen">
+        <h1>刺客信条 - HTML版</h1>
+        <p>
+            欢迎来到刺客的世界。<br><br>
+            使用WASD移动，空格键进行攻击或交互。<br>
+            在这款多关卡版本中，你将穿梭于不同的场景：中世纪城市、幽暗森林、坚固堡垒。<br>
+            难度随选择的关卡和模式而改变，守卫的数量、敏锐度与目标位置都会变化。<br><br>
+            当你准备好时，点击“开始”进入关卡选择界面。
+        </p>
+        <button id="go-level-select">开始</button>
+    </div>
+
+    <div id="level-select-screen">
+        <h2>选择关卡</h2>
+        <div class="levels">
+            <button data-level="city">城市</button>
+            <button data-level="forest">森林</button>
+            <button data-level="fortress">堡垒</button>
+        </div>
+        <div class="difficulty">
+            <span>选择难度：</span>
+            <select id="difficulty-select">
+                <option value="easy">容易</option>
+                <option value="normal" selected>普通</option>
+                <option value="hard">困难</option>
+                <option value="extreme">极限</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="hud">
+        <div class="left-hud">
+            <div class="health-bar-container">
+                <div class="health-bar" id="health-bar"></div>
+            </div>
+            <div class="weapon-info" id="weapon-info">武器: 隐刃</div>
+            <div class="mission-info" id="mission-info">任务: 未开始</div>
+        </div>
+        <div class="right-hud">
+            <div class="mini-map">
+                <canvas id="mini-map-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="game-canvas"></canvas>
+
+    <div id="dialog-box">
+        <h2 id="dialog-title"></h2>
+        <p id="dialog-text"></p>
+        <button id="dialog-button">继续</button>
+    </div>
+
+    <div id="game-over-screen">
+        <h1>你已阵亡</h1>
+        <p>很遗憾，你未能完成你的刺杀之旅。请选择更适合你的难度与关卡重新开始。</p>
+        <button id="retry-button">返回关卡选择</button>
+    </div>
+
+    <div id="victory-screen">
+        <h1>任务完成！</h1>
+        <p>恭喜你，你在该关卡完成了暗杀目标！你可继续尝试更高难度或其它场景。</p>
+        <button id="victory-button">返回关卡选择</button>
+    </div>
+</div>
+
+<script>
+/*
+===================================
+刺客信条 HTML版 多关卡拓展版 - 游戏脚本
+===================================
+
+新增功能：
+- 多关卡：
+  city（城市场景）、forest（森林场景）、fortress（堡垒场景）
+  不同关卡有不同的map大小、敌人数量、目标位置和场景色调。
+- 难度设置：easy、normal、hard、extreme影响敌人数量、视野范围、玩家生命恢复频率（可简化）
+- 更详细的剧情对话和提示：
+  根据关卡不同显示对应的初始剧情对话和提示。
+- 在场景背景、敌人巡逻、目标位置等方面有变化。
+- 返回关卡选择界面时不会刷新整个页面，而是重置状态。
+- 新增简单的生命恢复机制（易难度下玩家有微量自动回血）
+
+变量增加：
+- currentLevel 存储当前关卡类型
+- difficulty 存储当前难度
+- 根据难度和关卡调整敌人数量、目标位置、地图大小、敌人视野范围
+
+关卡特征示例：
+- city：中等大小地图 2000x2000，敌人20-30，根据难度变化，目标在城镇中央广场
+- forest：较大地图 3000x3000，敌人30-40，目标在一处森林空地
+- fortress：较小但复杂地图 1500x1500，敌人密集 25-35，目标在堡垒中心厅堂
+
+难度特征：
+- easy：敌人数量下限，视野缩短10%，玩家生命可缓慢恢复
+- normal：默认设定，无额外调整
+- hard：敌人数量上限+5%，视野+10%，玩家无恢复
+- extreme：敌人数量上限+20%，视野+30%，玩家无恢复且敌人伤害更高
+
+玩家自动恢复生命机制（易难度）：每帧小概率或缓慢恢复1点，封顶maxHealth。
+*/
+
+
+// 全局变量定义
+var canvas = document.getElementById('game-canvas');
+var ctx = canvas.getContext('2d');
+var width = window.innerWidth;
+var height = window.innerHeight - 50; 
+canvas.width = width;
+canvas.height = height;
+
+var gameStarted = false;
+var gameOver = false;
+var victory = false;
+var dialogActive = false;
+var currentDialog = null;
+var encounterTriggered = false; 
+var enemyKillCount = 0; 
+var currentLevel = null;
+var difficulty = 'normal';
+
+// 玩家属性
+var player = {
+    x: 200,
+    y: 200,
+    width: 40,
+    height: 40,
+    speed: 3,
+    health: 100,
+    maxHealth: 100,
+    weapon: "隐刃",
+    facing: "down",
+    attacking: false,
+    attackRange: 50,
+    stealth: true
+};
+
+// 基础数据
+var enemies = [];
+var obstacles = [];
+var assassinationTarget = { x: 1000, y: 600, width: 40, height: 40, alive: true };
+
+var mapWidth = 2000;
+var mapHeight = 2000;
+var cameraX = 0;
+var cameraY = 0;
+var keys = {};
+
+// 不同关卡、难度对应的配置
+var levelConfigs = {
+    city: {
+        mapWidth: 2000,
+        mapHeight: 2000,
+        baseEnemies: 20,
+        target: {x:1000,y:600},
+        bgColor: "#000"
+    },
+    forest: {
+        mapWidth: 3000,
+        mapHeight: 3000,
+        baseEnemies: 30,
+        target: {x:1500,y:1500},
+        bgColor: "#003300"
+    },
+    fortress: {
+        mapWidth: 1500,
+        mapHeight: 1500,
+        baseEnemies: 25,
+        target: {x:700,y:700},
+        bgColor: "#222"
+    }
+};
+
+var difficultyModifiers = {
+    easy: {enemyFactor:0.8, visionFactor:0.9, playerRegen:true, enemyDamageFactor:0.9},
+    normal:{enemyFactor:1.0, visionFactor:1.0, playerRegen:false, enemyDamageFactor:1.0},
+    hard:{enemyFactor:1.1, visionFactor:1.1, playerRegen:false, enemyDamageFactor:1.2},
+    extreme:{enemyFactor:1.2, visionFactor:1.3, playerRegen:false, enemyDamageFactor:1.5}
+};
+
+// 对话内容根据关卡变化
+var dialogs = {
+    city: [
+        {id: "intro_city", title: "城市任务", text:"你来到了一座中世纪城市的中央广场。这里守卫众多，他们的眼睛如鹰般锐利。你的目标在广场中央。保持低调，完成刺杀。", next:"hint"},
+        {id: "hint", title: "提示", text:"WASD移动，空格攻击。利用建筑与阴影潜行，避免正面冲突。", next:null},
+        {id: "encounter", title: "目标临近", text:"你已接近目标！他就在前方不远处的小广场中，周围守卫密布，请谨慎行动。", next:null},
+        {id: "victory", title: "任务完成", text:"你在城市中完成了暗杀任务，顺利脱身！", next:null}
+    ],
+    forest: [
+        {id: "intro_forest", title: "森林任务", text:"你深入一片幽暗森林。树影斑驳，守卫在林中巡逻。目标在森林深处的空地上。利用植被躲避视线，出其不意完成刺杀。", next:"hint"},
+        {id: "hint", title: "提示", text:"WASD移动，空格攻击。森林地形复杂，小心被守卫包抄。", next:null},
+        {id: "encounter", title: "目标临近", text:"你已接近森林空地上的目标。随时准备出手！", next:null},
+        {id: "victory", title: "任务完成", text:"你在森林中成功完成了目标刺杀，飞鸟不惊。", next:null}
+    ],
+    fortress: [
+        {id: "intro_fortress", title: "堡垒任务", text:"你潜入一座坚固堡垒。走廊狭窄，守卫密集。目标在堡垒大厅中。小心声响和回声，敌人灵敏非常。", next:"hint"},
+        {id: "hint", title: "提示", text:"WASD移动，空格攻击。利用掩体遮挡，逐步逼近目标。", next:null},
+        {id: "encounter", title: "目标临近", text:"你已接近堡垒的中心厅堂，目标就在前方！", next:null},
+        {id: "victory", title: "任务完成", text:"你在坚固堡垒中完成了不可能的刺杀！", next:null}
+    ]
+};
+
+// 当前对话集（根据关卡加载）
+var currentDialogs = [];
+var currentMission = "未开始";
+
+// 初始化游戏并进入对话
+function initGame() {
+    // 根据currentLevel和difficulty设置地图、敌人、目标等
+    var lc = levelConfigs[currentLevel];
+    var dm = difficultyModifiers[difficulty];
+
+    mapWidth = lc.mapWidth;
+    mapHeight = lc.mapHeight;
+    assassinationTarget.x = lc.target.x;
+    assassinationTarget.y = lc.target.y;
+    assassinationTarget.alive = true;
+
+    enemies = [];
+    obstacles = [];
+    var enemyCount = Math.floor(lc.baseEnemies * dm.enemyFactor);
+    initEnemies(enemyCount, dm);
+    initObstacles(30);
+
+    // 设置场景背景
+    document.getElementById("game-canvas").style.background = lc.bgColor;
+
+    // 加载当前关卡对话
+    currentDialogs = dialogs[currentLevel].map(function(d){return Object.assign({},d);});
+    showDialog(currentDialogs[0].id);
+
+    currentMission = "前往目标区域";
+    player.x = 200;
+    player.y = 200;
+    player.health = player.maxHealth;
+    enemyKillCount = 0;
+    encounterTriggered = false;
+    gameOver = false;
+    victory = false;
+
+    updateHUD();
+    gameStarted = true;
+    gameLoop();
+}
+
+// 初始化敌人（根据难度与场景）
+function initEnemies(count, dm) {
+    for (var i = 0; i < count; i++) {
+        var visionRange = 200 * dm.visionFactor;
+        var enemyDamage = 0.1 * dm.enemyDamageFactor;
+        enemies.push({
+            x: Math.random() * (mapWidth - 50) + 50,
+            y: Math.random() * (mapHeight - 50) + 50,
+            width: 40,
+            height: 40,
+            health: 50,
+            maxHealth: 50,
+            alive: true,
+            patrolRoute: generatePatrolRoute(),
+            currentPatrolIndex: 0,
+            speed: 2,
+            visionRange: visionRange,
+            state: "patrol",
+            facing: "down",
+            damage: enemyDamage
+        });
+    }
+}
+
+// 初始化障碍物（建筑/树木/箱子）
+function initObstacles(num) {
+    obstacles = [];
+    for (var i = 0; i < num; i++) {
+        obstacles.push({
+            x: Math.random() * (mapWidth - 100),
+            y: Math.random() * (mapHeight - 100),
+            width: 100,
+            height: 100
+        });
+    }
+}
+
+// 生成简单的巡逻路线
+function generatePatrolRoute() {
+    var route = [];
+    for (var j = 0; j < 4; j++) {
+        route.push({
+            x: Math.random() * mapWidth,
+            y: Math.random() * mapHeight
+        });
+    }
+    return route;
+}
+
+function updateHUD() {
+    var healthBar = document.getElementById("health-bar");
+    var healthPercent = (player.health / player.maxHealth) * 100;
+    healthBar.style.width = healthPercent + "%";
+    document.getElementById("weapon-info").textContent = "武器: " + player.weapon;
+    document.getElementById("mission-info").textContent = "任务: " + currentMission;
+}
+
+// 显示对话框
+function showDialog(id) {
+    var d = currentDialogs.find(function(di){return di.id === id;});
+    if(d) {
+        currentDialog = d;
+        dialogActive = true;
+        document.getElementById("dialog-title").textContent = d.title;
+        document.getElementById("dialog-text").textContent = d.text;
+        document.getElementById("dialog-box").style.display = "block";
+    }
+}
+
+// 隐藏对话框
+function hideDialog() {
+    dialogActive = false;
+    currentDialog = null;
+    document.getElementById("dialog-box").style.display = "none";
+}
+
+function gameLoop() {
+    if (!gameStarted || gameOver || victory) {
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+function update() {
+    handleInput();
+    updatePlayer();
+    updateEnemies();
+    checkCollisions();
+    updateCamera();
+    updateHUD();
+    updateMissionStatus();
+    updateMiniMap();
+    checkEncounterDialogTrigger();
+    checkEnemyKillMilestone();
+    handlePlayerRegen();
+}
+
+function draw() {
+    ctx.clearRect(0, 0, width, height);
+    drawBackground();
+    obstacles.forEach(drawObstacle);
+    if(assassinationTarget.alive) drawTarget(assassinationTarget);
+    enemies.forEach(function(e){if(e.alive) drawEnemy(e);});
+    drawPlayer(player);
+}
+
+function drawBackground() {
+    ctx.save();
+    ctx.translate(-cameraX, -cameraY);
+    ctx.fillStyle = "#222";
+    ctx.fillRect(0,0,mapWidth,mapHeight);
+    ctx.strokeStyle = "#333";
+    for (var x = 0; x < mapWidth; x += 100) {
+        ctx.beginPath();
+        ctx.moveTo(x,0);
+        ctx.lineTo(x,mapHeight);
+        ctx.stroke();
+    }
+    for (var y = 0; y < mapHeight; y += 100) {
+        ctx.beginPath();
+        ctx.moveTo(0,y);
+        ctx.lineTo(mapWidth,y);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+function drawObstacle(o) {
+    ctx.save();
+    ctx.translate(-cameraX, -cameraY);
+    ctx.fillStyle = "#444";
+    ctx.fillRect(o.x, o.y, o.width, o.height);
+    ctx.strokeStyle = "#555";
+    ctx.strokeRect(o.x, o.y, o.width, o.height);
+    ctx.restore();
+}
+
+function drawTarget(t) {
+    ctx.save();
+    ctx.translate(-cameraX, -cameraY);
+    ctx.fillStyle = "#a00";
+    ctx.fillRect(t.x, t.y, t.width, t.height);
+    ctx.strokeStyle = "#f00";
+    ctx.strokeRect(t.x, t.y, t.width, t.height);
+    ctx.restore();
+}
+
+function drawEnemy(e) {
+    ctx.save();
+    ctx.translate(-cameraX, -cameraY);
+    ctx.fillStyle = "#008";
+    ctx.fillRect(e.x, e.y, e.width, e.height);
+    ctx.strokeStyle = "#00f";
+    ctx.strokeRect(e.x, e.y, e.width, e.height);
+    ctx.restore();
+}
+
+function drawPlayer(p) {
+    ctx.save();
+    ctx.translate(-cameraX, -cameraY);
+    ctx.fillStyle = "#0f0";
+    ctx.fillRect(p.x, p.y, p.width, p.height);
+    ctx.strokeStyle = "#0c0";
+    ctx.strokeRect(p.x, p.y, p.width, p.height);
+    ctx.restore();
+}
+
+function handleInput() {
+    if (dialogActive) return;
+    if (keys['w']) {player.y -= player.speed; player.facing = "up";}
+    if (keys['s']) {player.y += player.speed; player.facing = "down";}
+    if (keys['a']) {player.x -= player.speed; player.facing = "left";}
+    if (keys['d']) {player.x += player.speed; player.facing = "right";}
+}
+
+function updatePlayer() {
+    if (player.x < 0) player.x = 0;
+    if (player.y < 0) player.y = 0;
+    if (player.x + player.width > mapWidth) player.x = mapWidth - player.width;
+    if (player.y + player.height > mapHeight) player.y = mapHeight - player.height;
+    if (player.health <= 0 && !gameOver) triggerGameOver();
+}
+
+function updateEnemies() {
+    enemies.forEach(function(e) {
+        if (!e.alive) return;
+        if (e.state === "patrol") {
+            patrol(e);
+            if (canSeePlayer(e)) e.state = "chase";
+        } else if (e.state === "chase") {
+            chase(e);
+            if (!canSeePlayer(e)) e.state = "patrol";
+        }
+    });
+}
+
+function patrol(e) {
+    var route = e.patrolRoute;
+    if (route.length === 0) return;
+    var target = route[e.currentPatrolIndex];
+    var dx = target.x - e.x;
+    var dy = target.y - e.y;
+    var dist = Math.sqrt(dx*dx+dy*dy);
+    if (dist < 10) {
+        e.currentPatrolIndex = (e.currentPatrolIndex + 1) % route.length;
+    } else {
+        var angle = Math.atan2(dy, dx);
+        e.x += Math.cos(angle)*e.speed;
+        e.y += Math.sin(angle)*e.speed;
+    }
+}
+
+function chase(e) {
+    var dx = player.x - e.x;
+    var dy = player.y - e.y;
+    var dist = Math.sqrt(dx*dx+dy*dy);
+    if (dist > 10) {
+        var angle = Math.atan2(dy, dx);
+        e.x += Math.cos(angle)*e.speed;
+        e.y += Math.sin(angle)*e.speed;
+    }
+}
+
+function canSeePlayer(e) {
+    var dx = player.x - e.x;
+    var dy = player.y - e.y;
+    var dist = Math.sqrt(dx*dx+dy*dy);
+    if (dist > e.visionRange) return false;
+    return !isObstructed(e.x,e.y,player.x,player.y);
+}
+
+function isObstructed(x1,y1,x2,y2) {
+    for (var i=0; i<obstacles.length; i++) {
+        var o = obstacles[i];
+        if (lineRectCollide(x1,y1,x2,y2,o.x,o.y,o.width,o.height)) return true;
+    }
+    return false;
+}
+
+function lineRectCollide(x1,y1,x2,y2,rx,ry,rw,rh) {
+    if(lineLineCollide(x1,y1,x2,y2, rx,ry,rx,ry+rh)) return true;
+    if(lineLineCollide(x1,y1,x2,y2, rx+rw,ry,rx+rw,ry+rh)) return true;
+    if(lineLineCollide(x1,y1,x2,y2, rx,ry,rx+rw,ry)) return true;
+    if(lineLineCollide(x1,y1,x2,y2, rx,ry+rh,rx+rw,ry+rh)) return true;
+    if (x1 > rx && x1 < rx+rw && y1 > ry && y1 < ry+rh) return true;
+    return false;
+}
+
+function lineLineCollide(x1,y1,x2,y2,x3,y3,x4,y4) {
+    var uA = ((x4 - x3)*(y1 - y3) - (y4 - y3)*(x1 - x3)) /
+             ((y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1));
+    var uB = ((x2 - x1)*(y1 - y3) - (y2 - y1)*(x1 - x3)) /
+             ((y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1));
+    if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) return true;
+    return false;
+}
+
+function checkCollisions() {
+    obstacles.forEach(function(o) {
+        if(rectCollide(player, o)) {
+            resolvePlayerObstacleCollision(player, o);
+        }
+    });
+
+    enemies.forEach(function(e) {
+        if (e.alive && rectCollide(player, e)) {
+            player.health -= e.damage; // 使用敌人damage值
+        }
+    });
+
+    if (assassinationTarget.alive && rectCollide(player, assassinationTarget)) {
+        if (player.attacking) {
+            assassinationTarget.alive = false;
+            showDialog("victory");
+            setTimeout(function(){
+                triggerVictory();
+            },2000);
+        }
+    }
+
+    if (player.attacking) {
+        enemies.forEach(function(e) {
+            if (e.alive && distance(player.x,player.y,e.x,e.y)<player.attackRange) {
+                if (isBehindPlayer(e)) {
+                    e.alive = false;
+                    enemyKillCount++;
+                    showRandomKillMessage();
+                } else {
+                    e.health -= 25;
+                    if (e.health <=0) {
+                        e.alive=false;
+                        enemyKillCount++;
+                        showRandomKillMessage();
+                    }
+                }
+            }
+        });
+    }
+}
+
+function showRandomKillMessage() {
+    var messages = [
+        "你在阴影中解决了一个守卫。",
+        "一击必杀！无声终结。",
+        "敌人的血迹悄然消失于夜色。",
+        "没有人会记得这个守卫的名字。"
+    ];
+    var msg = messages[Math.floor(Math.random()*messages.length)];
+    console.log(msg);
+}
+
+function isBehindPlayer(e) {
+    if (player.facing==="up" && e.y>player.y) return false;
+    if (player.facing==="down" && e.y<player.y) return false;
+    if (player.facing==="left" && e.x>player.x) return false;
+    if (player.facing==="right" && e.x<player.x) return false;
+    return true;
+}
+
+function distance(x1,y1,x2,y2) {
+    var dx=x2-x1; var dy=y2-y1;
+    return Math.sqrt(dx*dx+dy*dy);
+}
+
+function rectCollide(a,b) {
+    return a.x < b.x+b.width && a.x+a.width > b.x && a.y < b.y+b.height && a.y+a.height > b.y;
+}
+
+function resolvePlayerObstacleCollision(p, o) {
+    var playerCenterX = p.x+p.width/2;
+    var playerCenterY = p.y+p.height/2;
+    var obstacleCenterX = o.x+o.width/2;
+    var obstacleCenterY = o.y+o.height/2;
+
+    var dx = playerCenterX - obstacleCenterX;
+    var dy = playerCenterY - obstacleCenterY;
+
+    var combinedHalfWidth = (p.width+o.width)/2;
+    var combinedHalfHeight= (p.height+o.height)/2;
+
+    if(Math.abs(dx)<combinedHalfWidth && Math.abs(dy)<combinedHalfHeight) {
+        var overlapX = combinedHalfWidth - Math.abs(dx);
+        var overlapY = combinedHalfHeight - Math.abs(dy);
+
+        if(overlapX<overlapY) {
+            if(dx>0) p.x += overlapX; else p.x -= overlapX;
+        } else {
+            if(dy>0) p.y += overlapY; else p.y -= overlapY;
+        }
+    }
+}
+
+function updateCamera() {
+    cameraX = player.x + player.width/2 - width/2;
+    cameraY = player.y + player.height/2 - height/2;
+    if (cameraX<0) cameraX=0;
+    if (cameraY<0) cameraY=0;
+    if (cameraX>mapWidth-width) cameraX=mapWidth-width;
+    if (cameraY>mapHeight-height) cameraY=mapHeight-height;
+}
+
+function updateMissionStatus() {
+    if (!assassinationTarget.alive) currentMission = "任务完成";
+    else {
+        var distToTarget = distance(player.x,player.y,assassinationTarget.x,assassinationTarget.y);
+        if (distToTarget < 200) currentMission = "暗杀目标 (空格执行)";
+        else currentMission = "前往目标区域";
+    }
+}
+
+function updateMiniMap() {
+    var mm = document.getElementById("mini-map-canvas");
+    var mmCtx = mm.getContext('2d');
+    mm.width = 100;
+    mm.height = 100;
+
+    mmCtx.fillStyle = "#222";
+    mmCtx.fillRect(0,0,100,100);
+
+    var scaleX = 100/mapWidth;
+    var scaleY = 100/mapHeight;
+
+    mmCtx.fillStyle = "#0f0";
+    mmCtx.fillRect(player.x*scaleX, player.y*scaleY, 2, 2);
+
+    if(assassinationTarget.alive) {
+        mmCtx.fillStyle = "#f00";
+        mmCtx.fillRect(assassinationTarget.x*scaleX, assassinationTarget.y*scaleY, 2, 2);
+    }
+
+    mmCtx.fillStyle="#00f";
+    enemies.forEach(function(e) {
+        if(e.alive) mmCtx.fillRect(e.x*scaleX, e.y*scaleY,2,2);
+    });
+}
+
+function checkEncounterDialogTrigger() {
+    if (!encounterTriggered && assassinationTarget.alive) {
+        var distToTarget = distance(player.x,player.y,assassinationTarget.x,assassinationTarget.y);
+        if (distToTarget < 300 && !dialogActive && !victory && !gameOver) {
+            encounterTriggered = true;
+            showDialog("encounter");
+        }
+    }
+}
+
+function checkEnemyKillMilestone() {
+    if (enemyKillCount===5) console.log("你已击杀多名守卫，继续保持隐蔽。");
+    if (enemyKillCount===10) console.log("你已在此处如入无人之境，但仍需小心。");
+}
+
+function handlePlayerRegen() {
+    // 易难度下自动缓慢回血
+    if (difficulty === "easy" && player.health < player.maxHealth && !dialogActive && !gameOver && !victory) {
+        if (Math.random()<0.01) { 
+            player.health += 1; 
+            if (player.health>player.maxHealth) player.health=player.maxHealth;
+        }
+    }
+}
+
+function triggerGameOver() {
+    gameOver = true;
+    document.getElementById("game-over-screen").style.display="flex";
+}
+
+function triggerVictory() {
+    victory = true;
+    document.getElementById("victory-screen").style.display="flex";
+}
+
+// 事件监听
+document.getElementById("go-level-select").addEventListener("click", function(){
+    document.getElementById("start-screen").style.display="none";
+    document.getElementById("level-select-screen").style.display="flex";
+});
+
+document.getElementById("level-select-screen").addEventListener("click", function(e){
+    if (e.target.tagName.toLowerCase()==='button' && e.target.hasAttribute('data-level')) {
+        currentLevel = e.target.getAttribute('data-level');
+        difficulty = document.getElementById("difficulty-select").value;
+        document.getElementById("level-select-screen").style.display="none";
+        initGame();
+    }
+});
+
+document.getElementById("dialog-button").addEventListener("click",function(){
+    if (currentDialog && currentDialog.next) {
+        var nextId = currentDialog.next;
+        hideDialog();
+        showDialog(nextId);
+    } else {
+        hideDialog();
+    }
+});
+
+document.getElementById("retry-button").addEventListener("click", function(){
+    resetToLevelSelect();
+});
+
+document.getElementById("victory-button").addEventListener("click", function(){
+    resetToLevelSelect();
+});
+
+function resetToLevelSelect() {
+    // 回到关卡选择界面，但不刷新页面
+    gameOver = false;
+    victory = false;
+    gameStarted = false;
+    document.getElementById("game-over-screen").style.display="none";
+    document.getElementById("victory-screen").style.display="none";
+    document.getElementById("level-select-screen").style.display="flex";
+}
+
+// 键盘事件
+document.addEventListener("keydown", function(e){
+    keys[e.key.toLowerCase()] = true;
+    if(e.key === " " && !dialogActive && !gameOver && !victory && gameStarted) {
+        player.attacking = true;
+        setTimeout(function(){
+            player.attacking=false;
+        },100);
+    }
+});
+document.addEventListener("keyup", function(e){
+    keys[e.key.toLowerCase()] = false;
+});
+
+// 窗口调整
+window.addEventListener("resize", function(){
+    width = window.innerWidth;
+    height = window.innerHeight - 50;
+    canvas.width = width;
+    canvas.height = height;
+});
+
+/*
+扩展想法（非代码实现，仅注释说明）：
+- 可加入音效，如：按键音、攻击音、背景音乐（利用Audio元素）
+- 增加敌人的多样性：弓箭手、游骑兵、重甲卫士（不同颜色的矩形代替）
+- 增加陷阱、隐藏点（高草丛、屋顶）
+- 增加简单的库存系统和武器切换UI（当前仅有隐刃）
+- 增加更多剧情对话，根据杀敌数或关卡进程触发
+- 增加计时器系统，用时越短评分越高
+- 增加数据统计界面（击杀数、被发现次数等）
+- 优化AI逻辑：真正实现视角锥形检测、听觉范围响应
+*/
+
+</script>
+</body>
+</html>
