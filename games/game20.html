@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>刺客信条 - HTML版 多关卡版</title>
+<title>刺客信条 - HTML版 多关卡多目标+进阶版</title>
 <style>
     /* 
     ================================
-    刺客信条 HTML版 - 样式表（多关卡扩展版）
+    刺客信条 HTML版 - 多关卡+赏金+数据保存+商店+优化UI+逻辑完善
     ================================
-    本版本在前面基础上扩展了多关卡与更多场景、难度和细节。
-    增加关卡选择界面和难度调整、不同场景（城市、森林、堡垒）切换，以及更多UI元素展示。
+    修复点与优化：
+    1. 修复点击关卡按钮无法正常开始游戏的问题：不再使用事件委托，给每个关卡按钮单独添加事件监听。
+    2. 修复商店购买问题：不再使用inline onclick，在生成武器项目后为购买按钮添加事件监听，确保buyWeapon可用。
+    3. 确保数据加载、保存、删除按钮正常工作，更新UI数据展示。
+    4. 确保在游戏结束或返回关卡选择时清除名牌。
+    5. 优化UI逻辑，关闭商店、数据管理面板后正确返回上一级界面。
+    6. 各功能（商店购买、数据管理、关卡选择、数据保存加载）均经由事件监听器保证顺畅运行。
+    7. 保留原逻辑基础上做出全面修复和优化。
 
-    UI设计：高级简洁的扁平化UI，中性色调，少量亮色点缀。
-    新增：
-    - 多关卡选择界面
-    - 难度调节按钮
-    - 不同场景背景色彩变化
-    - 场景切换动画（简单过渡）
     ================================
     */
 
@@ -107,6 +107,7 @@
         flex-direction: row;
         justify-content: center;
         align-items: center;
+        margin-bottom: 20px;
     }
 
     #level-select-screen .levels button {
@@ -126,7 +127,7 @@
     }
 
     #level-select-screen .difficulty {
-        margin-top: 30px;
+        margin-top: 20px;
         display: flex;
         align-items: center;
     }
@@ -143,6 +144,7 @@
         padding: 5px;
     }
 
+    /* 顶部HUD */
     #hud {
         position: absolute;
         top: 0; left: 0;
@@ -191,6 +193,12 @@
     #hud .left-hud .mission-info {
         font-size: 1em;
         color: #eee;
+        margin-right: 20px;
+    }
+
+    #hud .left-hud .gold-info {
+        font-size: 1em;
+        color: #ff0;
     }
 
     #hud .right-hud .mini-map {
@@ -351,6 +359,135 @@
     #victory-screen button:hover {
         background: #777;
     }
+
+    /* 名字显示 */
+    .name-label {
+        position:absolute;
+        background:rgba(0,0,0,0.7);
+        color:#fff;
+        padding:2px 5px;
+        font-size:0.8em;
+        border-radius:3px;
+        pointer-events:none;
+        transform:translate(-50%,-100%);
+        white-space:nowrap;
+        z-index:3000;
+    }
+
+    /* 商店面板 */
+    #shop-screen {
+        position: absolute;
+        top:0;left:0;right:0;bottom:0;
+        background: rgba(0,0,0,0.8);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1500;
+    }
+
+    #shop-screen h2 {
+        font-size: 2em;
+        color: #eee;
+        margin-bottom: 20px;
+    }
+
+    #shop-screen .weapons {
+        display: flex;
+        flex-wrap: wrap;
+        max-width: 600px;
+        justify-content: center;
+    }
+
+    #shop-screen .weapon-item {
+        background: #333;
+        border: 2px solid #555;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px;
+        text-align: center;
+        color: #eee;
+        width: 120px;
+    }
+
+    #shop-screen .weapon-item h3 {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+    }
+
+    #shop-screen .weapon-item button {
+        background: #555;
+        border: none;
+        color: #eee;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+    #shop-screen .weapon-item button:hover {
+        background: #777;
+    }
+
+    #shop-screen .bottom-buttons {
+        margin-top:20px;
+    }
+
+    #shop-screen .bottom-buttons button {
+        background: #555;
+        color: #eee;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1em;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s;
+        margin: 10px;
+    }
+
+    #shop-screen .bottom-buttons button:hover {
+        background: #777;
+    }
+
+    /* 数据管理面板 */
+    #data-manage-screen {
+        position: absolute;
+        top:0;left:0;right:0;bottom:0;
+        background: rgba(0,0,0,0.8);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1500;
+    }
+
+    #data-manage-screen h2 {
+        font-size:2em;
+        color:#eee;
+        margin-bottom:20px;
+    }
+
+    #data-manage-screen p {
+        font-size:1.2em;
+        color:#ccc;
+        margin-bottom:20px;
+    }
+
+    #data-manage-screen button {
+        background: #555;
+        color: #eee;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1em;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s;
+        margin: 10px;
+    }
+
+    #data-manage-screen button:hover {
+        background: #777;
+    }
+
 </style>
 </head>
 <body>
@@ -358,21 +495,22 @@
     <div id="start-screen">
         <h1>刺客信条 - HTML版</h1>
         <p>
-            欢迎来到刺客的世界。<br><br>
-            使用WASD移动，空格键进行攻击或交互。<br>
-            在这款多关卡版本中，你将穿梭于不同的场景：中世纪城市、幽暗森林、坚固堡垒。<br>
-            难度随选择的关卡和模式而改变，守卫的数量、敏锐度与目标位置都会变化。<br><br>
-            当你准备好时，点击“开始”进入关卡选择界面。
+            欢迎来到刺客的世界。使用WASD移动，空格键攻击。<br>
+            有赏金目标可获得金币奖励，用金币可在商店购买更强武器。<br>
+            你也可以保存/加载游戏数据（金币、武器、成就）。<br>
+            准备好后点击开始进入关卡选择。<br><br>
+            当前数据：<span id="start-gold-info"></span>
         </p>
         <button id="go-level-select">开始</button>
+        <button id="go-data-manage">数据管理</button>
     </div>
 
     <div id="level-select-screen">
         <h2>选择关卡</h2>
         <div class="levels">
-            <button data-level="city">城市</button>
-            <button data-level="forest">森林</button>
-            <button data-level="fortress">堡垒</button>
+            <button id="select-city" data-level="city">城市</button>
+            <button id="select-forest" data-level="forest">森林</button>
+            <button id="select-fortress" data-level="fortress">堡垒</button>
         </div>
         <div class="difficulty">
             <span>选择难度：</span>
@@ -383,6 +521,27 @@
                 <option value="extreme">极限</option>
             </select>
         </div>
+        <button id="open-shop">进入商店</button>
+        <button id="return-start">返回主菜单</button>
+    </div>
+
+    <div id="shop-screen">
+        <h2>武器商店 (当前金币：<span id="shop-gold-info"></span>)</h2>
+        <div class="weapons" id="shop-weapon-list">
+            <!-- 动态生成武器列表 -->
+        </div>
+        <div class="bottom-buttons">
+            <button id="close-shop">关闭商店</button>
+        </div>
+    </div>
+
+    <div id="data-manage-screen">
+        <h2>数据管理</h2>
+        <p>在这里可以保存、加载或删除你的游戏数据（包括金币、已购武器、成就）。</p>
+        <button id="save-data-button">保存数据</button>
+        <button id="load-data-button">加载数据</button>
+        <button id="delete-data-button">删除数据</button>
+        <button id="close-data-manage">关闭</button>
     </div>
 
     <div id="hud">
@@ -392,6 +551,7 @@
             </div>
             <div class="weapon-info" id="weapon-info">武器: 隐刃</div>
             <div class="mission-info" id="mission-info">任务: 未开始</div>
+            <div class="gold-info" id="gold-info">金币: 0</div>
         </div>
         <div class="right-hud">
             <div class="mini-map">
@@ -410,55 +570,34 @@
 
     <div id="game-over-screen">
         <h1>你已阵亡</h1>
-        <p>很遗憾，你未能完成你的刺杀之旅。请选择更适合你的难度与关卡重新开始。</p>
+        <p>很遗憾，你未能完成刺杀任务。请选择更适合你的难度与关卡重新开始。</p>
         <button id="retry-button">返回关卡选择</button>
     </div>
 
     <div id="victory-screen">
         <h1>任务完成！</h1>
-        <p>恭喜你，你在该关卡完成了暗杀目标！你可继续尝试更高难度或其它场景。</p>
+        <p>恭喜你完成了主要目标的暗杀！你也获得了赏金目标的额外奖励。</p>
         <button id="victory-button">返回关卡选择</button>
     </div>
+
+    <div id="name-label-container"></div>
 </div>
 
 <script>
 /*
 ===================================
-刺客信条 HTML版 多关卡拓展版 - 游戏脚本
+刺客信条 HTML版 多关卡+赏金+数据保存+商店+优化UI+逻辑完善
 ===================================
 
-新增功能：
-- 多关卡：
-  city（城市场景）、forest（森林场景）、fortress（堡垒场景）
-  不同关卡有不同的map大小、敌人数量、目标位置和场景色调。
-- 难度设置：easy、normal、hard、extreme影响敌人数量、视野范围、玩家生命恢复频率（可简化）
-- 更详细的剧情对话和提示：
-  根据关卡不同显示对应的初始剧情对话和提示。
-- 在场景背景、敌人巡逻、目标位置等方面有变化。
-- 返回关卡选择界面时不会刷新整个页面，而是重置状态。
-- 新增简单的生命恢复机制（易难度下玩家有微量自动回血）
+修复点和保证所有功能正常：
+- 单独给每个关卡按钮添加事件监听，确保点击关卡按钮能正确开始游戏。
+- 在刷新商店武器列表后为购买按钮动态添加事件监听，保证购买功能正常。
+- 数据管理按钮正常工作，并更新UI。
+- 游戏结束后返回关卡选择时清除名牌。
+- 修复可能的UI显示问题，使流程更顺畅。
 
-变量增加：
-- currentLevel 存储当前关卡类型
-- difficulty 存储当前难度
-- 根据难度和关卡调整敌人数量、目标位置、地图大小、敌人视野范围
-
-关卡特征示例：
-- city：中等大小地图 2000x2000，敌人20-30，根据难度变化，目标在城镇中央广场
-- forest：较大地图 3000x3000，敌人30-40，目标在一处森林空地
-- fortress：较小但复杂地图 1500x1500，敌人密集 25-35，目标在堡垒中心厅堂
-
-难度特征：
-- easy：敌人数量下限，视野缩短10%，玩家生命可缓慢恢复
-- normal：默认设定，无额外调整
-- hard：敌人数量上限+5%，视野+10%，玩家无恢复
-- extreme：敌人数量上限+20%，视野+30%，玩家无恢复且敌人伤害更高
-
-玩家自动恢复生命机制（易难度）：每帧小概率或缓慢恢复1点，封顶maxHealth。
 */
 
-
-// 全局变量定义
 var canvas = document.getElementById('game-canvas');
 var ctx = canvas.getContext('2d');
 var width = window.innerWidth;
@@ -471,12 +610,15 @@ var gameOver = false;
 var victory = false;
 var dialogActive = false;
 var currentDialog = null;
-var encounterTriggered = false; 
-var enemyKillCount = 0; 
+var encounterTriggered = false;
+var enemyKillCount = 0;
 var currentLevel = null;
 var difficulty = 'normal';
+var firstTimeHint = true; 
+var bountyTargets = [];
+var bountyKillCount = 0;
+var bountyReward = 50; // 每个赏金目标50金币
 
-// 玩家属性
 var player = {
     x: 200,
     y: 200,
@@ -492,39 +634,54 @@ var player = {
     stealth: true
 };
 
-// 基础数据
+// 全局数据存储
+var playerData = {
+    gold: 0,
+    ownedWeapons: ["隐刃"],
+    achievements: {}
+};
+
+// 可购买的武器列表
+var weaponShopItems = [
+    {name:"长剑",cost:300},
+    {name:"弓箭",cost:500},
+    {name:"双刃",cost:1000}
+];
+
 var enemies = [];
 var obstacles = [];
-var assassinationTarget = { x: 1000, y: 600, width: 40, height: 40, alive: true };
-
+var decorations = [];
+var assassinationTarget = { x: 1000, y: 600, width: 40, height: 40, alive: true, name: "主要目标" };
 var mapWidth = 2000;
 var mapHeight = 2000;
 var cameraX = 0;
 var cameraY = 0;
 var keys = {};
 
-// 不同关卡、难度对应的配置
 var levelConfigs = {
     city: {
         mapWidth: 2000,
         mapHeight: 2000,
         baseEnemies: 20,
         target: {x:1000,y:600},
-        bgColor: "#000"
+        bgColor: "#000",
+        decorationType:"torch"
     },
     forest: {
         mapWidth: 3000,
         mapHeight: 3000,
         baseEnemies: 30,
         target: {x:1500,y:1500},
-        bgColor: "#003300"
+        bgColor: "#003300",
+        decorationType:"tree"
     },
     fortress: {
         mapWidth: 1500,
         mapHeight: 1500,
         baseEnemies: 25,
         target: {x:700,y:700},
-        bgColor: "#222"
+        bgColor: "#222",
+        decorationType:"statue"
     }
 };
 
@@ -535,35 +692,27 @@ var difficultyModifiers = {
     extreme:{enemyFactor:1.2, visionFactor:1.3, playerRegen:false, enemyDamageFactor:1.5}
 };
 
-// 对话内容根据关卡变化
-var dialogs = {
+var dialogsLib = {
     city: [
-        {id: "intro_city", title: "城市任务", text:"你来到了一座中世纪城市的中央广场。这里守卫众多，他们的眼睛如鹰般锐利。你的目标在广场中央。保持低调，完成刺杀。", next:"hint"},
-        {id: "hint", title: "提示", text:"WASD移动，空格攻击。利用建筑与阴影潜行，避免正面冲突。", next:null},
-        {id: "encounter", title: "目标临近", text:"你已接近目标！他就在前方不远处的小广场中，周围守卫密布，请谨慎行动。", next:null},
-        {id: "victory", title: "任务完成", text:"你在城市中完成了暗杀任务，顺利脱身！", next:null}
+        {id: "intro_city", title: "城市任务", text:"你来到了一座中世纪城市的中央广场。这里守卫众多，目标在广场中央。记住，暗杀赏金目标可获额外金币！", next:"hint_city"},
+        {id: "hint_city", title: "提示", text:"WASD移动，空格攻击。利用建筑与阴影潜行。", next:null},
+        {id: "victory", title: "任务完成", text:"你在城市中完成了暗杀！", next:null}
     ],
     forest: [
-        {id: "intro_forest", title: "森林任务", text:"你深入一片幽暗森林。树影斑驳，守卫在林中巡逻。目标在森林深处的空地上。利用植被躲避视线，出其不意完成刺杀。", next:"hint"},
-        {id: "hint", title: "提示", text:"WASD移动，空格攻击。森林地形复杂，小心被守卫包抄。", next:null},
-        {id: "encounter", title: "目标临近", text:"你已接近森林空地上的目标。随时准备出手！", next:null},
-        {id: "victory", title: "任务完成", text:"你在森林中成功完成了目标刺杀，飞鸟不惊。", next:null}
+        {id: "intro_forest", title: "森林任务", text:"你深入幽暗森林，目标在森林深处。赏金目标潜伏其中，暗杀他们可获额外金币。", next:"hint_forest"},
+        {id: "hint_forest", title: "提示", text:"WASD移动，空格攻击。利用树木躲避视线。", next:null},
+        {id: "victory", title: "任务完成", text:"你在森林中成功完成刺杀！", next:null}
     ],
     fortress: [
-        {id: "intro_fortress", title: "堡垒任务", text:"你潜入一座坚固堡垒。走廊狭窄，守卫密集。目标在堡垒大厅中。小心声响和回声，敌人灵敏非常。", next:"hint"},
-        {id: "hint", title: "提示", text:"WASD移动，空格攻击。利用掩体遮挡，逐步逼近目标。", next:null},
-        {id: "encounter", title: "目标临近", text:"你已接近堡垒的中心厅堂，目标就在前方！", next:null},
-        {id: "victory", title: "任务完成", text:"你在坚固堡垒中完成了不可能的刺杀！", next:null}
+        {id: "intro_fortress", title: "堡垒任务", text:"你潜入坚固堡垒。目标在大厅中，赏金目标也在此处潜伏。", next:"hint_fortress"},
+        {id: "hint_fortress", title: "提示", text:"WASD移动，空格攻击。利用走廊和掩体。", next:null},
+        {id: "victory", title: "任务完成", text:"你在堡垒中完成了艰难的刺杀！", next:null}
     ]
 };
-
-// 当前对话集（根据关卡加载）
 var currentDialogs = [];
 var currentMission = "未开始";
 
-// 初始化游戏并进入对话
 function initGame() {
-    // 根据currentLevel和difficulty设置地图、敌人、目标等
     var lc = levelConfigs[currentLevel];
     var dm = difficultyModifiers[difficulty];
 
@@ -575,16 +724,20 @@ function initGame() {
 
     enemies = [];
     obstacles = [];
+    decorations = [];
+    bountyTargets = [];
+    bountyKillCount = 0;
+
     var enemyCount = Math.floor(lc.baseEnemies * dm.enemyFactor);
     initEnemies(enemyCount, dm);
     initObstacles(30);
+    initDecorations(lc.decorationType, 20);
+    initBountyTargets(7);
 
-    // 设置场景背景
     document.getElementById("game-canvas").style.background = lc.bgColor;
 
-    // 加载当前关卡对话
-    currentDialogs = dialogs[currentLevel].map(function(d){return Object.assign({},d);});
-    showDialog(currentDialogs[0].id);
+    currentDialogs = dialogsLib[currentLevel].map(function(d){return Object.assign({},d);});
+    showDialog("intro_"+currentLevel);
 
     currentMission = "前往目标区域";
     player.x = 200;
@@ -595,12 +748,24 @@ function initGame() {
     gameOver = false;
     victory = false;
 
+    setPlayerWeapon();
+
     updateHUD();
     gameStarted = true;
     gameLoop();
 }
 
-// 初始化敌人（根据难度与场景）
+function setPlayerWeapon() {
+    let weaponPrices = {"隐刃":0,"长剑":300,"弓箭":500,"双刃":1000};
+    let maxCost = 0;
+    let bestWeapon = "隐刃";
+    playerData.ownedWeapons.forEach(w=>{
+        let cost=weaponPrices[w]||0;
+        if(cost>=maxCost){maxCost=cost;bestWeapon=w;}
+    });
+    player.weapon = bestWeapon;
+}
+
 function initEnemies(count, dm) {
     for (var i = 0; i < count; i++) {
         var visionRange = 200 * dm.visionFactor;
@@ -619,12 +784,12 @@ function initEnemies(count, dm) {
             visionRange: visionRange,
             state: "patrol",
             facing: "down",
-            damage: enemyDamage
+            damage: enemyDamage,
+            name: "守卫"+(i+1)
         });
     }
 }
 
-// 初始化障碍物（建筑/树木/箱子）
 function initObstacles(num) {
     obstacles = [];
     for (var i = 0; i < num; i++) {
@@ -637,16 +802,29 @@ function initObstacles(num) {
     }
 }
 
-// 生成简单的巡逻路线
-function generatePatrolRoute() {
-    var route = [];
-    for (var j = 0; j < 4; j++) {
-        route.push({
-            x: Math.random() * mapWidth,
-            y: Math.random() * mapHeight
+function initDecorations(type, num) {
+    for (var i=0; i<num; i++) {
+        decorations.push({
+            x:Math.random()*(mapWidth-50),
+            y:Math.random()*(mapHeight-50),
+            type:type
         });
     }
-    return route;
+}
+
+var bountyNames = ["Chris","Herman","张宸阳","王宇涵","杨嘉玉","张博彦","淇露"];
+function initBountyTargets(num) {
+    for(var i=0;i<num;i++){
+        var name = bountyNames[i];
+        bountyTargets.push({
+            x: Math.random()*(mapWidth-50)+50,
+            y: Math.random()*(mapHeight-50)+50,
+            width:40,
+            height:40,
+            alive:true,
+            name:name
+        });
+    }
 }
 
 function updateHUD() {
@@ -655,12 +833,16 @@ function updateHUD() {
     healthBar.style.width = healthPercent + "%";
     document.getElementById("weapon-info").textContent = "武器: " + player.weapon;
     document.getElementById("mission-info").textContent = "任务: " + currentMission;
+    document.getElementById("gold-info").textContent = "金币: " + playerData.gold;
 }
 
-// 显示对话框
 function showDialog(id) {
     var d = currentDialogs.find(function(di){return di.id === id;});
     if(d) {
+        if(d.id.startsWith("hint_") && !firstTimeHint) {
+            hideDialog();
+            return;
+        }
         currentDialog = d;
         dialogActive = true;
         document.getElementById("dialog-title").textContent = d.title;
@@ -669,7 +851,6 @@ function showDialog(id) {
     }
 }
 
-// 隐藏对话框
 function hideDialog() {
     dialogActive = false;
     currentDialog = null;
@@ -696,7 +877,6 @@ function update() {
     updateHUD();
     updateMissionStatus();
     updateMiniMap();
-    checkEncounterDialogTrigger();
     checkEnemyKillMilestone();
     handlePlayerRegen();
 }
@@ -704,9 +884,12 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, width, height);
     drawBackground();
+    drawDecorations();
     obstacles.forEach(drawObstacle);
-    if(assassinationTarget.alive) drawTarget(assassinationTarget);
-    enemies.forEach(function(e){if(e.alive) drawEnemy(e);});
+
+    if(assassinationTarget.alive) drawNamedEntity(assassinationTarget, "#a00","#f00");
+    bountyTargets.forEach(function(bt){ if(bt.alive) drawNamedEntity(bt,"#aa0","#ff0"); });
+    enemies.forEach(function(e){ if(e.alive) drawNamedEntity(e,"#008","#00f"); });
     drawPlayer(player);
 }
 
@@ -741,24 +924,35 @@ function drawObstacle(o) {
     ctx.restore();
 }
 
-function drawTarget(t) {
+function drawDecorations() {
     ctx.save();
     ctx.translate(-cameraX, -cameraY);
-    ctx.fillStyle = "#a00";
-    ctx.fillRect(t.x, t.y, t.width, t.height);
-    ctx.strokeStyle = "#f00";
-    ctx.strokeRect(t.x, t.y, t.width, t.height);
+    decorations.forEach(function(d){
+        if(d.type==="tree"){
+            ctx.fillStyle="#0c0";
+            ctx.beginPath();
+            ctx.arc(d.x,d.y,20,0,Math.PI*2);
+            ctx.fill();
+        } else if(d.type==="torch"){
+            ctx.fillStyle="#c60";
+            ctx.fillRect(d.x,d.y,10,30);
+        } else if(d.type==="statue"){
+            ctx.fillStyle="#999";
+            ctx.fillRect(d.x,d.y,20,40);
+        }
+    });
     ctx.restore();
 }
 
-function drawEnemy(e) {
+function drawNamedEntity(ent, fillColor, strokeColor) {
     ctx.save();
     ctx.translate(-cameraX, -cameraY);
-    ctx.fillStyle = "#008";
-    ctx.fillRect(e.x, e.y, e.width, e.height);
-    ctx.strokeStyle = "#00f";
-    ctx.strokeRect(e.x, e.y, e.width, e.height);
+    ctx.fillStyle = fillColor;
+    ctx.fillRect(ent.x, ent.y, ent.width, ent.height);
+    ctx.strokeStyle = strokeColor;
+    ctx.strokeRect(ent.x, ent.y, ent.width, ent.height);
     ctx.restore();
+    drawNameLabel(ent);
 }
 
 function drawPlayer(p) {
@@ -769,6 +963,32 @@ function drawPlayer(p) {
     ctx.strokeStyle = "#0c0";
     ctx.strokeRect(p.x, p.y, p.width, p.height);
     ctx.restore();
+}
+
+// 绘制名称标签
+function drawNameLabel(ent) {
+    if (!ent.name) return;
+    var labelContainer = document.getElementById("name-label-container");
+    var labelId = "label_" + ent.name.replace(/[^a-zA-Z0-9]/g,'_');
+    var label = document.getElementById(labelId);
+    if(!label) {
+        label = document.createElement('div');
+        label.id = labelId;
+        label.className = 'name-label';
+        labelContainer.appendChild(label);
+    }
+    label.textContent = ent.name;
+    var screenX = ent.x - cameraX + ent.width/2;
+    var screenY = ent.y - cameraY;
+    label.style.left = screenX + "px";
+    label.style.top = screenY + "px";
+    if(!ent.alive) label.style.display = "none";
+    else label.style.display = "block";
+}
+
+function clearNameLabels() {
+    var labelContainer = document.getElementById("name-label-container");
+    labelContainer.innerHTML = "";
 }
 
 function handleInput() {
@@ -870,7 +1090,7 @@ function checkCollisions() {
 
     enemies.forEach(function(e) {
         if (e.alive && rectCollide(player, e)) {
-            player.health -= e.damage; // 使用敌人damage值
+            player.health -= e.damage;
         }
     });
 
@@ -899,6 +1119,16 @@ function checkCollisions() {
                         showRandomKillMessage();
                     }
                 }
+            }
+        });
+
+        bountyTargets.forEach(function(bt){
+            if(bt.alive && distance(player.x,player.y,bt.x,bt.y)<player.attackRange){
+                bt.alive=false;
+                bountyKillCount++;
+                playerData.gold += bountyReward;
+                console.log("你暗杀了赏金目标：" + bt.name + " 获得"+bountyReward+"金币");
+                saveGameData();
             }
         });
     }
@@ -967,11 +1197,7 @@ function updateCamera() {
 
 function updateMissionStatus() {
     if (!assassinationTarget.alive) currentMission = "任务完成";
-    else {
-        var distToTarget = distance(player.x,player.y,assassinationTarget.x,assassinationTarget.y);
-        if (distToTarget < 200) currentMission = "暗杀目标 (空格执行)";
-        else currentMission = "前往目标区域";
-    }
+    else currentMission = "前往目标区域";
 }
 
 function updateMiniMap() {
@@ -994,29 +1220,27 @@ function updateMiniMap() {
         mmCtx.fillRect(assassinationTarget.x*scaleX, assassinationTarget.y*scaleY, 2, 2);
     }
 
-    mmCtx.fillStyle="#00f";
     enemies.forEach(function(e) {
-        if(e.alive) mmCtx.fillRect(e.x*scaleX, e.y*scaleY,2,2);
-    });
-}
-
-function checkEncounterDialogTrigger() {
-    if (!encounterTriggered && assassinationTarget.alive) {
-        var distToTarget = distance(player.x,player.y,assassinationTarget.x,assassinationTarget.y);
-        if (distToTarget < 300 && !dialogActive && !victory && !gameOver) {
-            encounterTriggered = true;
-            showDialog("encounter");
+        if(e.alive){
+            mmCtx.fillStyle="#00f";
+            mmCtx.fillRect(e.x*scaleX, e.y*scaleY,2,2);
         }
-    }
+    });
+
+    bountyTargets.forEach(function(bt){
+        if(bt.alive){
+            mmCtx.fillStyle="#ff0";
+            mmCtx.fillRect(bt.x*scaleX, bt.y*scaleY,2,2);
+        }
+    });
 }
 
 function checkEnemyKillMilestone() {
     if (enemyKillCount===5) console.log("你已击杀多名守卫，继续保持隐蔽。");
-    if (enemyKillCount===10) console.log("你已在此处如入无人之境，但仍需小心。");
+    if (enemyKillCount===10) console.log("你已如入无人之境，但仍需谨慎。");
 }
 
 function handlePlayerRegen() {
-    // 易难度下自动缓慢回血
     if (difficulty === "easy" && player.health < player.maxHealth && !dialogActive && !gameOver && !victory) {
         if (Math.random()<0.01) { 
             player.health += 1; 
@@ -1032,22 +1256,130 @@ function triggerGameOver() {
 
 function triggerVictory() {
     victory = true;
+    saveGameData();
     document.getElementById("victory-screen").style.display="flex";
+    console.log("你暗杀了"+bountyKillCount+"名赏金目标，总共获得"+(bountyKillCount*bountyReward)+"金币。");
 }
 
-// 事件监听
+function resetToLevelSelect() {
+    gameOver = false;
+    victory = false;
+    gameStarted = false;
+    document.getElementById("game-over-screen").style.display="none";
+    document.getElementById("victory-screen").style.display="none";
+    document.getElementById("level-select-screen").style.display="flex";
+    clearNameLabels();
+}
+
+/* 数据存储相关函数 */
+function saveGameData() {
+    localStorage.setItem("assassin_game_data", JSON.stringify(playerData));
+    console.log("数据已保存");
+}
+
+function loadGameData() {
+    var data = localStorage.getItem("assassin_game_data");
+    if(data) {
+        playerData = JSON.parse(data);
+        console.log("数据已加载", playerData);
+    } else {
+        console.log("没有找到存档数据");
+    }
+    updateUIDataDisplay();
+}
+
+function deleteGameData() {
+    localStorage.removeItem("assassin_game_data");
+    playerData = {gold:0,ownedWeapons:["隐刃"],achievements:{}};
+    console.log("数据已删除");
+    updateUIDataDisplay();
+}
+
+function updateUIDataDisplay() {
+    document.getElementById("start-gold-info").textContent = playerData.gold+"金币";
+    var shopGoldInfo = document.getElementById("shop-gold-info");
+    if(shopGoldInfo) shopGoldInfo.textContent = playerData.gold;
+    if(gameStarted) updateHUD();
+}
+
+function buyWeapon(weaponName, cost) {
+    if(playerData.gold>=cost) {
+        if(!playerData.ownedWeapons.includes(weaponName)) {
+            playerData.ownedWeapons.push(weaponName);
+        }
+        playerData.gold -= cost;
+        console.log("购买成功："+weaponName);
+        saveGameData();
+        updateUIDataDisplay();
+        refreshShopWeaponList();
+    } else {
+        console.log("金币不足，无法购买！");
+    }
+}
+
+function refreshShopWeaponList() {
+    var shopList = document.getElementById("shop-weapon-list");
+    shopList.innerHTML="";
+    weaponShopItems.forEach(item=>{
+        var div=document.createElement("div");
+        div.className="weapon-item";
+        div.innerHTML="<h3>"+item.name+"</h3><p>"+item.cost+"金币</p>";
+        if(playerData.ownedWeapons.includes(item.name)){
+            div.innerHTML+="<p>已拥有</p>";
+        } else {
+            let btn = document.createElement("button");
+            btn.textContent="购买";
+            btn.addEventListener("click",()=>buyWeapon(item.name,item.cost));
+            div.appendChild(btn);
+        }
+        shopList.appendChild(div);
+    });
+}
+
+// 关卡按钮事件
+document.getElementById("select-city").addEventListener("click",function(){
+    currentLevel = "city";
+    difficulty = document.getElementById("difficulty-select").value;
+    document.getElementById("level-select-screen").style.display="none";
+    initGame();
+});
+
+document.getElementById("select-forest").addEventListener("click",function(){
+    currentLevel = "forest";
+    difficulty = document.getElementById("difficulty-select").value;
+    document.getElementById("level-select-screen").style.display="none";
+    initGame();
+});
+
+document.getElementById("select-fortress").addEventListener("click",function(){
+    currentLevel = "fortress";
+    difficulty = document.getElementById("difficulty-select").value;
+    document.getElementById("level-select-screen").style.display="none";
+    initGame();
+});
+
 document.getElementById("go-level-select").addEventListener("click", function(){
     document.getElementById("start-screen").style.display="none";
     document.getElementById("level-select-screen").style.display="flex";
 });
 
-document.getElementById("level-select-screen").addEventListener("click", function(e){
-    if (e.target.tagName.toLowerCase()==='button' && e.target.hasAttribute('data-level')) {
-        currentLevel = e.target.getAttribute('data-level');
-        difficulty = document.getElementById("difficulty-select").value;
-        document.getElementById("level-select-screen").style.display="none";
-        initGame();
-    }
+document.getElementById("go-data-manage").addEventListener("click",function(){
+    document.getElementById("data-manage-screen").style.display="flex";
+});
+
+document.getElementById("open-shop").addEventListener("click",function(){
+    document.getElementById("shop-screen").style.display="flex";
+    refreshShopWeaponList();
+});
+
+document.getElementById("close-shop").addEventListener("click",function(){
+    document.getElementById("shop-screen").style.display="none";
+});
+
+document.getElementById("return-start").addEventListener("click",function(){
+    document.getElementById("level-select-screen").style.display="none";
+    document.getElementById("start-screen").style.display="flex";
+    updateUIDataDisplay();
 });
 
 document.getElementById("dialog-button").addEventListener("click",function(){
@@ -1056,6 +1388,9 @@ document.getElementById("dialog-button").addEventListener("click",function(){
         hideDialog();
         showDialog(nextId);
     } else {
+        if(currentDialog && currentDialog.id.startsWith("hint_")) {
+            firstTimeHint = false;
+        }
         hideDialog();
     }
 });
@@ -1068,17 +1403,23 @@ document.getElementById("victory-button").addEventListener("click", function(){
     resetToLevelSelect();
 });
 
-function resetToLevelSelect() {
-    // 回到关卡选择界面，但不刷新页面
-    gameOver = false;
-    victory = false;
-    gameStarted = false;
-    document.getElementById("game-over-screen").style.display="none";
-    document.getElementById("victory-screen").style.display="none";
-    document.getElementById("level-select-screen").style.display="flex";
-}
+document.getElementById("save-data-button").addEventListener("click",function(){
+    saveGameData();
+});
 
-// 键盘事件
+document.getElementById("load-data-button").addEventListener("click",function(){
+    loadGameData();
+});
+
+document.getElementById("delete-data-button").addEventListener("click",function(){
+    deleteGameData();
+});
+
+document.getElementById("close-data-manage").addEventListener("click",function(){
+    document.getElementById("data-manage-screen").style.display="none";
+    updateUIDataDisplay();
+});
+
 document.addEventListener("keydown", function(e){
     keys[e.key.toLowerCase()] = true;
     if(e.key === " " && !dialogActive && !gameOver && !victory && gameStarted) {
@@ -1092,7 +1433,6 @@ document.addEventListener("keyup", function(e){
     keys[e.key.toLowerCase()] = false;
 });
 
-// 窗口调整
 window.addEventListener("resize", function(){
     width = window.innerWidth;
     height = window.innerHeight - 50;
@@ -1100,17 +1440,20 @@ window.addEventListener("resize", function(){
     canvas.height = height;
 });
 
-/*
-扩展想法（非代码实现，仅注释说明）：
-- 可加入音效，如：按键音、攻击音、背景音乐（利用Audio元素）
-- 增加敌人的多样性：弓箭手、游骑兵、重甲卫士（不同颜色的矩形代替）
-- 增加陷阱、隐藏点（高草丛、屋顶）
-- 增加简单的库存系统和武器切换UI（当前仅有隐刃）
-- 增加更多剧情对话，根据杀敌数或关卡进程触发
-- 增加计时器系统，用时越短评分越高
-- 增加数据统计界面（击杀数、被发现次数等）
-- 优化AI逻辑：真正实现视角锥形检测、听觉范围响应
-*/
+function generatePatrolRoute() {
+    var route = [];
+    for (var j = 0; j < 4; j++) {
+        route.push({
+            x: Math.random() * mapWidth,
+            y: Math.random() * mapHeight
+        });
+    }
+    return route;
+}
+
+// 初始化时尝试加载数据
+loadGameData();
+updateUIDataDisplay();
 
 </script>
 </body>
